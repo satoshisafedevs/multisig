@@ -1,0 +1,5 @@
+node_modules
+dist
+functions/serviceAccountKey.json
+functions/openaiSecret.json
+functions/twilioSecrets.json
