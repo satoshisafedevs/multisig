@@ -2,10 +2,12 @@
     "name": "vite-template-react",
     "version": "1.2.0",
     "scripts": {
-        "start": "vite",
-        "dev": "vite",
-        "build": "vite build",
-        "serve": "vite preview",
+        "start": "vite --mode playground",
+        "dev": "vite --mode playground",
+        "build:playground": "vite build --mode playground",
+        "serve:playground": "vite preview --mode playground",
+        "build": "vite build --mode production",
+        "serve": "vite preview --mode production",
         "format": "prettier --write \"src/**/*.{js,jsx,json}\"",
         "format:verify": "prettier --check \"src/**/*.{js,jsx,json}\""
     },

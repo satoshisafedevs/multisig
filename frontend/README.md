@@ -60,26 +60,26 @@ git commit -m "Initial commit"
 Install dependencies:
 
 ```
-npm i
+yarn
 ```
 
 Now, you can start a local web server by running:
 
 ```
-npm start
+yarn start
 ```
 
-And then open http://localhost:3000 to view it in the browser.
+And then open http://localhost:5173 to view it in the browser.
 
 #### Available Scripts
 
 In this project, you can run the following scripts:
 
-| Script        | Description                                         |
-| ------------- | --------------------------------------------------- |
-| npm run dev   | Runs the app in the development mode.               |
-| npm run build | Builds the app for production to the `dist` folder. |
-| npm run serve | Serves the production build from the `dist` folder. |
+| Script     | Description                                         |
+| ---------- | --------------------------------------------------- |
+| yarn dev   | Runs the app in the development mode.               |
+| yarn build | Builds the app for production to the `dist` folder. |
+| yarn serve | Serves the production build from the `dist` folder. |
 
 ## Credits
 

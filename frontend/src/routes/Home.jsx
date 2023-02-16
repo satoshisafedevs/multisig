@@ -1,7 +1,7 @@
 import React from "react";
 import {
-    Flex,
     Container,
+    Flex,
     Image,
     Text,
     Stack,
@@ -10,7 +10,6 @@ import {
     Box,
 } from "@chakra-ui/react";
 import PhoneSignIn from "../components/PhoneSignIn";
-// import logo from './img/womanwithphone.png';
 import iPhone from "../img/transparent_iphone.png";
 import background from "../img/wave-haikei.svg";
 import video from "../img/test_iphone_video.mp4";
@@ -85,7 +84,6 @@ function Home() {
                                 borderRadius="40px"
                             />
                         </Container>
-
                         <Text fontSize="5xl">ProntoAI</Text>
                         <Text textAlign="center" fontSize="2xl">
                             Answers to any question, anywhere, instantly.

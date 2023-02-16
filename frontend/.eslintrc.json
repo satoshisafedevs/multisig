@@ -12,6 +12,7 @@
     "plugins": ["react"],
     "rules": {
         "react/require-default-props": "off",
+        "react/jsx-one-expression-per-line": "off",
         "quotes": ["error", "double"],
         "indent": ["error", 4],
         "react/jsx-indent": ["error", 4],

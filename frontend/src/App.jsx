@@ -1,22 +1,32 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { ChakraProvider } from "@chakra-ui/react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./routes/Home";
+import Login from "./routes/Login";
+import Subscribe from "./routes/Subscribe";
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Home />,
+    },
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    {
+        path: "/subscribe",
+        element: <Subscribe />,
+    },
+]);
 
 function App() {
     return (
-        <Router>
-            <Switch>
-                {/* <Route path="/about">
-                    <About />
-                </Route>
-                <Route path="/topics">
-                    <Topics />
-                </Route> */}
-                <Route path="/">
-                    <Home />
-                </Route>
-            </Switch>
-        </Router>
+        <React.StrictMode>
+            <ChakraProvider>
+                <RouterProvider router={router} />
+            </ChakraProvider>
+        </React.StrictMode>
     );
 }
 
