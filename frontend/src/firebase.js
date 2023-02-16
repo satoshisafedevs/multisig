@@ -4,20 +4,37 @@ import {
     getAuth,
     RecaptchaVerifier,
     signInWithPhoneNumber,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyD5FtVkUOqufdpZu8FhaFWJHzBECXDn6_k",
-    authDomain: "text-chatgpt.firebaseapp.com",
-    projectId: "text-chatgpt",
-    storageBucket: "text-chatgpt.appspot.com",
-    messagingSenderId: "1041401476799",
-    appId: "1:1041401476799:web:04a9c8384dc0dc0b99780a",
-    measurementId: "G-90JE35NMRL",
+    apiKey: import.meta.env.VITE_API_KEY,
+    authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_APP_ID,
+    measurementId: import.meta.env.VITE_MEASURMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const analytics = getAnalytics(app);
+const db = getFirestore(app);
 
-export { app, auth, analytics, RecaptchaVerifier, signInWithPhoneNumber };
+export {
+    app,
+    auth,
+    analytics,
+    db,
+    RecaptchaVerifier,
+    signInWithPhoneNumber,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+};
