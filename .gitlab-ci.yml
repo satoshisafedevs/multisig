@@ -58,5 +58,5 @@ deploy-playground-job:
     script:
         - echo "Deploying application..."
         - cd $CI_PROJECT_DIR/frontend
-        - firebase deploy --only hosting --token $FIREBASE_TOKEN --project playground
+        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only hosting --project playground
         - echo "Application successfully deployed."
