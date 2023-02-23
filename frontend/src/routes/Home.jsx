@@ -20,6 +20,8 @@ function Home() {
         <Container
             minHeight="100vh"
             minWidth="100vw"
+            padding="0"
+            overflow="auto"
             backgroundImage={background}
             backgroundSize="cover"
         >
