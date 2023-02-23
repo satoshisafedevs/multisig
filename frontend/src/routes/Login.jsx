@@ -7,7 +7,9 @@ import {
     Switch,
     Input,
     Button,
+    IconButton,
     useToast,
+    useColorMode,
 } from "@chakra-ui/react";
 import {
     auth,
@@ -19,6 +21,7 @@ import {
 
 function Login() {
     const toast = useToast();
+    const { colorMode, toggleColorMode } = useColorMode();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [registerMe, setRegisterMe] = useState(false);
@@ -114,61 +117,56 @@ function Login() {
             });
     };
 
-    if (user) {
-        return (
-            <Flex
-                height="100vh"
-                direction="column"
-                align="center"
-                justify="center"
-            >
-                <Stack spacing="10px">
-                    <span>Hello {user.email}!</span>
-                    <Button
-                        width="250px"
-                        colorScheme="blue"
-                        onClick={handleLogOut}
-                    >
-                        Log out
-                    </Button>
-                </Stack>
-            </Flex>
-        );
-    }
-
     return (
         <Flex height="100vh" direction="column" align="center" justify="center">
-            <Stack spacing="10px">
-                <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="email-alerts" marginBottom={0}>
-                        First Time User?
-                    </FormLabel>
-                    <Switch
-                        id="email-alerts"
-                        size="lg"
-                        onChange={handleSwitch}
-                    />
-                </FormControl>
-                <Input
-                    width="250px"
-                    placeholder="Email"
-                    onChange={handleEmail}
-                    value={email}
-                />
-                <Input
-                    width="250px"
-                    placeholder="Password"
-                    onChange={handlePassword}
-                    value={password}
-                />
-                <Button
-                    width="250px"
-                    colorScheme="blue"
-                    onClick={handleLogIn}
-                    isLoading={loading}
-                >
-                    {registerMe ? "Sign up" : "Log in"}
-                </Button>
+            <IconButton
+                aria-label="Color mode"
+                position="fixed"
+                top="10px"
+                right="10px"
+                onClick={toggleColorMode}
+                icon={colorMode === "light" ? <>🌚</> : <>🌝</>}
+            />
+            <Stack spacing="10px" width="250px">
+                {user ? (
+                    <>
+                        {" "}
+                        <span>Hello {user.email}!</span>
+                        <Button colorScheme="blue" onClick={handleLogOut}>
+                            Log out
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <FormControl display="flex" alignItems="center">
+                            <FormLabel htmlFor="email-alerts" marginBottom={0}>
+                                First Time User?
+                            </FormLabel>
+                            <Switch
+                                id="email-alerts"
+                                size="lg"
+                                onChange={handleSwitch}
+                            />
+                        </FormControl>
+                        <Input
+                            placeholder="Email"
+                            onChange={handleEmail}
+                            value={email}
+                        />
+                        <Input
+                            placeholder="Password"
+                            onChange={handlePassword}
+                            value={password}
+                        />
+                        <Button
+                            colorScheme="blue"
+                            onClick={handleLogIn}
+                            isLoading={loading}
+                        >
+                            {registerMe ? "Sign up" : "Log in"}
+                        </Button>
+                    </>
+                )}
             </Stack>
         </Flex>
     );

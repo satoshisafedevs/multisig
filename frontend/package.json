@@ -8,6 +8,8 @@
         "serve:playground": "vite preview --mode playground",
         "build": "vite build --mode production",
         "serve": "vite preview --mode production",
+        "eslint": "eslint --fix \"src/**/*.{js,jsx,json}\"",
+        "eslint:verify": "eslint \"src/**/*.{js,jsx,json}\"",
         "format": "prettier --write \"src/**/*.{js,jsx,json}\"",
         "format:verify": "prettier --check \"src/**/*.{js,jsx,json}\""
     },
