@@ -1,41 +1,46 @@
 image: node:lts-alpine
 
-before_script:
-    - cd frontend && yarn install
-
 cache:
     paths:
         - frontend/node_modules
         - frontend/yarn.lock
+        - functions/node_modules
+        - functions/yarn.lock
 
 stages:
     - test
     - build
     - deploy
 
-.unit-test-job:
+.unit-test:
     stage: test
     script:
         - echo "Running unit tests... This will take about 60 seconds."
         - sleep 60
         - echo "Code coverage is 90%"
 
-lint-test-job:
+lint-test:
     stage: test
+    before_script:
+        - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Linting code... This will take about 10 seconds."
         - yarn eslint:verify
         - echo "No lint issues found."
 
-format-test-job:
+format-test:
     stage: test
+    before_script:
+        - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Formatting code... This will take about 10 seconds."
         - yarn format:verify
         - echo "No format issues found."
 
-build-job:
+build-frontend:
     stage: build
+    before_script:
+        - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Compiling the code..."
         - yarn build:playground
@@ -47,16 +52,36 @@ build-job:
             - $CI_PROJECT_DIR/frontend/dist
         expire_in: 1 week
 
-deploy-playground-job:
+deploy-hosting-playground:
     stage: deploy
     only:
         - main
     dependencies:
-        - build-job
+        - build-frontend
     before_script:
+        - cd $CI_PROJECT_DIR/frontend && yarn install
         - yarn global add firebase-tools
     script:
-        - echo "Deploying application..."
         - cd $CI_PROJECT_DIR/frontend
+        - echo "Deploying application..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only hosting --project playground
         - echo "Application successfully deployed."
+
+deploy-functions-playground:
+    stage: deploy
+    only:
+        - main
+    before_script:
+        - cd $CI_PROJECT_DIR/functions && yarn install
+        - yarn global add firebase-tools
+    script:
+        - echo OPENAI_KEY=$OPENAI_KEY >> .env
+        - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
+        - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
+        - echo TWILIO_NUMBER=$TWILIO_NUMBER >> .env
+        - echo "Deploying firebase functions..."
+        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
+        - echo "Firebase functions successfully deployed."
+    after_script:
+        - cd $CI_PROJECT_DIR/functions
+        - rm -f .env
