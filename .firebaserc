@@ -1,6 +1,6 @@
 {
     "projects": {
-        "production": "text-chatgpt",
+        "production": "prontoai-production",
         "playground": "prontoai-playground"
     }
 }
