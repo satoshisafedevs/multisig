@@ -78,7 +78,7 @@ deploy-functions-playground:
         - echo OPENAI_KEY=$OPENAI_KEY >> .env
         - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
         - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
-        - echo TWILIO_NUMBER=$TWILIO_NUMBER >> .env
+        - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
         - echo "Deploying firebase functions..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
         - echo "Firebase functions successfully deployed."
