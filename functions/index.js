@@ -1,189 +1,18 @@
 // The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 const functions = require("firebase-functions");
-const twilio = require("twilio");
 const admin = require("firebase-admin");
 const stripe = require("stripe")(
-    "sk_test_51MYz08DRit5IskyXRtiL3nLfrodeoH8Ryf9qJ5TgNHVUuUW4vhHvlzgfnDidwCYJmd6f27wcmxC0GoLhsQDyS4DD00lGQU89R3"
+    "sk_test_51MYz08DRit5IskyXRtiL3nLfrodeoH8Ryf9qJ5TgNHVUuUW4vhHvlzgfnDidwCYJmd6f27wcmxC0GoLhsQDyS4DD00lGQU89R3",
 ); // this is a test mode api Stripe key
-const { write } = require("firebase-functions/logger");
-const appUrl =
-    "https://us-central1-text-chatgpt.cloudfunctions.net/receivedText";
 require("dotenv").config();
-const twilioClient = new twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
-const { openAIResponse } = require("./openAI");
-
-admin.initializeApp();
+const { db } = require("./firebase");
+const { receivedMessageHandler } = require("./receivedMessageHandler");
 
 // Take the text parameter passed to this HTTP endpoint and insert it into
 // Firestore under the path /messages/:documentId/original
 exports.receivedText = functions.https.onRequest(async (req, res) => {
-    if (
-        !(
-            req.body.AccountSid === process.env.TWILIO_ACCOUNT_SID &&
-            req.get("X-Twilio-Signature").length > 0
-        )
-    ) {
-        return;
-    }
-    const userPhone = req.body.From;
-    const userDocRef = admin
-        .firestore()
-        .collection("userConvos")
-        .doc(userPhone);
-    const userDoc = await userDocRef.get();
-    // If a user already has a conversation going
-    if (userDoc.exists) {
-        // log the message to the messageReceived docs
-        const writeResult = await admin
-            .firestore()
-            .collection("messageReceived")
-            .add({
-                headers: req.headers,
-                body: req.body,
-                hostname: req.hostname,
-                ip: req.ip,
-                createdTime: Date.now(),
-            });
-
-        // setup variables
-        const receivedMessage = req.body.Body;
-        const docData = userDoc.data();
-        const convo = docData.convoArray;
-
-        // if UNSUBSCRIBE in the message
-        if (receivedMessage.indexOf("UNSUBSCRIBE") >= 0) {
-            const unSubscribeUser = await admin
-                .firestore()
-                .collection("userConvos")
-                .doc(user.phoneNumber)
-                .set(
-                    {
-                        subscribed: false,
-                    },
-                    { merge: true }
-                );
-            twilioClient.messages.create({
-                body: "You have been successfully unsubscribed. If at any time you would like to come back, simply sign up at www.getprontoai.com again. Thanks!",
-                to: userPhone,
-                from: process.env.TWILIO_NUMBER,
-            });
-            return;
-        }
-
-        // if too many messages
-        // if(convo.length > 100) {
-        //     twilioClient.messages.create({
-        //         body: 'You have run into our systems limiter. Thanks for using the product! We are rolling out a paid service shortly and we will let you know when its launched.',
-        //         to: userPhone,
-        //         from: process.env.TWILIO_NUMBER
-        //     });
-        //     twilioClient.messages.create({
-        //         body: 'User: ' + userPhone + ' has hit the limit',
-        //         to: '+14359620349',
-        //         from: process.env.TWILIO_NUMBER
-        //     });
-        //     return;
-        // }
-
-        // add human message to convo
-        convo.push("Human:" + receivedMessage);
-
-        // get AI response
-        const aiResponse = await openAIResponse(convo);
-
-        // create the response object
-        convo.push("AI:" + aiResponse);
-        let messageToSend = {
-            body: aiResponse,
-            to: userPhone,
-            from: process.env.TWILIO_NUMBER,
-            dateCreated: Date.now(),
-        };
-
-        // text the user back
-        try {
-            twilioClient.messages.create(messageToSend);
-        } catch (e) {
-            console.log(e);
-        }
-
-        // log the message to the messageSent collection
-        const logMessage = await admin
-            .firestore()
-            .collection("messageSent")
-            .add({
-                ...messageToSend,
-            });
-
-        // save the messages to the userConvo object
-        await admin
-            .firestore()
-            .collection("userConvos")
-            .doc(userPhone)
-            .update(
-                {
-                    convoArray: convo,
-                    receivedMessages: [
-                        ...docData.receivedMessages,
-                        writeResult.id,
-                    ],
-                    sentMessages: [...docData.sentMessages, logMessage.id],
-                },
-                { merge: true }
-            );
-    } else {
-        // tell user to register on website
-        const unregisteredMsg =
-            "Hey there! It looks like you haven't registered on our site yet. Please head to https://getprontoai.com/ to register.";
-
-        // text the user that they don't have an account
-        try {
-            twilioClient.messages.create({
-                body: unregisteredMsg,
-                to: userPhone,
-                from: process.env.TWILIO_NUMBER,
-            });
-        } catch (e) {
-            console.log(e);
-        }
-    }
-    return;
+    receivedMessageHandler(req, res);
 });
-
-// commenting out sendWelcomeText function for now as it will send sms to every user created, we are still in testing mode here
-// exports.sendWelcomeText = functions.auth.user().onCreate(async (user) => {
-//     const msg =
-//         "Welcome to texting ProntoAI! ProntoAI is fantastic at answering questions, having a conversation, or basically anything that can be written (even playing chess)." +
-//         " To get started simply text back! \n\nTo unsubscribe, text back STOP in all caps";
-//     let messageToSend = {
-//         body: msg,
-//         to: user.phoneNumber,
-//         from: process.env.TWILIO_NUMBER,
-//     };
-//     const message = await twilioClient.messages.create(messageToSend);
-//     messageToSend.dateSent = Date.now();
-//     const logMessage = await admin
-//         .firestore()
-//         .collection("messageSent")
-//         .add({
-//             ...messageToSend,
-//         });
-//     const userConvoDoc = {
-//         welcomeMessageSent: msg,
-//         convoArray: [],
-//         sentMessages: [logMessage.id],
-//         receivedMessages: [],
-//         timeOfLastMessage: Date.now(),
-//     };
-//     const newDoc = await admin
-//         .firestore()
-//         .collection("userConvos")
-//         .doc(user.phoneNumber)
-//         .set({ ...userConvoDoc });
-// });
 
 const corsAndOptions = (req, res) => {
     res.set("Access-Control-Allow-Origin", "*");
@@ -199,7 +28,7 @@ const corsAndOptions = (req, res) => {
 // when decoded successfully, the ID Token content will be added as `req.user`.
 const validateFirebaseIdToken = async (req, res) => {
     functions.logger.log(
-        "Check if request is authorized with Firebase ID token"
+        "Check if request is authorized with Firebase ID token",
     );
     if (
         (!req.headers.authorization ||
@@ -210,7 +39,7 @@ const validateFirebaseIdToken = async (req, res) => {
             "No Firebase ID token was passed as a Bearer token in the Authorization header.",
             "Make sure you authorize your request by providing the following HTTP header:",
             "Authorization: Bearer <Firebase ID Token>",
-            'or by passing a "__session" cookie.'
+            "or by passing a \"__session\" cookie.",
         );
         res.status(403).send({ message: "Unauthorized" });
         return;
@@ -220,15 +49,15 @@ const validateFirebaseIdToken = async (req, res) => {
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer ")
     ) {
-        functions.logger.log('Found "Authorization" header');
+        functions.logger.log("Found \"Authorization\" header");
         // Read the ID Token from the Authorization header.
         idToken = req.headers.authorization.split("Bearer ")[1];
     } else if (req.cookies) {
-        functions.logger.log('Found "__session" cookie');
+        functions.logger.log("Found \"__session\" cookie");
         // Read the ID Token from cookie.
         idToken = req.cookies.__session;
     } else {
-        // No cookie
+    // No cookie
         res.status(403).send({ message: "Unauthorized" });
         return;
     }
@@ -240,7 +69,7 @@ const validateFirebaseIdToken = async (req, res) => {
     } catch (error) {
         functions.logger.error(
             "Error while verifying Firebase ID token:",
-            error
+            error,
         );
         res.status(403).send({ message: "Unauthorized" });
         return;
@@ -258,8 +87,7 @@ exports.stripeCustomers = functions.https.onRequest(async (req, res) => {
                         tax_exempt: "exempt",
                     });
                     // Save the customer.id in your database alongside your user.
-                    await admin
-                        .firestore()
+                    await db
                         .collection("stripeCustomers")
                         .doc(req.body.email)
                         .set({ ...customer }); // note: set.({}) will overwrite any existing data

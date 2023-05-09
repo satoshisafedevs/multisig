@@ -23,6 +23,8 @@
         "twilio": "^3.84.1"
     },
     "devDependencies": {
+        "eslint": "^8.15.0",
+        "eslint-config-google": "^0.14.0",
         "firebase-functions-test": "^0.2.0"
     },
     "private": true

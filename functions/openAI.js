@@ -1,6 +1,7 @@
 const { Configuration, OpenAIApi } = require("openai");
 const originalPrompt =
-    "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.Human: Hello, who are you?AI: I am an AI created by OpenAI. How can I help you today?";
+    "The following is a conversation with an AI assistant. The assistant is helpful, creative, "+
+    "clever, and very friendly.Human: Hello, who are you?AI: I am an AI created by OpenAI. How can I help you today?";
 
 const configuration = new Configuration({
     apiKey: process.env.OPENAI_KEY,
