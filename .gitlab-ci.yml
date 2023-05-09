@@ -28,6 +28,15 @@ lint-test:
         - yarn eslint:verify
         - echo "No lint issues found."
 
+lint-test-functions:
+    stage: test
+    before_script:
+        - cd $CI_PROJECT_DIR/functions && yarn install
+    script:
+        - echo "Linting code... This will take about 10 seconds."
+        - yarn lint
+        - echo "No lint issues found."
+
 format-test:
     stage: test
     before_script:
