@@ -1,8 +1,10 @@
-const { twilioClient } = require("./twilio");
-const { db } = require("./firebase");
-const { openAIResponse } = require("./openAI");
 
-async function receivedMessageHandler(req, res) {
+const { onRequest, db } = require("../firebase");
+const { twilioClient } = require("./twilioUtils");
+const { openAIResponse } = require("../openai");
+require("dotenv").config();
+
+exports.receivedText = onRequest(async (req, res) => {
     if (
         !(
             req.body.AccountSid === process.env.TWILIO_ACCOUNT_SID &&
@@ -132,8 +134,5 @@ async function receivedMessageHandler(req, res) {
         }
     }
     res.end();
-}
+});
 
-module.exports = {
-    receivedMessageHandler,
-};
