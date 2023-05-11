@@ -5,12 +5,12 @@ const stripe = require("stripe")(
     "sk_test_51MYz08DRit5IskyXRtiL3nLfrodeoH8Ryf9qJ5TgNHVUuUW4vhHvlzgfnDidwCYJmd6f27wcmxC0GoLhsQDyS4DD00lGQU89R3",
 ); // this is a test mode api Stripe key
 require("dotenv").config();
-const { db } = require("./firebase");
+const { db, onRequest } = require("./firebase");
 const { receivedMessageHandler } = require("./receivedMessageHandler");
 
 // Take the text parameter passed to this HTTP endpoint and insert it into
 // Firestore under the path /messages/:documentId/original
-exports.receivedText = functions.https.onRequest(async (req, res) => {
+exports.received_text = onRequest(async (req, res) => {
     receivedMessageHandler(req, res);
 });
 
@@ -76,7 +76,7 @@ const validateFirebaseIdToken = async (req, res) => {
     }
 };
 
-exports.stripeCustomers = functions.https.onRequest(async (req, res) => {
+exports.stripe_customers = onRequest(async (req, res) => {
     corsAndOptions(req, res);
     if (validateFirebaseIdToken(req, res)) {
         if (req.method === "POST") {
@@ -127,7 +127,7 @@ exports.stripeCustomers = functions.https.onRequest(async (req, res) => {
     }
 });
 
-exports.stripePrices = functions.https.onRequest(async (req, res) => {
+exports.stripe_prices = onRequest(async (req, res) => {
     // const allowedOrigins = ["http://localhost:8000"];
     // const origin = req.headers.origin;
     // if (allowedOrigins.includes(origin)) {
