@@ -8,7 +8,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-exports.openAIResponse = async (convoArray) => {
+const openAIResponse = async (convoArray) => {
     let aiText = originalPrompt;
     let aiResponse = "";
     const lastTenMsgs = convoArray.slice(-10);
@@ -33,4 +33,8 @@ exports.openAIResponse = async (convoArray) => {
         console.log(e);
     }
     return aiResponse;
+};
+
+module.exports = {
+    openAIResponse,
 };
