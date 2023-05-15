@@ -1,4 +1,3 @@
-
 const { onRequest, db } = require("../firebase");
 const { twilioClient } = require("./twilioUtils");
 const { openAIResponse } = require("../openai");
@@ -14,22 +13,18 @@ exports.receivedText = onRequest(async (req, res) => {
         return;
     }
     const userPhone = req.body.From;
-    const userDocRef = db
-        .collection("userConvos")
-        .doc(userPhone);
+    const userDocRef = db.collection("userConvos").doc(userPhone);
     const userDoc = await userDocRef.get();
     // If a user already has a conversation going
     if (userDoc.exists) {
         // log the message to the messageReceived docs
-        const writeResult = await db
-            .collection("messageReceived")
-            .add({
-                headers: req.headers,
-                body: req.body,
-                hostname: req.hostname,
-                ip: req.ip,
-                createdTime: Date.now(),
-            });
+        const writeResult = await db.collection("messageReceived").add({
+            headers: req.headers,
+            body: req.body,
+            hostname: req.hostname,
+            ip: req.ip,
+            createdTime: Date.now(),
+        });
 
         // setup variables
         const receivedMessage = req.body.Body;
@@ -48,8 +43,9 @@ exports.receivedText = onRequest(async (req, res) => {
             //         {merge: true},
             //     );
             twilioClient.messages.create({
-                body: "You have been successfully unsubscribed. If at any time you would like to come back, "+
-                "simply sign up at www.getprontoai.com again. Thanks!",
+                body:
+                    "You have been successfully unsubscribed. If at any time you would like to come back, " +
+                    "simply sign up at www.getprontoai.com again. Thanks!",
                 to: userPhone,
                 from: process.env.TWILIO_NUMBER,
             });
@@ -95,11 +91,9 @@ exports.receivedText = onRequest(async (req, res) => {
         }
 
         // log the message to the messageSent collection
-        const logMessage = await db
-            .collection("messageSent")
-            .add({
-                ...messageToSend,
-            });
+        const logMessage = await db.collection("messageSent").add({
+            ...messageToSend,
+        });
 
         // save the messages to the userConvo object
         await db
@@ -119,7 +113,7 @@ exports.receivedText = onRequest(async (req, res) => {
     } else {
         // tell user to register on website
         const unregisteredMsg =
-            "Hey there! It looks like you haven't registered on our site yet. "+
+            "Hey there! It looks like you haven't registered on our site yet. " +
             "Please head to https://getprontoai.com/ to register.";
 
         // text the user that they don't have an account
@@ -135,4 +129,3 @@ exports.receivedText = onRequest(async (req, res) => {
     }
     res.end();
 });
-

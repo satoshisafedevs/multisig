@@ -19,7 +19,7 @@ stages:
         - sleep 60
         - echo "Code coverage is 90%"
 
-lint-test:
+lint-test-frontend:
     stage: test
     before_script:
         - cd $CI_PROJECT_DIR/frontend && yarn install
@@ -34,10 +34,10 @@ lint-test-functions:
         - cd $CI_PROJECT_DIR/functions && yarn install
     script:
         - echo "Linting code... This will take about 10 seconds."
-        - yarn lint
+        - yarn eslint:verify
         - echo "No lint issues found."
 
-format-test:
+format-test-frontend:
     stage: test
     before_script:
         - cd $CI_PROJECT_DIR/frontend && yarn install
@@ -88,6 +88,7 @@ deploy-functions-playground:
         - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
         - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
         - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
+        - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
         - echo "Deploying firebase functions..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
         - echo "Firebase functions successfully deployed."

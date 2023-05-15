@@ -4,20 +4,20 @@ module.exports = {
         node: true,
     },
     parserOptions: {
-        "ecmaVersion": 2018,
+        ecmaVersion: 2018,
     },
-    extends: [
-        "eslint:recommended",
-        "google",
-    ],
+    extends: ["eslint:recommended", "google"],
     rules: {
         "no-restricted-globals": ["error", "name", "length"],
         "prefer-arrow-callback": "error",
-        "quotes": ["error", "double"],
+        "space-infix-ops": "error",
+        "eol-last": ["error", "always"],
+        "no-multiple-empty-lines": "error",
+        "quotes": ["error", "double", { avoidEscape: true }],
         "indent": ["error", 4],
         "object-curly-newline": "off",
         "object-curly-spacing": ["error", "always"],
-        "max-len": ["error", { "code": 120 }],
+        "max-len": ["error", { code: 120 }],
         "require-jsdoc": 0,
     },
     overrides: [
@@ -26,8 +26,7 @@ module.exports = {
             env: {
                 mocha: true,
             },
-            rules: {
-            },
+            rules: {},
         },
     ],
     globals: {},

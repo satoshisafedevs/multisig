@@ -20,7 +20,7 @@ const validateFirebaseIdToken = async (req, res) => {
             "No Firebase ID token was passed as a Bearer token in the Authorization header.",
             "Make sure you authorize your request by providing the following HTTP header:",
             "Authorization: Bearer <Firebase ID Token>",
-            "or by passing a \"__session\" cookie.",
+            'or by passing a "__session" cookie.',
         );
         res.status(403).send({ message: "Unauthorized" });
         return;
@@ -30,15 +30,15 @@ const validateFirebaseIdToken = async (req, res) => {
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer ")
     ) {
-        functions.logger.log("Found \"Authorization\" header");
+        functions.logger.log('Found "Authorization" header');
         // Read the ID Token from the Authorization header.
         idToken = req.headers.authorization.split("Bearer ")[1];
     } else if (req.cookies) {
-        functions.logger.log("Found \"__session\" cookie");
+        functions.logger.log('Found "__session" cookie');
         // Read the ID Token from cookie.
         idToken = req.cookies.__session;
     } else {
-    // No cookie
+        // No cookie
         res.status(403).send({ message: "Unauthorized" });
         return;
     }
@@ -113,6 +113,7 @@ exports.customers = onRequest(async (req, res) => {
                 }
             }
         }
+        res.end();
     }
 });
 
@@ -146,6 +147,7 @@ exports.prices = onRequest(async (req, res) => {
                 }
             }
         }
+        res.end();
     }
 });
 
