@@ -1,2 +1,3 @@
-exports.stripe = require("./stripe");
 exports.twilio = require("./twilio");
+exports.typeform = require("./typeform");
+exports.stripe = require("./stripe");
