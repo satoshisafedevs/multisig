@@ -1,8 +1,8 @@
 const crypto = require("crypto");
-const functions = require("firebase-functions");
+const { log } = require("../firebase");
 
 const verifySignature = (receivedSignature, payload) => {
-    functions.logger.log("Check if request is authorized with secret");
+    log("Check if request is authorized with secret");
     const hash = crypto
         .createHmac("sha256", process.env.TYPEFORM_SECRET)
         .update(payload)
