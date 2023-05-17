@@ -1,12 +1,20 @@
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
+const { getFirestore } = require("firebase-admin/firestore");
+const { error, log } = require("firebase-functions/logger");
 const { onRequest } = require("firebase-functions/v2/https");
-admin.initializeApp();
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 
-const db = admin.firestore();
-const auth = admin.auth();
+initializeApp();
+
+const db = getFirestore();
+const auth = getAuth();
 
 module.exports = {
-    db,
-    onRequest,
     auth,
+    db,
+    error,
+    log,
+    onRequest,
+    onDocumentCreated,
 };

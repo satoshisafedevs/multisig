@@ -1,5 +1,4 @@
-const functions = require("firebase-functions");
-const { auth, onRequest, db } = require("../firebase");
+const { auth, onRequest, db, log, error } = require("../firebase");
 const stripe = require("stripe")(
     "sk_test_51MYz08DRit5IskyXRtiL3nLfrodeoH8Ryf9qJ5TgNHVUuUW4vhHvlzgfnDidwCYJmd6f27wcmxC0GoLhsQDyS4DD00lGQU89R3",
 );
@@ -8,15 +7,13 @@ const stripe = require("stripe")(
 // `Authorization: Bearer <Firebase ID Token>`.
 // when decoded successfully, the ID Token content will be added as `req.user`.
 const validateFirebaseIdToken = async (req, res) => {
-    functions.logger.log(
-        "Check if request is authorized with Firebase ID token",
-    );
+    log("Check if request is authorized with Firebase ID token");
     if (
         (!req.headers.authorization ||
             !req.headers.authorization.startsWith("Bearer ")) &&
         !(req.cookies && req.cookies.__session)
     ) {
-        functions.logger.error(
+        error(
             "No Firebase ID token was passed as a Bearer token in the Authorization header.",
             "Make sure you authorize your request by providing the following HTTP header:",
             "Authorization: Bearer <Firebase ID Token>",
@@ -30,11 +27,11 @@ const validateFirebaseIdToken = async (req, res) => {
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer ")
     ) {
-        functions.logger.log('Found "Authorization" header');
+        log('Found "Authorization" header');
         // Read the ID Token from the Authorization header.
         idToken = req.headers.authorization.split("Bearer ")[1];
     } else if (req.cookies) {
-        functions.logger.log('Found "__session" cookie');
+        log('Found "__session" cookie');
         // Read the ID Token from cookie.
         idToken = req.cookies.__session;
     } else {
@@ -44,14 +41,11 @@ const validateFirebaseIdToken = async (req, res) => {
     }
     try {
         const decodedIdToken = await auth.verifyIdToken(idToken);
-        functions.logger.log("ID Token correctly decoded", decodedIdToken);
+        log("ID Token correctly decoded", decodedIdToken);
         req.user = decodedIdToken;
         return true;
     } catch (error) {
-        functions.logger.error(
-            "Error while verifying Firebase ID token:",
-            error,
-        );
+        error("Error while verifying Firebase ID token:", error);
         res.status(403).send({ message: "Unauthorized" });
         return;
     }
