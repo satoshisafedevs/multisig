@@ -14,11 +14,11 @@
         "format:verify": "prettier --check \"src/**/*.{js,jsx,json}\""
     },
     "dependencies": {
-        "@chakra-ui/pin-input": "^2.0.19",
-        "@chakra-ui/react": "^2.4.6",
+        "@chakra-ui/pin-input": "^2.0.20",
+        "@chakra-ui/react": "^2.6.1",
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
-        "@vitejs/plugin-react": "^2.2.0",
+        "@vitejs/plugin-react": "^4.0.0",
         "firebase": "^9.15.0",
         "framer-motion": "^8.3.3",
         "prop-types": "^15.8.1",
@@ -26,7 +26,7 @@
         "react-dom": "^18.2.0",
         "react-otp-input": "^2.4.0",
         "react-router-dom": "^6.8.0",
-        "vite": "^3.2.4",
+        "vite": "^4.3.8",
         "vite-plugin-eslint": "^1.8.1"
     },
     "devDependencies": {

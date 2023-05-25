@@ -1,12 +1,11 @@
-const crypto = require("crypto");
+const sha256 = require("crypto-js/hmac-sha256");
+const enc = require("crypto-js/enc-base64");
 const { log } = require("../firebase");
+require("dotenv").config();
 
 const verifySignature = (receivedSignature, payload) => {
     log("Check if request is authorized with secret");
-    const hash = crypto
-        .createHmac("sha256", process.env.TYPEFORM_SECRET)
-        .update(payload)
-        .digest("base64");
+    const hash = sha256(payload, process.env.TYPEFORM_SECRET).toString(enc);
     return receivedSignature === `sha256=${hash}`;
 };
 
