@@ -1,3 +1,5 @@
+// require("dotenv").config();
+//
 // exports.sendWelcomeText = functions.auth.user().onCreate(async (user) => {
 //     const msg =
 //         "Welcome to texting ProntoAI! ProntoAI is fantastic at answering questions, having a conversation, or " +

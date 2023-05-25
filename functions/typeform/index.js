@@ -1,6 +1,5 @@
 const { onRequest, db, log } = require("../firebase");
 const { verifySignature, handleFormResponse } = require("./typeformUtils");
-require("dotenv").config();
 
 exports.receivedForm = onRequest(async (req, res) => {
     if (req.method === "POST") {
