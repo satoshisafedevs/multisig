@@ -8,6 +8,8 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
+    sendPasswordResetEmail,
+    sendEmailVerification,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -37,4 +39,6 @@ export {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
+    sendPasswordResetEmail,
+    sendEmailVerification,
 };
