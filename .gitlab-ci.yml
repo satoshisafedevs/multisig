@@ -22,6 +22,7 @@ stages:
 lint-test-frontend:
     stage: test
     before_script:
+        - apk update && apk add git
         - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Linting code... This will take about 10 seconds."
@@ -31,15 +32,27 @@ lint-test-frontend:
 lint-test-functions:
     stage: test
     before_script:
+        - apk update && apk add git
         - cd $CI_PROJECT_DIR/functions && yarn install
     script:
         - echo "Linting code... This will take about 10 seconds."
         - yarn eslint:verify
         - echo "No lint issues found."
 
+unit-test-functions:
+    stage: test
+    before_script:
+        - apk update && apk add git
+        - cd $CI_PROJECT_DIR/functions && yarn install
+    script:
+        - echo "Testing code... This will take about 10 seconds."
+        - yarn test
+        - echo "No test issues found."
+
 format-test-frontend:
     stage: test
     before_script:
+        - apk update && apk add git
         - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Formatting code... This will take about 10 seconds."
@@ -49,6 +62,7 @@ format-test-frontend:
 build-frontend:
     stage: build
     before_script:
+        - apk update && apk add git
         - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Compiling the code..."
@@ -68,6 +82,7 @@ deploy-hosting-playground:
     dependencies:
         - build-frontend
     before_script:
+        - apk update && apk add git
         - cd $CI_PROJECT_DIR/frontend && yarn install
         - yarn global add firebase-tools
     script:
@@ -81,6 +96,7 @@ deploy-functions-playground:
     only:
         - main
     before_script:
+        - apk update && apk add git
         - cd $CI_PROJECT_DIR/functions && yarn install
         - yarn global add firebase-tools
     script:
@@ -89,6 +105,7 @@ deploy-functions-playground:
         - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
         - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
         - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
+        - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
         - echo "Deploying firebase functions..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
         - echo "Firebase functions successfully deployed."
