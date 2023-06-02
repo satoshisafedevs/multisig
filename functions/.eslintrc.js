@@ -2,6 +2,7 @@ module.exports = {
     env: {
         es6: true,
         node: true,
+        mocha: true,
     },
     parserOptions: {
         ecmaVersion: 2020,
@@ -29,5 +30,7 @@ module.exports = {
             rules: {},
         },
     ],
-    globals: {},
+    globals: {
+        expect: true,
+    },
 };
