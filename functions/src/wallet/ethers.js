@@ -16,7 +16,6 @@ async function getLatestBlock() {
     }
 }
 
-
 module.exports = {
     getLatestBlock,
     wallet,

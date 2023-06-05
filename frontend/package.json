@@ -19,15 +19,20 @@
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
         "@vitejs/plugin-react": "^4.0.0",
+        "chart.js": "^4.3.0",
+        "ethers": "^6.4.0",
         "firebase": "^9.15.0",
         "framer-motion": "^8.3.3",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
+        "react-chartjs-2": "^5.2.0",
         "react-dom": "^18.2.0",
         "react-icons": "^4.9.0",
         "react-otp-input": "^2.4.0",
         "react-router-dom": "^6.11.2",
-        "vite": "^4.3.8"
+        "viem": "^0.3.49",
+        "vite": "^4.3.8",
+        "wagmi": "^1.1.0"
     },
     "devDependencies": {
         "eslint": "^8.41.0",
