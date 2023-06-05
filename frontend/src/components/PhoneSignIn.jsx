@@ -1,14 +1,6 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import {
-    Button,
-    Input,
-    Flex,
-    Center,
-    Text,
-    Spinner,
-    Box,
-} from "@chakra-ui/react";
+import { Button, Input, Flex, Center, Text, Spinner, Box } from "@chakra-ui/react";
 import usePhoneLogin from "../hooks/usePhoneLogin";
 import VerificationInput from "./VerificationInput";
 import StatusAlert from "./StatusAlert";
@@ -29,23 +21,13 @@ function PhoneSignIn() {
     } = usePhoneLogin();
 
     if (signInStatus) {
-        return (
-            <StatusAlert
-                signInStatus={signInStatus}
-                resetFlow={resetState}
-                errorMsg={errorMsg}
-            />
-        );
+        return <StatusAlert signInStatus={signInStatus} resetFlow={resetState} errorMsg={errorMsg} />;
     }
 
     return (
         <div>
             {confirmationNumber ? (
-                <VerificationInput
-                    pinChange={onPinChange}
-                    spinner={buttonSpinner}
-                    pin={pin}
-                />
+                <VerificationInput pinChange={onPinChange} spinner={buttonSpinner} pin={pin} />
             ) : (
                 <Flex m={5}>
                     <Input
@@ -60,12 +42,7 @@ function PhoneSignIn() {
                     />
                     <Box w="100px" h="40px">
                         {buttonSpinner ? (
-                            <Spinner
-                                color="orange"
-                                size="lg"
-                                m="4px"
-                                ml="24px"
-                            />
+                            <Spinner color="orange" size="lg" m="4px" ml="24px" />
                         ) : (
                             <ActionButton signInSubmit={signInSubmit} />
                         )}

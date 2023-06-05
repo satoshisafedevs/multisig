@@ -41,12 +41,7 @@ export default function StatusAlert({ signInStatus, resetFlow, errorMsg }) {
         <Center m={10}>
             <Alert status={status}>
                 {status === "success" ? (
-                    <Image
-                        src={boratSuccess}
-                        objectFit="cover"
-                        width="100px"
-                        mr="10px"
-                    />
+                    <Image src={boratSuccess} objectFit="cover" width="100px" mr="10px" />
                 ) : (
                     <AlertIcon />
                 )}

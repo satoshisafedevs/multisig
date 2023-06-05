@@ -11,6 +11,7 @@
     },
     "plugins": ["react"],
     "rules": {
+        "max-len": ["error", { "code": 120, "tabWidth": 4 }],
         "react/require-default-props": "off",
         "react/jsx-one-expression-per-line": "off",
         "quotes": ["error", "double"],

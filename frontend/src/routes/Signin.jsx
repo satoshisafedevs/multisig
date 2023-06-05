@@ -22,17 +22,11 @@ import { IoEye, IoEyeOff } from "react-icons/io5";
 import logo from "../img/logo.svg";
 import useAuth from "../hooks/useAuth";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import theme from "../theme";
 
 function Signin() {
-    const {
-        user,
-        gettingUserAuthStatus,
-        isSigningIn,
-        createUser,
-        signInUser,
-        resetPassword,
-        isResettingPassword,
-    } = useAuth();
+    const { user, gettingUserAuthStatus, isSigningIn, createUser, signInUser, resetPassword, isResettingPassword } =
+        useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,7 +36,7 @@ function Signin() {
     const filterValue = useColorModeValue("invert(90%)", "none");
     const colorValue = useColorModeValue("blackAlpha.800", "whiteAlpha.900");
     const hoverValue = useColorModeValue("blackAlpha.800", "white");
-    const chromeAutofill = useColorModeValue("white", "#2D3748"); // idk why gray.700 not working here
+    const chromeAutofill = useColorModeValue("white", theme.colors.gray[700]); // just gray.700 not working here
 
     useEffect(() => {
         document.title = "Sign in - Better Wallet";
@@ -59,8 +53,7 @@ function Signin() {
 
     const handlePassword = (event) => setPassword(event.target.value);
 
-    const handleConfirmPassword = (event) =>
-        setConfirmPassword(event.target.value);
+    const handleConfirmPassword = (event) => setConfirmPassword(event.target.value);
 
     const handleHideShow = () => setShowPassword(!showPassword);
 
@@ -97,16 +90,7 @@ function Signin() {
     };
 
     if (gettingUserAuthStatus) {
-        return (
-            <Spinner
-                color="blue.500"
-                speed="1s"
-                size="xl"
-                thickness="4px"
-                emptyColor="gray.200"
-                margin="auto"
-            />
-        );
+        return <Spinner color="blue.500" speed="1s" size="xl" thickness="4px" emptyColor="gray.200" margin="auto" />;
     }
 
     if (user) {
@@ -122,18 +106,9 @@ function Signin() {
                 <Card margin="20px">
                     <CardBody>
                         <Stack spacing="15px" width="300px">
-                            <Image
-                                src={logo}
-                                filter={filterValue}
-                                paddingTop="10px"
-                                paddingBottom="20px"
-                            />
+                            <Image src={logo} filter={filterValue} paddingTop="10px" paddingBottom="20px" />
                             <Center>
-                                <Heading
-                                    size="lg"
-                                    paddingBottom="40px"
-                                    color={colorValue}
-                                >
+                                <Heading size="lg" paddingBottom="40px" color={colorValue}>
                                     {formTitle()}
                                 </Heading>
                             </Center>
@@ -148,9 +123,7 @@ function Signin() {
                             {!forgotPassword && (
                                 <InputGroup>
                                     <Input
-                                        type={
-                                            showPassword ? "text" : "password"
-                                        }
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="Password"
                                         onChange={handlePassword}
                                         value={password}
@@ -159,14 +132,7 @@ function Signin() {
                                         }}
                                     />
                                     <InputRightElement>
-                                        <Tooltip
-                                            label={
-                                                showPassword
-                                                    ? "Hide password"
-                                                    : "Show password"
-                                            }
-                                            hasArrow
-                                        >
+                                        <Tooltip label={showPassword ? "Hide password" : "Show password"} hasArrow>
                                             <IconButton
                                                 focusable
                                                 boxSize="38px"
@@ -175,13 +141,7 @@ function Signin() {
                                                     color: hoverValue,
                                                 }}
                                                 onClick={handleHideShow}
-                                                icon={
-                                                    showPassword ? (
-                                                        <IoEyeOff />
-                                                    ) : (
-                                                        <IoEye />
-                                                    )
-                                                }
+                                                icon={showPassword ? <IoEyeOff /> : <IoEye />}
                                             />
                                         </Tooltip>
                                     </InputRightElement>
@@ -190,9 +150,7 @@ function Signin() {
                             {noAccount && (
                                 <InputGroup>
                                     <Input
-                                        type={
-                                            showPassword ? "text" : "password"
-                                        }
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="Confirm password"
                                         onChange={handleConfirmPassword}
                                         value={confirmPassword}
@@ -201,14 +159,7 @@ function Signin() {
                                         }}
                                     />
                                     <InputRightElement>
-                                        <Tooltip
-                                            label={
-                                                showPassword
-                                                    ? "Hide password"
-                                                    : "Show password"
-                                            }
-                                            hasArrow
-                                        >
+                                        <Tooltip label={showPassword ? "Hide password" : "Show password"} hasArrow>
                                             <IconButton
                                                 focusable
                                                 boxSize="38px"
@@ -217,13 +168,7 @@ function Signin() {
                                                     color: hoverValue,
                                                 }}
                                                 onClick={handleHideShow}
-                                                icon={
-                                                    showPassword ? (
-                                                        <IoEyeOff />
-                                                    ) : (
-                                                        <IoEye />
-                                                    )
-                                                }
+                                                icon={showPassword ? <IoEyeOff /> : <IoEye />}
                                             />
                                         </Tooltip>
                                     </InputRightElement>
@@ -231,21 +176,14 @@ function Signin() {
                             )}
                             <Tooltip
                                 label="Passwords do not match"
-                                isOpen={
-                                    noAccount && password !== confirmPassword
-                                }
+                                isOpen={noAccount && password !== confirmPassword}
                                 hasArrow
                             >
                                 <Button
-                                    colorScheme="blue"
+                                    colorScheme="green300"
                                     onClick={handleSubmit}
-                                    isLoading={
-                                        isSigningIn || isResettingPassword
-                                    }
-                                    isDisabled={
-                                        noAccount &&
-                                        password !== confirmPassword
-                                    }
+                                    isLoading={isSigningIn || isResettingPassword}
+                                    isDisabled={noAccount && password !== confirmPassword}
                                 >
                                     {buttonLabel()}
                                 </Button>
@@ -253,26 +191,14 @@ function Signin() {
                         </Stack>
                         {!noAccount && (
                             <Box textAlign="right" marginTop="5px">
-                                <Button
-                                    variant="link"
-                                    size="sm"
-                                    fontWeight="normal"
-                                    onClick={handleForgotPassword}
-                                >
-                                    {!forgotPassword
-                                        ? "Forgot password?"
-                                        : "Back to sign in"}
+                                <Button variant="link" size="sm" fontWeight="normal" onClick={handleForgotPassword}>
+                                    {!forgotPassword ? "Forgot password?" : "Back to sign in"}
                                 </Button>
                             </Box>
                         )}
                         <Center paddingTop="70px">
                             {noAccount ? "Already a member?" : "Not a member?"}
-                            <Button
-                                colorScheme="blue"
-                                paddingLeft="10px"
-                                variant="link"
-                                onClick={handleNoAccount}
-                            >
+                            <Button colorScheme="blue" paddingLeft="10px" variant="link" onClick={handleNoAccount}>
                                 {noAccount ? "Sign in" : "Create account"}
                             </Button>
                         </Center>

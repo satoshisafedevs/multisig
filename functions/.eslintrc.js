@@ -13,7 +13,7 @@ module.exports = {
         "prefer-arrow-callback": "error",
         "space-infix-ops": "error",
         "eol-last": ["error", "always"],
-        "no-multiple-empty-lines": "error",
+        "no-multiple-empty-lines": ["error", { max: 1 }],
         "quotes": ["error", "double", { avoidEscape: true }],
         "indent": ["error", 4],
         "object-curly-newline": "off",

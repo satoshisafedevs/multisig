@@ -14,33 +14,21 @@ import {
     ModalContent,
     ModalHeader,
     ModalBody,
+    Input,
 } from "@chakra-ui/react";
-import { IoAdd } from "react-icons/io5";
-import Header from "../components/Header";
+import { IoAdd, IoSend } from "react-icons/io5";
 import useAuth from "../hooks/useAuth";
+import Header from "../components/Header";
+import LineChart from "../components/LineChart";
 
 function Home() {
-    const {
-        user,
-        gettingUserAuthStatus,
-        resendVerificationEmail,
-        signOutUser,
-    } = useAuth();
+    const { user, gettingUserAuthStatus, resendVerificationEmail, signOutUser } = useAuth();
     useEffect(() => {
         document.title = "Better Wallet";
     }, []);
 
     if (gettingUserAuthStatus) {
-        return (
-            <Spinner
-                color="blue.500"
-                speed="1s"
-                size="xl"
-                thickness="4px"
-                emptyColor="gray.200"
-                margin="auto"
-            />
-        );
+        return <Spinner color="blue.500" speed="1s" size="xl" thickness="4px" emptyColor="gray.200" margin="auto" />;
     }
 
     if (!user) {
@@ -51,37 +39,26 @@ function Home() {
         return (
             <Modal isOpen={!user.emailVerified} size="xl">
                 <ModalContent>
-                    <ModalHeader>Email verification</ModalHeader>
+                    <ModalHeader>Your account requires email verification</ModalHeader>
                     <ModalBody>
                         <Box>
-                            Please verify your email and{" "}
-                            <Button
-                                variant="link"
-                                colorScheme="blue"
-                                onClick={() => window.location.reload()}
-                            >
+                            A verification email has been sent to your inbox. Please verify your email by clicking the
+                            link provided. Once done, please{" "}
+                            <Button variant="link" colorScheme="blue" onClick={() => window.location.reload()}>
                                 refresh
                             </Button>{" "}
-                            the page.
+                            this page.
                         </Box>
                         <Box padding="20px 0">
-                            Have not received email yet? Click
-                            <Button
-                                variant="link"
-                                colorScheme="blue"
-                                onClick={resendVerificationEmail}
-                            >
+                            Haven&apos;t received the email yet? Click
+                            <Button variant="link" colorScheme="blue" onClick={resendVerificationEmail}>
                                 here
                             </Button>
-                            to re-send verification email.
+                            to resend the verification email.
                         </Box>
                         <Box paddingBottom="20px">
-                            Feeling stuck? Click
-                            <Button
-                                variant="link"
-                                colorScheme="blue"
-                                onClick={() => signOutUser(user.email)}
-                            >
+                            If you&apos;re encountering difficulties, feel free to sign out and try again later. Click
+                            <Button variant="link" colorScheme="blue" onClick={() => signOutUser(user.email)}>
                                 here
                             </Button>
                             to sign out from <Text as="i">{user.email}</Text>.
@@ -100,9 +77,8 @@ function Home() {
                 minHeight="500px"
                 gap="20px"
                 padding="10px"
-                color="blackAlpha.800"
                 gridTemplateRows="1fr 1fr"
-                gridTemplateColumns="1fr 2fr 1fr"
+                gridTemplateColumns="0.8fr 2fr 1fr"
                 gridTemplateAreas="
                     'one two four'
                     'one three four'
@@ -116,33 +92,52 @@ function Home() {
                             </Text>
                         </CardBody>
                         <CardFooter>
-                            <Button
-                                leftIcon={<IoAdd size="25px" />}
-                                width="100%"
-                                colorScheme="green300"
-                            >
+                            <Button leftIcon={<IoAdd size="25px" />} width="100%" colorScheme="green300">
                                 Add Safe wallet
                             </Button>
                         </CardFooter>
                     </Card>
                 </GridItem>
-                <GridItem area="two">
+                <GridItem minWidth="350px" area="two">
                     <Card height="100%">
-                        <CardBody>2</CardBody>
+                        <CardBody>
+                            <Text fontSize="lg" fontWeight="bold">
+                                Portfolio
+                            </Text>
+                            <LineChart />
+                        </CardBody>
                     </Card>
                 </GridItem>
-                <GridItem area="three">
+                <GridItem minWidth="350px" area="three">
+                    <Card height="100%">
+                        <CardBody>
+                            <Text fontSize="lg" fontWeight="bold">
+                                Control panel
+                            </Text>
+                        </CardBody>
+                        <CardFooter>
+                            <Input placeholder="Chat or action" />
+                            <Box>
+                                <Button marginLeft="20px" colorScheme="green300" rightIcon={<IoSend size="20px" />}>
+                                    Send
+                                </Button>
+                            </Box>
+                        </CardFooter>
+                    </Card>
+                </GridItem>
+                <GridItem minWidth="300px" area="four">
                     <Card height="100%">
                         <CardBody>
                             <Text fontSize="lg" fontWeight="bold">
                                 Actions
                             </Text>
+                            <Input marginTop="10px" placeholder="Filter actions" />
                         </CardBody>
-                    </Card>
-                </GridItem>
-                <GridItem area="four">
-                    <Card height="100%">
-                        <CardBody>4</CardBody>
+                        <CardFooter>
+                            <Button leftIcon={<IoAdd size="25px" />} width="100%" colorScheme="green300">
+                                Add protocol function
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </GridItem>
             </Grid>
