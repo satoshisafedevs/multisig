@@ -5,13 +5,13 @@ async function generateWallet() {
     return ethers.Wallet.createRandom();
 }
 
-async function loadWallet(privateKey) {
-    wallet = new ethers.Wallet(privateKey);
+async function loadWallet(privateKey, provider) {
+    wallet = new ethers.Wallet(privateKey, provider);
     return wallet;
 }
 
 module.exports = {
     generateWallet,
     loadWallet,
-    wallet,
+    getWallet: () => wallet,
 };

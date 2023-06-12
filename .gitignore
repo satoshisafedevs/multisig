@@ -1,5 +1,6 @@
 .DS_Store
 .firebase
+.vscode
 node_modules
 dist
 functions/serviceAccountKey.json

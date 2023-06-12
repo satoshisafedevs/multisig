@@ -44,14 +44,11 @@ unit-test-functions:
     before_script:
         - apk update && apk add git
         - cd $CI_PROJECT_DIR/functions && yarn install
+        - cp $GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND ./serviceAccountKey.json
     script:
-        - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
         - echo "Testing code... This will take about 10 seconds."
         - yarn test
         - echo "No test issues found."
-    after_script:
-        - cd $CI_PROJECT_DIR/functions
-        - rm -f .env
 
 format-test-frontend:
     stage: test

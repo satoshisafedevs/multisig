@@ -1,16 +1,36 @@
 require("dotenv").config();
-const ethers = require("ethers");
-const wallet = null;
+const { ethers, providers } = require("ethers");
+const { EthersAdapter } = require("@safe-global/protocol-kit");
+const networks = {
+    "arbitrum": "arbitrum",
+    "optimism": "optimism",
+    "matic": "matic",
+    "homestead": "homestead",
+    "optimism-goerli": "optimism-goerli",
+    "arbitrum-goerli": "arbitrum-goerli",
+};
 
-// Define Alchemy provider for Optimism network
-const optProvider =
-    new ethers.AlchemyProvider("optimism", process.env.ALCHEMY_KEY);
-
-async function getLatestBlock() {
+async function getLatestBlock(provider) {
     try {
-        const blockNumber = await optProvider.getBlockNumber();
-        const block = await optProvider.getBlock(blockNumber);
+        const blockNumber = await provider.getBlockNumber();
+        const block = await provider.getBlock(blockNumber);
         return block;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function getProvider(network) {
+    if (networks[network] === undefined) {
+        throw new Error("Invalid network");
+    }
+    return new providers.AlchemyProvider(network, process.env.ALCHEMY_KEY);
+}
+
+async function getEthersAdapter(wallet) {
+    try {
+        const ethersAdapter = new EthersAdapter({ ethers, signerOrProvider: wallet });
+        return ethersAdapter;
     } catch (error) {
         console.error(error);
     }
@@ -18,5 +38,6 @@ async function getLatestBlock() {
 
 module.exports = {
     getLatestBlock,
-    wallet,
+    getProvider,
+    getEthersAdapter,
 };

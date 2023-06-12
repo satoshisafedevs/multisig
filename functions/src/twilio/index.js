@@ -1,4 +1,4 @@
-const { onRequest, db } = require("../firebase");
+const { onRequest, db } = require("../../firebase");
 const { twilioClient } = require("./twilioUtils");
 const { openAIResponse } = require("../openai");
 require("dotenv").config();
