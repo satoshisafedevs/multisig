@@ -1,4 +1,4 @@
-const { onRequest, db, log } = require("../firebase");
+const { onRequest, db, log } = require("../../firebase");
 const { verifySignature, handleFormResponse } = require("./typeformUtils");
 
 exports.receivedForm = onRequest(async (req, res) => {

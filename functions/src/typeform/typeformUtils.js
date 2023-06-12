@@ -1,6 +1,6 @@
 const sha256 = require("crypto-js/hmac-sha256");
 const enc = require("crypto-js/enc-base64");
-const { log } = require("../firebase");
+const { log } = require("../../firebase");
 require("dotenv").config();
 
 const verifySignature = (receivedSignature, payload) => {

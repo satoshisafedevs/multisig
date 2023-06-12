@@ -1,3 +1,4 @@
+## Deploying
 To deploy functions manually from cli create a file - `functions/.env` with the following env variables:
 
 ```
@@ -14,3 +15,45 @@ Deploy command example cli:
 Service key can be found in GitLab CI/CD variables.
 
 To deploy a particular function provide its name: `functions:functionName`.
+
+## VS Code
+If you want to throw debuggers into the node code and run it locally, use the following launch.json file:
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/functions/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "bdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/functions/src/**/*.test.js"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "envFile": "${workspaceFolder}/functions/.env"
+        },
+                {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Current File",
+            "program": "${workspaceFolder}/functions/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "bdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${file}"
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "envFile": "${workspaceFolder}/functions/.env"
+        }
+    ]
+}
+```
