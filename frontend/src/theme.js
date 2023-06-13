@@ -14,6 +14,17 @@ const styles = {
             overflow: "auto",
             margin: "0",
             padding: "0",
+            scrollbarColor: props.colorMode === "light" ? "lightgray transparent" : "dimgray transparent",
+            "*::-webkit-scrollbar": {
+                width: "8px",
+            },
+            "*::-webkit-scrollbar-thumb": {
+                background: props.colorMode === "light" ? "lightgray" : "dimgray",
+                borderRadius: "6px",
+            },
+            "*::-webkit-scrollbar-corner": {
+                background: "transparent",
+            },
             ...(props.colorMode === "light" && {
                 backgroundColor: "#EFF3F8",
             }),
