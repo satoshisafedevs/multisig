@@ -1,17 +1,32 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {
-    getAuth,
-    RecaptchaVerifier,
-    signInWithPhoneNumber,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
+    getAuth,
     onAuthStateChanged,
-    signOut,
-    sendPasswordResetEmail,
+    RecaptchaVerifier,
     sendEmailVerification,
+    sendPasswordResetEmail,
+    signInWithEmailAndPassword,
+    signInWithPhoneNumber,
+    signOut,
+    updateProfile,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    getFirestore,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    setDoc,
+    Timestamp,
+    updateDoc,
+} from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_API_KEY,
@@ -29,16 +44,29 @@ const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
 export {
+    addDoc,
+    analytics,
     app,
     auth,
-    analytics,
-    db,
-    RecaptchaVerifier,
-    signInWithPhoneNumber,
+    collection,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
+    db,
+    doc,
+    getDoc,
+    getDocs,
     onAuthStateChanged,
-    signOut,
-    sendPasswordResetEmail,
+    onSnapshot,
+    orderBy,
+    query,
+    RecaptchaVerifier,
     sendEmailVerification,
+    sendPasswordResetEmail,
+    serverTimestamp,
+    setDoc,
+    signInWithEmailAndPassword,
+    signInWithPhoneNumber,
+    signOut,
+    Timestamp,
+    updateDoc,
+    updateProfile,
 };

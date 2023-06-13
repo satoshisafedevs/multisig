@@ -35,6 +35,7 @@ export default function LineChart() {
 
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: "bottom",

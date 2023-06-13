@@ -8,9 +8,19 @@ import {
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
     sendEmailVerification,
+    db,
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
+    updateProfile,
+    onSnapshot,
+    Timestamp,
 } from "../firebase";
+import { useFirestoreUser } from "../providers/FirestoreUser";
 
 const useAuth = () => {
+    const { firestoreUser, setFirestoreUser } = useFirestoreUser();
     const toast = useToast();
     const [user, setUser] = useState(null);
     const [gettingUserAuthStatus, setGettingUserAuthStatus] = useState(true);
@@ -19,13 +29,31 @@ const useAuth = () => {
     const [isResettingPassword, setResettingPassword] = useState(false);
     const [authInProgress, setAuthInProgress] = useState(false);
 
+    const getFirestoreUserData = async (userAuth) => {
+        const docRef = doc(db, "users", userAuth.uid);
+        try {
+            const docSnap = await getDoc(docRef);
+            setFirestoreUser({ ...docSnap.data(), uid: userAuth.uid });
+        } catch (error) {
+            toast({
+                description: `Failed to get firestore user: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (userAuth) => {
             if (userAuth) {
                 setUser(userAuth);
+                getFirestoreUserData(userAuth);
                 setGettingUserAuthStatus(false);
             } else {
                 setUser(null);
+                setFirestoreUser(null);
                 setGettingUserAuthStatus(false);
             }
         });
@@ -37,7 +65,6 @@ const useAuth = () => {
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 setSigningIn(false);
-                setUser(userCredential.user);
                 sendEmailVerification(userCredential.user);
             })
             .catch((error) => {
@@ -146,7 +173,70 @@ const useAuth = () => {
             });
     };
 
+    const addMessage = async (text) => {
+        let team;
+        if (!firestoreUser.team) {
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                team = docSnap.data().team;
+                setFirestoreUser({ ...firestoreUser, ...docSnap.data() });
+            }
+        } else {
+            team = firestoreUser.team;
+        }
+        const docRef = doc(db, "teams", team, "chat", "messages");
+        try {
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                await updateDoc(docRef, {
+                    [Timestamp.now().toMillis()]: {
+                        from: user.displayName || user.email,
+                        message: text,
+                        uid: user.uid,
+                    },
+                });
+            } else {
+                await setDoc(docRef, {
+                    [Timestamp.now().toMillis()]: {
+                        from: user.displayName || user.email,
+                        message: text,
+                        uid: user.uid,
+                    },
+                });
+            }
+        } catch (error) {
+            toast({
+                description: `Failed to send message: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const updateFirestoreUserData = async (userData, data) => {
+        const docRef = doc(db, "users", userData.uid);
+        try {
+            await updateDoc(docRef, data);
+            setFirestoreUser(...firestoreUser, ...data);
+        } catch (error) {
+            toast({
+                description: `Failed to update firestore user: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     return {
+        db,
+        doc,
+        getDoc,
+        setDoc,
         user,
         gettingUserAuthStatus,
         isSigningIn,
@@ -158,6 +248,11 @@ const useAuth = () => {
         resetPassword,
         resendVerificationEmail,
         authInProgress,
+        addMessage,
+        updateDoc,
+        updateFirestoreUserData,
+        updateProfile,
+        onSnapshot,
     };
 };
 

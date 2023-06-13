@@ -86,6 +86,16 @@ export default function Header() {
         });
     };
 
+    const walletValue = () => {
+        if (wallet) {
+            if (Number(wallet.formatted) % 1 === 0) {
+                return ` - ${wallet.formatted} ${wallet.symbol}`;
+            }
+            return ` - ${Number(wallet.formatted).toFixed(6)} ${wallet.symbol}`;
+        }
+        return null;
+    };
+
     return (
         <Flex margin="10px 10px 0 10px">
             <Card direction="row" width="100%" justify="space-between" padding="10px">
@@ -123,7 +133,7 @@ export default function Header() {
                             <MenuList>
                                 <MenuGroup title="Profile">
                                     <Box paddingLeft="3" paddingRight="3">
-                                        {user?.email}
+                                        {user?.displayName ? `${user.displayName} (${user?.email})` : user?.email}
                                     </Box>
                                     <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>
                                         Sign out
@@ -136,11 +146,8 @@ export default function Header() {
                                             <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
                                                 {address.slice(0, 5)}
                                                 ...
-                                                {address.slice(-4)} -{" "}
-                                                {Number(wallet?.formatted) % 1 === 0
-                                                    ? wallet?.formatted
-                                                    : Number(wallet?.formatted).toFixed(6)}{" "}
-                                                {wallet?.symbol}
+                                                {address.slice(-4)}
+                                                {walletValue()}
                                             </Box>
                                             <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
                                                 <Menu>
@@ -154,7 +161,7 @@ export default function Header() {
                                                                 vale={el.name}
                                                                 isChecked={el.name === chain.name}
                                                                 type="checkbox"
-                                                                onClick={() => switchNetwork?.(el.id)}
+                                                                onClick={() => switchNetwork(el.id)}
                                                                 isDisabled={switchNetworkIsLoading}
                                                             >
                                                                 {el.name}
@@ -168,9 +175,9 @@ export default function Header() {
                                 )}
                                 <MenuDivider />
                                 <Box paddingLeft="3" paddingBottom="1">
-                                    Dark theme{" "}
+                                    Dark theme
                                     <Switch
-                                        paddingLeft="2"
+                                        paddingLeft="3"
                                         size="md"
                                         onChange={toggleColorMode}
                                         isChecked={colorMode !== "light"}

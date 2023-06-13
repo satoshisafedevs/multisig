@@ -39,7 +39,7 @@ function Signin() {
     const chromeAutofill = useColorModeValue("white", theme.colors.gray[700]); // just gray.700 not working here
 
     useEffect(() => {
-        document.title = "Sign in - Better Wallet";
+        document.title = "Sign in - Satoshi Safe";
     }, []);
 
     const handleNoAccount = () => {
