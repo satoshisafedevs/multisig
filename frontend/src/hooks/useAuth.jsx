@@ -13,6 +13,7 @@ import {
     setDoc,
     getDoc,
     updateDoc,
+    deleteField,
     updateProfile,
     onSnapshot,
     Timestamp,
@@ -20,7 +21,7 @@ import {
 import { useFirestoreUser } from "../providers/FirestoreUser";
 
 const useAuth = () => {
-    const { firestoreUser, setFirestoreUser } = useFirestoreUser();
+    const { firestoreUser, setFirestoreUser, setTeamMembers } = useFirestoreUser();
     const toast = useToast();
     const [user, setUser] = useState(null);
     const [gettingUserAuthStatus, setGettingUserAuthStatus] = useState(true);
@@ -29,11 +30,32 @@ const useAuth = () => {
     const [isResettingPassword, setResettingPassword] = useState(false);
     const [authInProgress, setAuthInProgress] = useState(false);
 
-    const getFirestoreUserData = async (userAuth) => {
-        const docRef = doc(db, "users", userAuth.uid);
+    const getTeamInfo = async (team) => {
         try {
-            const docSnap = await getDoc(docRef);
-            setFirestoreUser({ ...docSnap.data(), uid: userAuth.uid });
+            const teamRef = doc(db, "teams", team);
+            const teamSnap = await getDoc(teamRef);
+            const teamData = teamSnap.data();
+            setTeamMembers(teamData.usersInfo);
+        } catch (error) {
+            toast({
+                description: `Failed to get team members: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const getFirestoreUserData = async (userAuth) => {
+        const userRef = doc(db, "users", userAuth.uid);
+        try {
+            const userSnap = await getDoc(userRef);
+            const userData = userSnap.data();
+            setFirestoreUser({ ...userData, uid: userAuth.uid });
+            if (userData.team) {
+                getTeamInfo(userData.team);
+            }
         } catch (error) {
             toast({
                 description: `Failed to get firestore user: ${error.message}`,
@@ -216,6 +238,23 @@ const useAuth = () => {
         }
     };
 
+    const deleteMessage = async (messageID) => {
+        const docRef = doc(db, "teams", firestoreUser.team, "chat", "messages");
+        try {
+            await updateDoc(docRef, {
+                [messageID]: deleteField(),
+            });
+        } catch (error) {
+            toast({
+                description: `Failed to delete message: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     const updateFirestoreUserData = async (userData, data) => {
         const docRef = doc(db, "users", userData.uid);
         try {
@@ -249,6 +288,7 @@ const useAuth = () => {
         resendVerificationEmail,
         authInProgress,
         addMessage,
+        deleteMessage,
         updateDoc,
         updateFirestoreUserData,
         updateProfile,
