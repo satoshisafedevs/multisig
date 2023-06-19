@@ -1,4 +1,4 @@
-const { generateWallet, loadWallet, wallet } = require("./wallet");
+const { generateWallet, loadWallet, wallet, setupWallet } = require("./wallet");
 
 const { getLatestBlock, getProvider, getEthersAdapter } = require("./ethers");
 
@@ -9,4 +9,5 @@ module.exports = {
     loadWallet,
     wallet,
     getEthersAdapter,
+    setupWallet,
 };

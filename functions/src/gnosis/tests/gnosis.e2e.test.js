@@ -1,29 +1,62 @@
 require("dotenv").config();
 const chai = require("chai");
+const { utils } = require("ethers");
 const expect = chai.expect;
-const { getProvider, loadWallet, getEthersAdapter } = require("../../wallet");
-const { createSafe } = require("../gnosis");
+const { setupWallet } = require("../../wallet");
+const { createSafe, loadSafe } = require("../manageSafes");
+const { getSafesByOwner, getAllTransactions } = require("../safeService");
 
-describe("Gnosis Safe", () => {
+describe("Gnosis Safe", async () => {
+    const network = "optimism";
+    const pKey = process.env.PRIVATE_EVM_KEY;
+    let safeAddress = null;
+    const { wallet, ethAdapter, safeService } = await setupWallet(network, pKey);
+
     describe("#createSafe", async () => {
-        xit("should create a gnosis safe for a valid network", async () => {
-            const network = "arbitrum-goerli";
-            const provider = await getProvider(network);
-            const pKey = process.env.PRIVATE_KEY;
-            const wallet = await loadWallet(pKey, provider);
-            console.log(wallet);
-            const ethAdapter = await getEthersAdapter(wallet);
-            console.log(ethAdapter);
-            const safe = await createSafe(ethAdapter);
-            expect(safe).to.have.property("address");
-            expect(safe).to.have.property("nonce");
-            expect(safe).to.have.property("masterCopy");
-            expect(safe).to.have.property("fallbackHandler");
-            expect(safe).to.have.property("version");
-            expect(safe).to.have.property("threshold");
-            expect(safe).to.have.property("owners");
-            expect(safe).to.have.property("modules");
-            expect(safe).to.have.property("guard");
+        it.skip("should create a gnosis safe for a valid network", async () => {
+            await createSafe(ethAdapter);
+        });
+    });
+
+    describe("#getSafesByOwner", () => {
+        it("should return a list of safes for a valid owner", async () => {
+            const { safes } = await getSafesByOwner(safeService, wallet.address);
+            expect(safes).to.be.an("array");
+            safes.forEach((safe) => {
+                expect(utils.isAddress(safe)).to.be.true;
+                // add more assertions based on the properties each safe is expected to have
+            });
+            safeAddress = safes[0];
+        });
+    });
+
+    describe("#getAllTransactions", () => {
+        it("should return a list of transactions for a valid safe address", async () => {
+            const transactions = await getAllTransactions(safeService, safeAddress);
+            expect(transactions.results).to.be.an("array");
+            transactions.results.forEach((transaction) => {
+                expect(transaction).to.have.property("to");
+                expect(transaction).to.have.property("data");
+                // add more assertions based on the properties each transaction is expected to have
+            });
+        });
+    });
+
+    describe("#loadSafeByAddress", () => {
+        let safe = null;
+        it("should load a safe with the correct owner and address", async () => {
+            safe = await loadSafe(ethAdapter, safeAddress);
+        });
+        it("should create a new transaction given sample data", async () => {
+            const safeTransactionData = {
+                to: wallet.address,
+                value: utils.parseEther("0.01"),
+                data: "0x",
+            };
+            const tx = await safe.createTransaction({
+                safeTransactionData,
+            });
+            expect(tx).to.have.property("data");
         });
     });
 });

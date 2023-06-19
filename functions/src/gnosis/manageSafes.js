@@ -1,4 +1,5 @@
-const { SafeFactory } = require("@safe-global/protocol-kit");
+const Safe = require("@safe-global/protocol-kit");
+const { SafeFactory } = Safe;
 
 async function createSafe(ethAdapter) {
     try {
@@ -15,7 +16,17 @@ async function createSafe(ethAdapter) {
     }
 }
 
+async function loadSafe(ethAdapter, safeAddress) {
+    try {
+        const safe = await Safe.default.create({ ethAdapter, safeAddress });
+        return safe;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 module.exports = {
     createSafe,
+    loadSafe,
 };
 

@@ -7,8 +7,9 @@ const { getLatestBlock, getProvider } = require("../ethers");
 describe("Optimism Goerli Provider", () => {
     describe("#getProvider()", () => {
         it("should return a provider for a valid network", async () => {
-            const network = "optimism-goerli";
+            const network = "goerli";
             const provider = await getProvider(network);
+
             expect(provider).to.be.instanceOf(providers.AlchemyProvider);
         });
 
@@ -26,7 +27,7 @@ describe("Optimism Goerli Provider", () => {
 
     describe("#getLatestBlock()", () => {
         it("should return the latest block", async () => {
-            const network = "optimism-goerli";
+            const network = "goerli";
             const provider = await getProvider(network);
             const block = await getLatestBlock(provider);
 
