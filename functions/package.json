@@ -18,6 +18,7 @@
     "main": "index.js",
     "dependencies": {
         "@google-cloud/secret-manager": "^4.2.2",
+        "@safe-global/api-kit": "^1.1.0",
         "@safe-global/protocol-kit": "^1.0.1",
         "crypto-js": "^4.1.1",
         "dotenv": "^16.0.3",

@@ -1,14 +1,7 @@
 require("dotenv").config();
 const { ethers, providers } = require("ethers");
 const { EthersAdapter } = require("@safe-global/protocol-kit");
-const networks = {
-    "arbitrum": "arbitrum",
-    "optimism": "optimism",
-    "matic": "matic",
-    "homestead": "homestead",
-    "optimism-goerli": "optimism-goerli",
-    "arbitrum-goerli": "arbitrum-goerli",
-};
+const networks = require("../networks");
 
 async function getLatestBlock(provider) {
     try {
@@ -21,10 +14,15 @@ async function getLatestBlock(provider) {
 }
 
 async function getProvider(network) {
-    if (networks[network] === undefined) {
+    try {
+        if (networks[network] === undefined) {
+            throw new Error("Invalid network");
+        }
+        return new providers.AlchemyProvider(network, process.env.ALCHEMY_KEY);
+    } catch (error) {
+        console.error(error);
         throw new Error("Invalid network");
     }
-    return new providers.AlchemyProvider(network, process.env.ALCHEMY_KEY);
 }
 
 async function getEthersAdapter(wallet) {

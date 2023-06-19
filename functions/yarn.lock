@@ -653,6 +653,15 @@
   resolved "https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz"
   integrity sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==
 
+"@safe-global/api-kit@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@safe-global/api-kit/-/api-kit-1.1.0.tgz#b46bcb4491d43576832488183019769d37e3f3e6"
+  integrity sha512-3HB+Vl3dFunID4kadpAqYQQ9lfIJuCk9pYoJsfSWGeEgOOGFwexg3UtO8hh0JXoIO+bX8pm8x5GEF6pX8HeNTQ==
+  dependencies:
+    "@ethersproject/abstract-signer" "^5.7.0"
+    "@safe-global/safe-core-sdk-types" "^2.0.0"
+    node-fetch "^2.6.6"
+
 "@safe-global/protocol-kit@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@safe-global/protocol-kit/-/protocol-kit-1.0.1.tgz#05c00436a75bebedb2cc35efc461c9aa909f8f89"
@@ -3572,7 +3581,7 @@ node-fetch@^2.6.1, node-fetch@^2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-fetch@^2.6.11:
+node-fetch@^2.6.11, node-fetch@^2.6.6:
   version "2.6.11"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.11.tgz#cde7fc71deef3131ef80a738919f999e6edfff25"
   integrity sha512-4I6pdBY1EthSqDmJkiNk3JIT8cswwR9nfeW/cPdUagJYEQG7R95WRH74wpz7ma8Gh/9dI9FP+OU+0E4FvtA55w==
