@@ -41,8 +41,8 @@ describe("Secret Manager", function() {
         expect(secret).to.equal(testPrivateKey);
     });
 
-    after(async () => {
-        // cleanup: delete the versions of the secret
+    it("should delete a secret", async () => {
         await secrets.deleteSecret(keyLocation);
     });
 });
+

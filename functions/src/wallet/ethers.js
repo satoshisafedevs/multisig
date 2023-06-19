@@ -25,9 +25,9 @@ async function getProvider(network) {
     }
 }
 
-async function getEthersAdapter(wallet) {
+async function getEthersAdapter(signerOrProvider) {
     try {
-        const ethersAdapter = new EthersAdapter({ ethers, signerOrProvider: wallet });
+        const ethersAdapter = new EthersAdapter({ ethers, signerOrProvider });
         return ethersAdapter;
     } catch (error) {
         console.error(error);

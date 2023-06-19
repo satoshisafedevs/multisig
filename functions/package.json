@@ -4,7 +4,7 @@
     "scripts": {
         "eslint": "eslint --fix .",
         "eslint:verify": "eslint .",
-        "serve": "firebase emulators:start --only functions",
+        "serve": "firebase emulators:start --inspect-functions",
         "shell": "firebase functions:shell",
         "test": "mocha --reporter spec --recursive './src/**/*.test.js'",
         "start": "npm run shell",

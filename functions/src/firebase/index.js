@@ -6,6 +6,7 @@ const {
     onRequest,
     onDocumentCreated,
     onDocumentUpdated,
+    onDocumentWritten,
 } = require("./firebase");
 const {
     createOrUpdatePrivateKey,
@@ -22,10 +23,11 @@ module.exports = {
     log,
     onRequest,
     onDocumentCreated,
-    onDocumentUpdated,
     createOrUpdatePrivateKey,
     getPrivateKey,
     deleteSecret,
     deletePrivateKeyVersion,
     getPrivateKeyVersion,
+    onDocumentWritten,
+    onDocumentUpdated,
 };
