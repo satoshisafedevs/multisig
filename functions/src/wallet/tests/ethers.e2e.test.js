@@ -2,9 +2,10 @@ require("dotenv").config();
 const chai = require("chai");
 const expect = chai.expect;
 const { providers } = require("ethers");
-const { getLatestBlock, getProvider } = require("../ethers");
+const { EthersAdapter } = require("@safe-global/protocol-kit");
+const { getLatestBlock, getProvider, getEthersAdapter } = require("../ethers");
 
-describe("Optimism Goerli Provider", () => {
+describe("Ethers e2e Tests", () => {
     describe("#getProvider()", () => {
         it("should return a provider for a valid network", async () => {
             const network = "goerli";
@@ -22,6 +23,13 @@ describe("Optimism Goerli Provider", () => {
                 expect(error).to.be.an("error");
                 expect(error.message).to.equal("Invalid network");
             }
+        });
+        it("should return an ethers adapter for a valid network", async () => {
+            const network = "goerli";
+            const provider = await getProvider(network);
+            const ethersAdapter = await getEthersAdapter(provider);
+
+            expect(ethersAdapter).to.be.instanceOf(EthersAdapter);
         });
     });
 

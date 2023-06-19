@@ -6,6 +6,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 const {
     onDocumentCreated,
     onDocumentUpdated,
+    onDocumentWritten,
 } = require("firebase-functions/v2/firestore");
 
 initializeApp();
@@ -21,5 +22,6 @@ module.exports = {
     onRequest,
     onDocumentCreated,
     onDocumentUpdated,
+    onDocumentWritten,
     Timestamp,
 };

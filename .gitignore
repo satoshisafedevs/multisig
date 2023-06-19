@@ -6,3 +6,6 @@ dist
 functions/serviceAccountKey.json
 functions/openaiSecret.json
 functions/twilioSecrets.json
+firebase-debug.log
+ui-debug.log
+functions/firestore-debug.log
