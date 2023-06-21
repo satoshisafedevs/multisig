@@ -4,11 +4,11 @@ const expect = chai.expect;
 const { providers } = require("ethers");
 const { EthersAdapter } = require("@safe-global/protocol-kit");
 const { getLatestBlock, getProvider, getEthersAdapter } = require("../ethers");
+const network = "optimism";
 
 describe("Ethers e2e Tests", () => {
     describe("#getProvider()", () => {
         it("should return a provider for a valid network", async () => {
-            const network = "goerli";
             const provider = await getProvider(network);
 
             expect(provider).to.be.instanceOf(providers.AlchemyProvider);
@@ -25,17 +25,14 @@ describe("Ethers e2e Tests", () => {
             }
         });
         it("should return an ethers adapter for a valid network", async () => {
-            const network = "goerli";
             const provider = await getProvider(network);
             const ethersAdapter = await getEthersAdapter(provider);
-
             expect(ethersAdapter).to.be.instanceOf(EthersAdapter);
         });
     });
 
     describe("#getLatestBlock()", () => {
         it("should return the latest block", async () => {
-            const network = "goerli";
             const provider = await getProvider(network);
             const block = await getLatestBlock(provider);
 
