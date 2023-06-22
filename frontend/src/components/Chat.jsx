@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import {
     Avatar,
@@ -13,19 +14,20 @@ import {
     Text,
     Stack,
     useColorModeValue,
+    Heading,
 } from "@chakra-ui/react";
 import { IoSend, IoTrash } from "react-icons/io5";
 import useAuth from "../hooks/useAuth";
-import { useFirestoreUser } from "../providers/FirestoreUser";
 import DeleteMessageModal from "./DeleteMessageModal";
+import { useFirestoreUser } from "../providers/FirestoreUser";
 
 export default function Chat() {
-    const { firestoreUser, teamMembers } = useFirestoreUser();
-    const { user, db, doc, getDoc, onSnapshot, addMessage } = useAuth();
+    const { user, db, onSnapshot, addMessage, teamData, collection } = useAuth();
+    const { currentTeam, teamUsersDisplayNames } = useFirestoreUser();
+    const { slug } = useParams();
     const colorValue = useColorModeValue("gray.200", "whiteAlpha.200");
-    const [chatEnabled, setChatEnabled] = useState(false);
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState({});
+    const [messages, setMessages] = useState([]);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [messageID, setMessageID] = useState();
     const [hoverID, setHoverID] = useState();
@@ -45,30 +47,21 @@ export default function Chat() {
     }, [messages]);
 
     useEffect(() => {
-        const checkUserTeam = async () => {
-            if (firestoreUser?.team) {
-                const docRef = doc(db, "teams", firestoreUser.team);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    setChatEnabled(true);
-                }
-            }
-        };
-        checkUserTeam();
-        let unsubscribe = () => {};
-        if (firestoreUser?.team) {
-            unsubscribe = onSnapshot(doc(db, "teams", firestoreUser.team, "chat", "messages"), (el) => {
-                const chatMessages = el.data();
-                if (chatMessages) {
-                    const sortByTimestamp = Object.fromEntries(
-                        Object.entries(chatMessages).sort((a, b) => a[0].localeCompare(b[0])),
-                    );
-                    setMessages(sortByTimestamp);
-                }
-            });
-        }
+        if (!currentTeam || !currentTeam.id) return;
+        const messagesRef = collection(db, "teams", currentTeam.id, "messages");
+
+        const unsubscribe = onSnapshot(messagesRef, (querySnapshot) => {
+            const chatMessages = querySnapshot.docs
+                .map((msg) => ({
+                    ...msg.data(),
+                    id: msg.id,
+                }))
+                .sort((a, b) => a.createdAt - b.createdAt);
+            setMessages(chatMessages);
+        });
+
         return unsubscribe;
-    }, [firestoreUser]);
+    }, [slug, teamData, db, onSnapshot, currentTeam]);
 
     const handleText = (event) => setMessage(event.target.value);
 
@@ -88,12 +81,14 @@ export default function Chat() {
         hour12: true,
     };
 
-    const convertToDate = (timestamp) => new Date(Number(timestamp)).toLocaleString("en-US", dateOptions);
+    const timeInMilliseconds = (ts) => ts.seconds * 1000 + ts.nanoseconds / 1e6;
 
-    const convertToTime = (timestamp) => new Date(Number(timestamp)).toLocaleString("en-US", timeOptions);
+    const convertToDate = (ts) => new Date(timeInMilliseconds(ts)).toLocaleString("en-US", dateOptions);
+
+    const convertToTime = (ts) => new Date(timeInMilliseconds(ts)).toLocaleString("en-US", timeOptions);
 
     const isSameDate = (ts) => {
-        const date1 = new Date(Number(ts));
+        const date1 = new Date(timeInMilliseconds(ts));
         const date2 = new Date();
 
         return (
@@ -111,9 +106,7 @@ export default function Chat() {
     return (
         <Card height="100%">
             <CardHeader paddingBottom="0">
-                <Text fontSize="lg" fontWeight="bold">
-                    Control panel
-                </Text>
+                <Heading size="md">Control panel</Heading>
             </CardHeader>
             <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px">
                 <DeleteMessageModal
@@ -122,79 +115,75 @@ export default function Chat() {
                     setIsOpen={setDeleteModalOpen}
                     setHoverID={setHoverID}
                 />
-                {chatEnabled && (
-                    <Stack spacing="3">
-                        {Object.entries(messages).map(([key, value]) => (
-                            <Stack
-                                direction="row"
-                                align="center"
-                                key={key}
-                                spacing="0"
-                                paddingLeft="3px"
-                                _hover={{ backgroundColor: colorValue, borderRadius: "3px" }}
-                                onMouseEnter={() => setHoverID(key)}
-                                onMouseLeave={() => setHoverID(null)}
-                            >
-                                <Avatar name={teamMembers[value.uid].displayName || value.from} size="sm" />
-                                <Box flexGrow="1" paddingLeft="6px">
-                                    <Stack direction="row">
-                                        <Text fontSize="xs" fontWeight="bold">
-                                            {teamMembers[value.uid].displayName || value.from}
-                                        </Text>
-                                        <Text fontSize="xs">
-                                            {isSameDate(key) ? convertToTime(key) : convertToDate(key)}
-                                        </Text>
-                                    </Stack>
-                                    <Text fontSize="xs">{value.message}</Text>
-                                </Box>
-                                {user && user.uid === value.uid && key === hoverID && (
-                                    <IconButton
-                                        icon={<StyledTrashIcon />}
-                                        onClick={() => handleDelete(key)}
-                                        height="36px"
-                                        width="36px"
-                                        borderRadius="3px"
-                                        background="none"
-                                        _hover={{ background: "none", cursor: "default" }}
-                                    />
-                                )}
-                                <Box ref={lastMessage} />
-                            </Stack>
-                        ))}
-                    </Stack>
-                )}
+                <Stack spacing="3">
+                    {messages.map((msg) => (
+                        <Stack
+                            direction="row"
+                            align="center"
+                            key={msg.id}
+                            spacing="0"
+                            paddingLeft="3px"
+                            _hover={{ backgroundColor: colorValue, borderRadius: "3px" }}
+                            onMouseEnter={() => setHoverID(msg.id)}
+                            onMouseLeave={() => setHoverID(null)}
+                        >
+                            <Avatar name={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : null} size="sm" />
+                            <Box flexGrow="1" paddingLeft="6px">
+                                <Stack direction="row">
+                                    <Text fontSize="xs" fontWeight="bold">
+                                        {teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : "No name"}
+                                    </Text>
+                                    <Text fontSize="xs">
+                                        {isSameDate(msg.createdAt)
+                                            ? convertToTime(msg.createdAt)
+                                            : convertToDate(msg.createdAt)}
+                                    </Text>
+                                </Stack>
+                                <Text fontSize="xs">{msg.message}</Text>
+                            </Box>
+                            {user && user.uid === msg.uid && msg.id === hoverID && (
+                                <IconButton
+                                    icon={<StyledTrashIcon />}
+                                    onClick={() => handleDelete(msg.id)}
+                                    height="36px"
+                                    width="36px"
+                                    borderRadius="3px"
+                                    background="none"
+                                    _hover={{ background: "none", cursor: "default" }}
+                                />
+                            )}
+                            <Box ref={lastMessage} />
+                        </Stack>
+                    ))}
+                </Stack>
             </CardBody>
             <CardFooter paddingTop="5px">
-                {chatEnabled && (
-                    <>
-                        <Input
-                            placeholder="Chat or action"
-                            value={message}
-                            onChange={handleText}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && message.trim().length !== 0) {
-                                    addMessage(message.trim());
-                                    setMessage("");
-                                }
-                            }}
-                        />
-                        <Box>
-                            <Button
-                                marginLeft="20px"
-                                colorScheme="green300"
-                                rightIcon={<IoSend size="20px" />}
-                                onClick={() => {
-                                    if (message.trim().length !== 0) {
-                                        addMessage(message.trim());
-                                        setMessage("");
-                                    }
-                                }}
-                            >
-                                Send
-                            </Button>
-                        </Box>
-                    </>
-                )}
+                <Input
+                    placeholder="Chat or action"
+                    value={message}
+                    onChange={handleText}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && message.trim().length !== 0) {
+                            addMessage(message.trim());
+                            setMessage("");
+                        }
+                    }}
+                />
+                <Box>
+                    <Button
+                        marginLeft="20px"
+                        colorScheme="green300"
+                        rightIcon={<IoSend size="20px" />}
+                        onClick={() => {
+                            if (message.trim().length !== 0) {
+                                addMessage(message.trim());
+                                setMessage("");
+                            }
+                        }}
+                    >
+                        Send
+                    </Button>
+                </Box>
             </CardFooter>
         </Card>
     );

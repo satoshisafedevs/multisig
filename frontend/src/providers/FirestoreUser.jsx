@@ -10,16 +10,31 @@ export function useFirestoreUser() {
 
 function FirestoreUser({ children }) {
     const [firestoreUser, setFirestoreUser] = useState({});
-    const [teamMembers, setTeamMembers] = useState({});
+    const [teamData, setTeamData] = useState({});
+    const [currentTeam, setCurrentTeam] = useState(null);
+    const [teamUsersDisplayNames, setTeamUsersDisplayNames] = useState(null);
 
     const values = useMemo(
         () => ({
             firestoreUser,
             setFirestoreUser,
-            teamMembers,
-            setTeamMembers,
+            teamData,
+            setTeamData,
+            currentTeam,
+            setCurrentTeam,
+            teamUsersDisplayNames,
+            setTeamUsersDisplayNames,
         }),
-        [firestoreUser, setFirestoreUser, teamMembers, setTeamMembers],
+        [
+            firestoreUser,
+            setFirestoreUser,
+            teamData,
+            setTeamData,
+            currentTeam,
+            setCurrentTeam,
+            teamUsersDisplayNames,
+            setTeamUsersDisplayNames,
+        ],
     );
 
     return <FirestoreUserProvider value={values}>{children}</FirestoreUserProvider>;

@@ -20,50 +20,28 @@ import { useFirestoreUser } from "../providers/FirestoreUser";
 
 export default function CompleteProfileModal() {
     const toast = useToast();
-    const { firestoreUser, setFirestoreUser } = useFirestoreUser();
-    const { db, doc, getDoc, user, updateProfile, updateDoc } = useAuth();
+    const { firestoreUser } = useFirestoreUser();
+    const { db, doc, user, updateProfile, updateDoc } = useAuth();
     const [loading, setLoading] = useState(true);
     const [displayName, setDisplayName] = useState("");
-    const [team, setTeam] = useState("");
     const [profileCompleted, setProfileCompleted] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    let intervalId;
-
-    const checkAuthorization = async () => {
-        // Check if user is authorized for the chat room in teams collection
-        const docRef = doc(db, "teams", team);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            await user.reload();
-            clearInterval(intervalId);
-            setSaving(false);
-            setProfileCompleted(true);
-            setFirestoreUser({ ...firestoreUser, displayName, team });
-        }
-    };
-
     useEffect(() => {
         if (firestoreUser && Object.keys(firestoreUser).length !== 0) {
-            if (!("displayName" in firestoreUser) || !("team" in firestoreUser)) {
-                if ("displayName" in firestoreUser) {
-                    setDisplayName(user.displayName);
-                }
-                if ("team" in firestoreUser) {
-                    setTeam(firestoreUser.team);
-                }
+            if (!("displayName" in firestoreUser)) {
                 setLoading(false);
                 setProfileCompleted(false);
                 return;
             }
+            setDisplayName(firestoreUser.displayName);
+
             setLoading(false);
             setProfileCompleted(true);
         }
     }, [firestoreUser]);
 
     const handleDisplayName = (event) => setDisplayName(event.target.value);
-
-    const handleTeam = (event) => setTeam(event.target.value.replaceAll(" ", ""));
 
     const handleSave = async () => {
         setSaving(true);
@@ -72,9 +50,9 @@ export default function CompleteProfileModal() {
             const userRef = doc(db, "users", user.uid);
             await updateDoc(userRef, {
                 displayName,
-                team,
             });
-            intervalId = setInterval(() => checkAuthorization(), 1000);
+            setSaving(false);
+            setProfileCompleted(true);
         } catch (error) {
             toast({
                 description: `User profile update error: ${error.message}`,
@@ -95,7 +73,7 @@ export default function CompleteProfileModal() {
                 <ModalBody>
                     <Box>
                         Welcome to Satoshi Safe, your new operation center for DeFi. Let&apos;s add your name to your
-                        profile and create your first team.
+                        profile.
                     </Box>
                     <Box width="100%">
                         <Stack direction="row" align="center" padding="20px 0">
@@ -104,19 +82,13 @@ export default function CompleteProfileModal() {
                                 <Input value={displayName} onChange={handleDisplayName} />
                             </InputGroup>
                         </Stack>
-                        <Stack direction="row" align="center">
-                            <InputGroup>
-                                <InputLeftAddon width="120px">* Team</InputLeftAddon>
-                                <Input value={team} onChange={handleTeam} />
-                            </InputGroup>
-                        </Stack>
                     </Box>
                 </ModalBody>
                 <ModalFooter>
                     <Button
                         colorScheme="green300"
                         rightIcon={<IoSave size="20px" />}
-                        isDisabled={displayName.length === 0 || team.length === 0}
+                        isDisabled={displayName.length === 0}
                         isLoading={saving}
                         onClick={handleSave}
                     >
