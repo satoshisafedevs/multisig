@@ -19,10 +19,13 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import logo from "../img/logo.svg";
 import useAuth from "../hooks/useAuth";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import theme from "../theme";
+
+const logo =
+    "https://firebasestorage.googleapis.com/v0/b/" +
+    "prontoai-playground.appspot.com/o/logo%2Fsatoshi_safe.png?alt=media&token=b5333920-3b92-447c-93b3-2b5f6e34c09e";
 
 function Signin() {
     const { user, gettingUserAuthStatus, isSigningIn, createUser, signInUser, resetPassword, isResettingPassword } =
@@ -33,7 +36,6 @@ function Signin() {
     const [showPassword, setShowPassword] = useState(false);
     const [noAccount, setNoAccount] = useState(false);
     const [forgotPassword, setForgotPassword] = useState(false);
-    const filterValue = useColorModeValue("invert(90%)", "none");
     const colorValue = useColorModeValue("blackAlpha.800", "whiteAlpha.900");
     const hoverValue = useColorModeValue("blackAlpha.800", "white");
     const chromeAutofill = useColorModeValue("white", theme.colors.gray[700]); // just gray.700 not working here
@@ -106,7 +108,7 @@ function Signin() {
                 <Card margin="20px">
                     <CardBody>
                         <Stack spacing="15px" width="300px">
-                            <Image src={logo} filter={filterValue} paddingTop="10px" paddingBottom="20px" />
+                            <Image src={logo} paddingTop="10px" paddingBottom="20px" />
                             <Center>
                                 <Heading size="lg" paddingBottom="40px" color={colorValue}>
                                     {formTitle()}

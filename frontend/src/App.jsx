@@ -6,6 +6,8 @@ import { mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import FirestoreUser from "./providers/FirestoreUser";
+import TeamPicker from "./routes/TeamPicker";
+import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import Home from "./routes/Home";
 import Signin from "./routes/Signin";
 import Fourofour from "./routes/Fourofour";
@@ -14,12 +16,24 @@ import theme from "./theme";
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <Home />,
+        element: (
+            <AuthenticatedRoute>
+                <TeamPicker />
+            </AuthenticatedRoute>
+        ),
         errorElement: <Fourofour />,
     },
     {
         path: "/signin",
         element: <Signin />,
+    },
+    {
+        path: "/team/:slug",
+        element: (
+            <AuthenticatedRoute>
+                <Home />
+            </AuthenticatedRoute>
+        ),
     },
 ]);
 

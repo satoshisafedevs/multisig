@@ -20,13 +20,15 @@ import {
     useColorMode,
 } from "@chakra-ui/react";
 import { IoWalletOutline } from "react-icons/io5";
-import logo from "../img/logo.svg";
 import useAuth from "../hooks/useAuth";
 import useWagmi from "../hooks/useWagmi";
 import theme from "../theme";
 
+const logo =
+    "https://firebasestorage.googleapis.com/v0/b/" +
+    "prontoai-playground.appspot.com/o/logo%2Fsatoshi_safe.png?alt=media&token=b5333920-3b92-447c-93b3-2b5f6e34c09e";
+
 export default function Header() {
-    const filterValue = useColorModeValue("invert(90%)", "none");
     const bgValue = useColorModeValue("green300.500", "green300.300");
     const colorValue = useColorModeValue("white", theme.colors.gray[700]);
     // for some reason gray.700 not working with styled()
@@ -100,7 +102,7 @@ export default function Header() {
         <Flex margin="10px 10px 0 10px">
             <Card direction="row" width="100%" justify="space-between" padding="10px">
                 <Stack direction="row" spacing={8}>
-                    <Image src={logo} filter={filterValue} width="170px" />
+                    <Image src={logo} width="170px" />
                     <Button variant="link" size="sm">
                         Security center
                     </Button>

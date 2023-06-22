@@ -1,0 +1,20 @@
+{
+    "uniswap": {
+        "title": "Unsiwap",
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Ficon_uniswap_20x20.svg?alt=media&token=13618c88-dd9c-40f3-b1a2-4b5617fe2d47",
+        "actions": {
+            "swap": "Swap",
+            "addLiquidity": "Add Liquidity",
+            "removeLiquidity": "Remove Liquidity"
+        }
+    },
+    "synthetix": {
+        "title": "Synthetix",
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Ficon_synthetix_20x20.svg?alt=media&token=02599e92-4368-4ece-b5c0-a859eee54812",
+        "actions": {
+            "claim": "Claim",
+            "burnDebt": "Burn Debt",
+            "mint": "Mint"
+        }
+    }
+}
