@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    Text,
-    VStack,
+    Heading,
+    Card,
+    Spinner,
+    Stack,
     Button,
     Container,
     Modal,
@@ -56,30 +58,34 @@ function TeamPicker() {
     };
 
     return (
-        <Container maxW="container.lg" py={5}>
-            <Text fontSize="2xl" mb={5}>
+        <Container align="center" margin="auto" height="80vh">
+            <Heading fontSize="2xl" mb={5}>
                 Select your team
-            </Text>
-            <VStack
-                spacing={4}
-                align="stretch"
-                overflowY="auto"
-                maxHeight="80vh"
-                padding={5}
-                border="1px"
-                borderColor="gray.200"
-                borderRadius="md"
-            >
-                {Array.isArray(teamData) &&
-                    teamData.map((team) => (
-                        <Button key={team.id} onClick={() => handleTeamSelect(team.slug)}>
-                            {team.name}
-                        </Button>
-                    ))}
-                <Button leftIcon={<IoAdd />} colorScheme="green300" onClick={onOpen}>
-                    Create new team
-                </Button>
-            </VStack>
+            </Heading>
+            <Card padding={5}>
+                <Stack direction="column" align="stretch" spacing={4}>
+                    {!teamData && (
+                        <Spinner
+                            color="blue.500"
+                            speed="1s"
+                            size="md"
+                            thickness="2px"
+                            emptyColor="gray.200"
+                            margin="auto"
+                            paddingBottom={15}
+                        />
+                    )}
+                    {Array.isArray(teamData) &&
+                        teamData.map((team) => (
+                            <Button key={team.id} onClick={() => handleTeamSelect(team.slug)}>
+                                {team.name}
+                            </Button>
+                        ))}
+                    <Button leftIcon={<IoAdd size="25px" />} colorScheme="green300" onClick={onOpen}>
+                        Create new team
+                    </Button>
+                </Stack>
+            </Card>
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
@@ -96,12 +102,14 @@ function TeamPicker() {
                         </FormControl>
                     </ModalBody>
                     <ModalFooter>
-                        <Button colorScheme="green300" mr={3} onClick={handleNewTeamSubmit}>
-                            Create
-                        </Button>
-                        <Button variant="ghost" onClick={onClose}>
-                            Cancel
-                        </Button>
+                        <Stack direction="row" spacing={4}>
+                            <Button variant="ghost" onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme="green300" onClick={handleNewTeamSubmit}>
+                                Create
+                            </Button>
+                        </Stack>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

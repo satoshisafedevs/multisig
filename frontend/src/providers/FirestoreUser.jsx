@@ -9,8 +9,8 @@ export function useFirestoreUser() {
 }
 
 function FirestoreUser({ children }) {
-    const [firestoreUser, setFirestoreUser] = useState({});
-    const [teamData, setTeamData] = useState({});
+    const [firestoreUser, setFirestoreUser] = useState(null);
+    const [teamData, setTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
     const [teamUsersDisplayNames, setTeamUsersDisplayNames] = useState(null);
 
