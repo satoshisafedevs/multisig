@@ -53,7 +53,6 @@ exports.onUserWalletChange = onDocumentWritten(
                 return;
             } catch (error) {
                 log("Failed to fetch all safes", error);
-                throw error;
             }
         } else {
             log("Invalid wallet address");
