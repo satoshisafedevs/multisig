@@ -20,6 +20,7 @@ module.exports = {
         "object-curly-spacing": ["error", "always"],
         "max-len": ["error", { code: 120 }],
         "require-jsdoc": 0,
+        "space-before-function-paren": "off",
     },
     overrides: [
         {

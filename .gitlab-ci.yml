@@ -50,6 +50,9 @@ unit-test-functions:
         - echo "Testing code... This will take about 10 seconds."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && yarn serve:test --project playground
         - echo "No test issues found."
+    after_script:
+        - cd $CI_PROJECT_DIR/functions
+        - rm -f serviceAccountKey.json
 
 format-test-frontend:
     stage: test

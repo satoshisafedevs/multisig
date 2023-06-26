@@ -5,7 +5,7 @@ import { WagmiConfig, configureChains, createConfig } from "wagmi";
 import { mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import FirestoreUser from "./providers/FirestoreUser";
+import User from "./providers/User";
 import TeamPicker from "./routes/TeamPicker";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import Home from "./routes/Home";
@@ -69,9 +69,9 @@ function App() {
             <ChakraProvider theme={theme}>
                 <Flex height="100%" direction="column">
                     <WagmiConfig config={config}>
-                        <FirestoreUser>
+                        <User>
                             <RouterProvider router={router} />
-                        </FirestoreUser>
+                        </User>
                     </WagmiConfig>
                 </Flex>
             </ChakraProvider>

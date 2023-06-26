@@ -19,6 +19,7 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import theme from "../theme";
@@ -28,8 +29,8 @@ const logo =
     "prontoai-playground.appspot.com/o/logo%2Fsatoshi_safe.png?alt=media&token=b5333920-3b92-447c-93b3-2b5f6e34c09e";
 
 function Signin() {
-    const { user, gettingUserAuthStatus, isSigningIn, createUser, signInUser, resetPassword, isResettingPassword } =
-        useAuth();
+    const { user, gettingUserAuthStatus } = useUser();
+    const { isSigningIn, createUser, signInUser, resetPassword, isResettingPassword } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");

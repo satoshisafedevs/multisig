@@ -15,13 +15,14 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoSave } from "react-icons/io5";
+import { db, doc } from "../firebase";
 import useAuth from "../hooks/useAuth";
-import { useFirestoreUser } from "../providers/FirestoreUser";
+import { useUser } from "../providers/User";
 
 export default function CompleteProfileModal() {
     const toast = useToast();
-    const { firestoreUser } = useFirestoreUser();
-    const { db, doc, user, updateProfile, updateDoc } = useAuth();
+    const { user, firestoreUser } = useUser();
+    const { updateProfile, updateDoc } = useAuth();
     const [loading, setLoading] = useState(true);
     const [displayName, setDisplayName] = useState("");
     const [profileCompleted, setProfileCompleted] = useState(false);

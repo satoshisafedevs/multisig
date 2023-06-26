@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import { PropTypes } from "prop-types";
 import {
+    Alert,
+    AlertIcon,
     Avatar,
     Box,
     Button,
@@ -20,20 +23,22 @@ import {
     useColorMode,
 } from "@chakra-ui/react";
 import { IoWalletOutline } from "react-icons/io5";
+import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import useWagmi from "../hooks/useWagmi";
-import theme from "../theme";
+import UpdateProfileModal from "./UpdateProfileModal";
 
 const logo =
     "https://firebasestorage.googleapis.com/v0/b/" +
     "prontoai-playground.appspot.com/o/logo%2Fsatoshi_safe.png?alt=media&token=b5333920-3b92-447c-93b3-2b5f6e34c09e";
 
-export default function Header() {
+export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("green300.500", "green300.300");
-    const colorValue = useColorModeValue("white", theme.colors.gray[700]);
+    const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { user, signOutUser, isSigningOut } = useAuth();
+    const { firestoreUser, currentTeam } = useUser();
+    const { signOutUser, isSigningOut } = useAuth();
     const {
         preflightCheck,
         metaMaskInstalled,
@@ -48,6 +53,25 @@ export default function Header() {
         switchNetwork,
         switchNetworkIsLoading,
     } = useWagmi();
+    const [walletMismatch, setWalletMismatch] = useState(false);
+    const [updateProfileModalOpen, setUpdateProfileModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (address && currentTeam?.userWalletAddress) {
+            if (address !== currentTeam.userWalletAddress) {
+                setWalletMismatch(true);
+            } else {
+                setWalletMismatch(false);
+            }
+        }
+    }, [address, currentTeam]);
+
+    const StyledAvatarButton = styled(MenuButton)`
+        border-radius: 16px;
+        &:focus-visible {
+            box-shadow: var(--chakra-shadows-outline);
+        }
+    `;
 
     const StyledAvatar = styled(Avatar)`
         svg {
@@ -100,96 +124,126 @@ export default function Header() {
 
     return (
         <Flex margin="10px 10px 0 10px">
-            <Card direction="row" width="100%" justify="space-between" padding="10px">
-                <Stack direction="row" spacing={8}>
-                    <Image src={logo} width="170px" />
-                    <Button variant="link" size="sm">
-                        Security center
-                    </Button>
-                    <Button variant="link" size="sm">
-                        Reports
-                    </Button>
-                    <Button variant="link" size="sm">
-                        Docs
-                    </Button>
-                </Stack>
-                <Stack direction="row" spacing={4} align="center">
-                    {!isConnected && (
-                        <Button
-                            leftIcon={<IoWalletOutline />}
-                            size="sm"
-                            width="100%"
-                            colorScheme={setColorScheme()}
-                            isDisabled={preflightCheck || connectIsLoading}
-                            onClick={handleClick}
-                        >
-                            {buttonLabel()}
-                        </Button>
-                    )}
-                    {/* Box wrapper fixes warning in console */}
-                    <Box>
-                        <Menu>
-                            <MenuButton>
-                                <StyledAvatar bg={bgValue} size="sm" />
-                            </MenuButton>
-                            <MenuList>
-                                <MenuGroup title="Profile">
-                                    <Box paddingLeft="3" paddingRight="3">
-                                        {user?.displayName ? `${user.displayName} (${user?.email})` : user?.email}
+            <UpdateProfileModal isOpen={updateProfileModalOpen} setIsOpen={setUpdateProfileModalOpen} />
+            <Card direction="column" width="100%">
+                <Flex direction="row" justify="space-between" padding="10px">
+                    <Stack direction="row" spacing={8}>
+                        <Image src={logo} width="170px" height="40px" />
+                        {withTeam && (
+                            <>
+                                <Button variant="link" size="sm">
+                                    Security center
+                                </Button>
+                                <Button variant="link" size="sm">
+                                    Reports
+                                </Button>
+                                <Button variant="link" size="sm">
+                                    Docs
+                                </Button>{" "}
+                            </>
+                        )}
+                    </Stack>
+                    <Stack direction="row" spacing={4} align="center">
+                        {!isConnected && (
+                            <Button
+                                leftIcon={<IoWalletOutline />}
+                                size="sm"
+                                width="100%"
+                                colorScheme={setColorScheme()}
+                                isDisabled={preflightCheck || connectIsLoading}
+                                onClick={handleClick}
+                            >
+                                {buttonLabel()}
+                            </Button>
+                        )}
+                        {/* Box wrapper fixes warning in console */}
+                        <Box>
+                            <Menu>
+                                <StyledAvatarButton>
+                                    <StyledAvatar bg={bgValue} size="sm" />
+                                </StyledAvatarButton>
+                                <MenuList>
+                                    <MenuGroup title="Profile">
+                                        <Box paddingLeft="3" paddingRight="3" paddingBottom="1">
+                                            {firestoreUser?.displayName
+                                                ? `${firestoreUser.displayName} (${firestoreUser?.email})`
+                                                : firestoreUser?.email}
+                                        </Box>
+                                        <MenuItem onClick={() => setUpdateProfileModalOpen(true)}>
+                                            Update profile
+                                        </MenuItem>
+                                        <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>
+                                            Sign out
+                                        </MenuItem>
+                                    </MenuGroup>
+                                    {withTeam && address && (
+                                        <>
+                                            <MenuDivider />
+                                            <MenuGroup title="Wallet">
+                                                <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
+                                                    {address.slice(0, 5)}
+                                                    ...
+                                                    {address.slice(-4)}
+                                                    {walletValue()}
+                                                </Box>
+                                                <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
+                                                    <Menu>
+                                                        <MenuButton fontWeight="normal" as={Button}>
+                                                            Network {chain.name}
+                                                        </MenuButton>
+                                                        <MenuList>
+                                                            {chains.map((el) => (
+                                                                <MenuItemOption
+                                                                    key={el.name}
+                                                                    vale={el.name}
+                                                                    isChecked={el.name === chain.name}
+                                                                    type="checkbox"
+                                                                    onClick={() => switchNetwork(el.id)}
+                                                                    isDisabled={switchNetworkIsLoading}
+                                                                >
+                                                                    {el.name}
+                                                                </MenuItemOption>
+                                                            ))}
+                                                        </MenuList>
+                                                    </Menu>
+                                                </Box>
+                                            </MenuGroup>
+                                        </>
+                                    )}
+                                    <MenuDivider />
+                                    <Box paddingLeft="3" paddingBottom="1">
+                                        Dark theme
+                                        <Switch
+                                            paddingLeft="3"
+                                            size="md"
+                                            onChange={toggleColorMode}
+                                            isChecked={colorMode !== "light"}
+                                        />
                                     </Box>
-                                    <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>
-                                        Sign out
-                                    </MenuItem>
-                                </MenuGroup>
-                                {address && (
-                                    <>
-                                        <MenuDivider />
-                                        <MenuGroup title="Wallet">
-                                            <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
-                                                {address.slice(0, 5)}
-                                                ...
-                                                {address.slice(-4)}
-                                                {walletValue()}
-                                            </Box>
-                                            <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
-                                                <Menu>
-                                                    <MenuButton fontWeight="normal" as={Button}>
-                                                        Network {chain.name}
-                                                    </MenuButton>
-                                                    <MenuList>
-                                                        {chains.map((el) => (
-                                                            <MenuItemOption
-                                                                key={el.name}
-                                                                vale={el.name}
-                                                                isChecked={el.name === chain.name}
-                                                                type="checkbox"
-                                                                onClick={() => switchNetwork(el.id)}
-                                                                isDisabled={switchNetworkIsLoading}
-                                                            >
-                                                                {el.name}
-                                                            </MenuItemOption>
-                                                        ))}
-                                                    </MenuList>
-                                                </Menu>
-                                            </Box>
-                                        </MenuGroup>
-                                    </>
-                                )}
-                                <MenuDivider />
-                                <Box paddingLeft="3" paddingBottom="1">
-                                    Dark theme
-                                    <Switch
-                                        paddingLeft="3"
-                                        size="md"
-                                        onChange={toggleColorMode}
-                                        isChecked={colorMode !== "light"}
-                                    />
-                                </Box>
-                            </MenuList>
-                        </Menu>
-                    </Box>
-                </Stack>
+                                </MenuList>
+                            </Menu>
+                        </Box>
+                    </Stack>
+                </Flex>
+                {withTeam && walletMismatch && (
+                    <Flex>
+                        <Alert
+                            status="error"
+                            variant="top-accent"
+                            justifyContent="center"
+                            borderBottomRadius="var(--chakra-radii-md)"
+                        >
+                            <AlertIcon />
+                            The MetaMask wallet address you have selected does not match the wallet address registered
+                            with Satoshi Safe.
+                        </Alert>
+                    </Flex>
+                )}
             </Card>
         </Flex>
     );
 }
+
+Header.propTypes = {
+    withTeam: PropTypes.bool,
+};
