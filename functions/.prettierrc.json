@@ -2,5 +2,6 @@
     "trailingComma": "all",
     "tabWidth": 4,
     "semi": true,
-    "quoteProps": "consistent"
+    "quoteProps": "consistent",
+    "printWidth": 120
 }

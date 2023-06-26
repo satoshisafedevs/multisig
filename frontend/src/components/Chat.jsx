@@ -15,15 +15,16 @@ import {
     Stack,
     useColorModeValue,
     Heading,
+    useToast,
 } from "@chakra-ui/react";
 import { IoSend, IoTrash } from "react-icons/io5";
-import useAuth from "../hooks/useAuth";
+import { db, collection, addDoc, onSnapshot, Timestamp } from "../firebase";
 import DeleteMessageModal from "./DeleteMessageModal";
-import { useFirestoreUser } from "../providers/FirestoreUser";
+import { useUser } from "../providers/User";
 
 export default function Chat() {
-    const { user, db, onSnapshot, addMessage, teamData, collection } = useAuth();
-    const { currentTeam, teamUsersDisplayNames } = useFirestoreUser();
+    const toast = useToast();
+    const { firestoreUser, teamsData, currentTeam, teamUsersDisplayNames } = useUser();
     const { slug } = useParams();
     const colorValue = useColorModeValue("gray.200", "whiteAlpha.200");
     const [message, setMessage] = useState("");
@@ -61,7 +62,30 @@ export default function Chat() {
         });
 
         return unsubscribe;
-    }, [slug, teamData, db, onSnapshot, currentTeam]);
+    }, [slug, teamsData, db, onSnapshot, currentTeam]);
+
+    const addMessage = async (text) => {
+        try {
+            const newMessage = {
+                message: text,
+                uid: firestoreUser.uid,
+                type: "text",
+                createdAt: Timestamp.now(),
+            };
+            // Points to the 'messages' subcollection in the team document
+            const messagesCollectionRef = collection(db, "teams", currentTeam.id, "messages");
+            // Add a new document with 'newMessage' object. Firestore will auto-generate an ID.
+            await addDoc(messagesCollectionRef, newMessage);
+        } catch (error) {
+            toast({
+                description: `Failed to send message: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     const handleText = (event) => setMessage(event.target.value);
 
@@ -87,15 +111,37 @@ export default function Chat() {
 
     const convertToTime = (ts) => new Date(timeInMilliseconds(ts)).toLocaleString("en-US", timeOptions);
 
-    const isSameDate = (ts) => {
-        const date1 = new Date(timeInMilliseconds(ts));
-        const date2 = new Date();
+    const isToday = (ts) => {
+        const date = new Date(timeInMilliseconds(ts));
+        const today = new Date();
 
         return (
-            date1.getFullYear() === date2.getFullYear() &&
-            date1.getMonth() === date2.getMonth() &&
-            date1.getDate() === date2.getDate()
+            date.getFullYear() === today.getFullYear() &&
+            date.getMonth() === today.getMonth() &&
+            date.getDate() === today.getDate()
         );
+    };
+
+    const isYesterday = (ts) => {
+        const date = new Date(timeInMilliseconds(ts));
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1); // set to yesterday's date
+
+        return (
+            date.getFullYear() === yesterday.getFullYear() &&
+            date.getMonth() === yesterday.getMonth() &&
+            date.getDate() === yesterday.getDate()
+        );
+    };
+
+    const messageTimeFormat = (key) => {
+        if (isToday(key)) {
+            return `Today at ${convertToTime(key)}`;
+        }
+        if (isYesterday(key)) {
+            return `Yesterday at ${convertToTime(key)}`;
+        }
+        return convertToDate(key);
     };
 
     const handleDelete = (key) => {
@@ -115,7 +161,7 @@ export default function Chat() {
                     setIsOpen={setDeleteModalOpen}
                     setHoverID={setHoverID}
                 />
-                <Stack spacing="3">
+                <Stack spacing="2">
                     {messages.map((msg) => (
                         <Stack
                             direction="row"
@@ -123,25 +169,23 @@ export default function Chat() {
                             key={msg.id}
                             spacing="0"
                             paddingLeft="3px"
+                            paddingTop="2px"
+                            paddingBottom="2px"
                             _hover={{ backgroundColor: colorValue, borderRadius: "3px" }}
                             onMouseEnter={() => setHoverID(msg.id)}
                             onMouseLeave={() => setHoverID(null)}
                         >
                             <Avatar name={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : null} size="sm" />
                             <Box flexGrow="1" paddingLeft="6px">
-                                <Stack direction="row">
+                                <Stack direction="row" spacing="5px">
                                     <Text fontSize="xs" fontWeight="bold">
                                         {teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : "No name"}
                                     </Text>
-                                    <Text fontSize="xs">
-                                        {isSameDate(msg.createdAt)
-                                            ? convertToTime(msg.createdAt)
-                                            : convertToDate(msg.createdAt)}
-                                    </Text>
+                                    <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
                                 </Stack>
                                 <Text fontSize="xs">{msg.message}</Text>
                             </Box>
-                            {user && user.uid === msg.uid && msg.id === hoverID && (
+                            {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
                                 <IconButton
                                     icon={<StyledTrashIcon />}
                                     onClick={() => handleDelete(msg.id)}

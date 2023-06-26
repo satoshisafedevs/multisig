@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Heading,
@@ -18,102 +18,142 @@ import {
     FormLabel,
     Input,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
-import { useFirestoreUser } from "../providers/FirestoreUser";
-import useAuth from "../hooks/useAuth";
+import { db, addDoc, collection, setDoc, doc } from "../firebase";
+import { useUser } from "../providers/User";
+import Header from "../components/Header";
 
 function TeamPicker() {
-    const { firestoreUser, teamData } = useFirestoreUser();
-    const { db, addDoc, collection, setDoc, doc } = useAuth();
+    const toast = useToast();
+    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersDisplayNames, getUserTeamsData } = useUser();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [teamName, setTeamName] = useState("");
     const [walletAddress, setWalletAddress] = useState("");
+    const [loading, setLoading] = useState(false);
+    const inputRef = useRef();
 
-    const handleTeamSelect = (slug) => {
-        navigate(`/team/${slug}`);
-    };
+    useEffect(() => {
+        document.title = "Select your team - Satoshi Safe";
+        setCurrentTeam(null);
+        setTeamUsersDisplayNames(null);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
+        }
+    }, [isOpen]);
+
+    const handleTeamSelect = (slug) => navigate(`/team/${slug}`);
 
     const handleNewTeamSubmit = async () => {
+        setLoading(true);
         const newTeamData = {
             name: teamName,
             users: [firestoreUser.uid],
             // generate a slug from the team name
-            slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Math.floor(Math.random() * 1000)}`,
+            slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
         };
-        const newDoc = await addDoc(collection(db, "teams"), newTeamData);
-        const teamRef = doc(db, "users", firestoreUser.uid, "teams", newDoc.id);
-        await setDoc(
-            teamRef,
-            {
-                userWalletAddress: walletAddress,
-            },
-            { merge: true },
-        );
-        setTeamName("");
-        setWalletAddress("");
-        onClose();
-        handleTeamSelect(newTeamData.slug);
+        try {
+            const newDoc = await addDoc(collection(db, "teams"), newTeamData);
+            const teamRef = doc(db, "users", firestoreUser.uid, "teams", newDoc.id);
+            await setDoc(
+                teamRef,
+                {
+                    userWalletAddress: walletAddress,
+                },
+                { merge: true },
+            );
+            if ((await getUserTeamsData(user)) === true) {
+                // navigate once new team is ready
+                handleTeamSelect(newTeamData.slug);
+            }
+            setTeamName("");
+            setWalletAddress("");
+            onClose();
+            setLoading(false);
+        } catch (error) {
+            toast({
+                description: `Failed to create team: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            setLoading(false);
+        }
     };
 
     return (
-        <Container align="center" margin="auto" height="80vh">
-            <Heading fontSize="2xl" mb={5}>
-                Select your team
-            </Heading>
-            <Card padding={5}>
-                <Stack direction="column" align="stretch" spacing={4}>
-                    {!teamData && (
-                        <Spinner
-                            color="blue.500"
-                            speed="1s"
-                            size="md"
-                            thickness="2px"
-                            emptyColor="gray.200"
-                            margin="auto"
-                            paddingBottom={15}
-                        />
-                    )}
-                    {Array.isArray(teamData) &&
-                        teamData.map((team) => (
-                            <Button key={team.id} onClick={() => handleTeamSelect(team.slug)}>
-                                {team.name}
-                            </Button>
-                        ))}
-                    <Button leftIcon={<IoAdd size="25px" />} colorScheme="green300" onClick={onOpen}>
-                        Create new team
-                    </Button>
-                </Stack>
-            </Card>
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Create new team</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <FormControl>
-                            <FormLabel>Team name</FormLabel>
-                            <Input value={teamName} onChange={(e) => setTeamName(e.target.value)} />
-                        </FormControl>
-                        <FormControl mt={4}>
-                            <FormLabel>Wallet address</FormLabel>
-                            <Input value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} />
-                        </FormControl>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Stack direction="row" spacing={4}>
-                            <Button variant="ghost" onClick={onClose}>
-                                Cancel
-                            </Button>
-                            <Button colorScheme="green300" onClick={handleNewTeamSubmit}>
-                                Create
-                            </Button>
-                        </Stack>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-        </Container>
+        <>
+            <Header />
+            <Container align="center" margin="auto" height="80vh">
+                <Heading fontSize="2xl" mb={5}>
+                    Select your team
+                </Heading>
+                <Card padding={5}>
+                    <Stack direction="column" align="stretch" spacing={4}>
+                        {!teamsData && (
+                            <Spinner
+                                color="blue.500"
+                                speed="1s"
+                                size="md"
+                                thickness="2px"
+                                emptyColor="gray.200"
+                                margin="auto"
+                                paddingBottom={15}
+                            />
+                        )}
+                        {Array.isArray(teamsData) &&
+                            teamsData.map((team) => (
+                                <Button key={team.id} onClick={() => handleTeamSelect(team.slug)}>
+                                    {team.name}
+                                </Button>
+                            ))}
+                        <Button leftIcon={<IoAdd size="25px" />} colorScheme="green300" onClick={onOpen}>
+                            Create new team
+                        </Button>
+                    </Stack>
+                </Card>
+                <Modal isOpen={isOpen} onClose={onClose} size="lg">
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>Create new team</ModalHeader>
+                        <ModalCloseButton top="var(--chakra-space-3)" />
+                        <ModalBody>
+                            <FormControl>
+                                <FormLabel>Team name</FormLabel>
+                                <Input value={teamName} onChange={(e) => setTeamName(e.target.value)} ref={inputRef} />
+                            </FormControl>
+                            <FormControl mt={4}>
+                                <FormLabel>Wallet address</FormLabel>
+                                <Input value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} />
+                            </FormControl>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Stack direction="row" spacing={4}>
+                                <Button variant="ghost" onClick={onClose}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    colorScheme="green300"
+                                    onClick={handleNewTeamSubmit}
+                                    isLoading={loading}
+                                    isDisabled={teamName.length === 0 || walletAddress.length === 0}
+                                >
+                                    Create
+                                </Button>
+                            </Stack>
+                        </ModalFooter>
+                    </ModalContent>
+                </Modal>
+            </Container>
+        </>
     );
 }
 

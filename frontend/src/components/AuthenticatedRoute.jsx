@@ -1,35 +1,88 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
-import { Spinner } from "@chakra-ui/react";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Spinner, useToast } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import useAuth from "../hooks/useAuth"; // Assuming you have an authentication hook
+import { db, doc, getDoc } from "../firebase";
 import EmailVerifyModal from "./EmailVerifyModal";
-import { useFirestoreUser } from "../providers/FirestoreUser";
+import { useUser } from "../providers/User";
 
 function AuthenticatedRoute({ children }) {
-    const { teamData, setCurrentTeam, setTeamUsersDisplayNames } = useFirestoreUser();
+    const {
+        user,
+        gettingUserAuthStatus,
+        teamsData,
+        setTeamsData,
+        setCurrentTeam,
+        setTeamUsersDisplayNames,
+        getFirestoreUserData,
+        getUserTeamsData,
+    } = useUser();
     const [hasFetchedUserData, setHasFetchedUserData] = useState(false);
+    const toast = useToast();
     const { slug } = useParams();
-    const { user, doc, db, getDoc, gettingUserAuthStatus, getFirestoreUserData, getUserTeamsData } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (teamData && teamData.length > 0) {
-            const team = teamData.find((t) => t.slug === slug);
+        if (teamsData && teamsData.length > 0) {
+            const team = teamsData.find((t) => t.slug === slug);
+            if (!team) {
+                return navigate("/");
+            }
+            if (team) {
+                const getUserWallet = async () => {
+                    try {
+                        const docRef = doc(db, "users", user.uid, "teams", team.id);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists()) {
+                            const docData = docSnap.data();
+                            setCurrentTeam((prevState) => ({
+                                ...prevState,
+                                userWalletAddress: docData.userWalletAddress,
+                            }));
+                        } else {
+                            // when user has no access to a team but UI does not know yet
+                            setTeamsData(null);
+                            getUserTeamsData(user);
+                            return navigate("/");
+                        }
+                    } catch (error) {
+                        toast({
+                            description: `Failed to get user wallet: ${error.message}`,
+                            position: "top",
+                            status: "error",
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    }
+                };
+                getUserWallet();
+            }
             // fetch each user id and get displayName and add to team
             if (team?.users) {
                 const displayNames = {};
-                const getUsersDisplayNames = async (el) => {
-                    const docRef = doc(db, "users", el);
-                    const docSnap = await getDoc(docRef);
-                    displayNames[el] = docSnap.data().displayName;
+                const getUsersDisplayNames = async (uid) => {
+                    try {
+                        const docRef = doc(db, "users", uid);
+                        const docSnap = await getDoc(docRef);
+                        const docData = docSnap.data();
+                        displayNames[uid] = docData.displayName || docData.email;
+                    } catch (error) {
+                        toast({
+                            description: `Failed to get team display names: ${error.message}`,
+                            position: "top",
+                            status: "error",
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    }
                 };
-                Promise.all(team.users.map((el) => getUsersDisplayNames(el)))
+                Promise.all(team.users.map((uid) => getUsersDisplayNames(uid)))
                     .then(() => setTeamUsersDisplayNames(displayNames))
                     .catch(() => {});
             }
-            setCurrentTeam({ ...team });
+            setCurrentTeam((prevState) => ({ ...prevState, ...team }));
         }
-    }, [teamData, slug]);
+    }, [teamsData, slug]);
 
     if (gettingUserAuthStatus) {
         return <Spinner color="blue.500" speed="1s" size="xl" thickness="4px" emptyColor="gray.200" margin="auto" />;
@@ -44,9 +97,9 @@ function AuthenticatedRoute({ children }) {
     }
 
     if (!hasFetchedUserData) {
-        setHasFetchedUserData(true);
         getUserTeamsData(user);
         getFirestoreUserData(user);
+        setHasFetchedUserData(true);
     }
 
     return children;

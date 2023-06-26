@@ -4,7 +4,7 @@ import { Button, Box, Text, Modal, ModalContent, ModalHeader, ModalBody } from "
 import useAuth from "../hooks/useAuth";
 
 export default function EmailVerifyModal({ user }) {
-    const { resendVerificationEmail, signOutUser, updateFirestoreUserData } = useAuth();
+    const { resendVerificationEmail, signOutUser, updateUserData } = useAuth();
 
     let intervalId;
     let intervalTime = 0;
@@ -16,7 +16,7 @@ export default function EmailVerifyModal({ user }) {
                 clearInterval(intervalId);
             }
             if (user.emailVerified) {
-                await updateFirestoreUserData(user, { emailVerified: true });
+                await updateUserData(user, { emailVerified: true });
                 clearInterval(intervalId);
                 window.location.reload();
             }

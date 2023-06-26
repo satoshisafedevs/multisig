@@ -2,7 +2,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const secrets = require("../secretManager"); // adjust this to your file structure
 
-describe("Secret Manager", function() {
+describe("Secret Manager", function () {
     this.timeout(60000); // these tests can be slow
 
     let testSecretId;
@@ -13,10 +13,10 @@ describe("Secret Manager", function() {
     before(async () => {
         // create a unique ID for the test secret
         testSecretId = `test-secret-${Date.now()}`;
-        // eslint-disable-next-line max-len
         keyLocation = `projects/${JSON.parse(process.env.FIREBASE_CONFIG).projectId}/secrets/${testSecretId}`;
-        keyLocationWithVersion =
-            `projects/${JSON.parse(process.env.FIREBASE_CONFIG).projectId}/secrets/${testSecretId}/versions/latest`;
+        keyLocationWithVersion = `projects/${
+            JSON.parse(process.env.FIREBASE_CONFIG).projectId
+        }/secrets/${testSecretId}/versions/latest`;
     });
 
     it("should create a new secret", async () => {
@@ -30,8 +30,10 @@ describe("Secret Manager", function() {
     });
 
     it("should create a new version of the secret", async () => {
+        this.timeout(5000); // wonder if this will help with test intermittent failure
         const secret = await secrets.createOrUpdatePrivateKey(testSecretId, "newTestPrivateKey");
         expect(secret).to.have.property("name");
+        this.timeout(5000); // wonder if this will help with test intermittent failure
         const newSecret = await secrets.getPrivateKey(keyLocationWithVersion);
         expect(newSecret).to.equal("newTestPrivateKey");
     });
@@ -45,4 +47,3 @@ describe("Secret Manager", function() {
         await secrets.deleteSecret(keyLocation);
     });
 });
-
