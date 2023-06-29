@@ -7,7 +7,7 @@ const { createSafe, loadSafe } = require("../manageSafes");
 const { getSafesByOwner, getAllTransactions } = require("../safeService");
 
 describe("Gnosis Safe", async () => {
-    const network = "optimism";
+    const network = "arbitrum";
     const pKey = process.env.PRIVATE_EVM_KEY;
     let safeAddress = null;
     const { wallet, ethAdapter, safeService } = await setupWallet(network, pKey);
@@ -20,7 +20,7 @@ describe("Gnosis Safe", async () => {
 
     describe("#getSafesByOwner", () => {
         it("should return a list of safes for a valid owner", async () => {
-            const { safes } = await getSafesByOwner(safeService, wallet.address);
+            const { safes } = await getSafesByOwner(safeService, "0x15C3c3E0444bC58aad1c3b27d196016F9E28bC70");
             expect(safes).to.be.an("array");
             safes.forEach((safe) => {
                 expect(utils.isAddress(safe)).to.be.true;
