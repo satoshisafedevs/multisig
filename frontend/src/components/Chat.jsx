@@ -66,16 +66,32 @@ export default function Chat() {
 
     const addMessage = async (text) => {
         try {
+            let type = "text";
+            if (text.indexOf("@satoshi") > -1) {
+                type = "satoshibot";
+            }
             const newMessage = {
                 message: text,
                 uid: firestoreUser.uid,
-                type: "text",
+                type,
                 createdAt: Timestamp.now(),
             };
             // Points to the 'messages' subcollection in the team document
             const messagesCollectionRef = collection(db, "teams", currentTeam.id, "messages");
             // Add a new document with 'newMessage' object. Firestore will auto-generate an ID.
             await addDoc(messagesCollectionRef, newMessage);
+            const response = await fetch("https://api-onsatoshibotmessagereceived-mojsb2l5zq-uc.a.run.app", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    teamid: currentTeam.id,
+                }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         } catch (error) {
             toast({
                 description: `Failed to send message: ${error.message}`,
