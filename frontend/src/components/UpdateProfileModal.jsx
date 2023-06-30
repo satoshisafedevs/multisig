@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { PropTypes } from "prop-types";
 import {
     Button,
@@ -27,8 +27,17 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
     const [team, setTeam] = useState("");
     const [userWalletAddress, setUserWalletAddress] = useState("");
     const [saving, setSaving] = useState(false);
+    const firstInput = useRef();
 
     const onClose = () => setIsOpen(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => {
+                firstInput.current.focus();
+            }, 0);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (firestoreUser?.displayName) {
@@ -88,7 +97,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
                         <Stack direction="row" align="center" paddingBottom="20px">
                             <InputGroup>
                                 <InputLeftAddon width="150px">Name</InputLeftAddon>
-                                <Input value={displayName} onChange={handleDisplayName} />
+                                <Input value={displayName} onChange={handleDisplayName} ref={firstInput} />
                             </InputGroup>
                         </Stack>
                         <Stack direction="row" align="center" paddingBottom="20px">

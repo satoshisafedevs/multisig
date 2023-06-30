@@ -1,14 +1,13 @@
 const { db } = require("../../firebase");
 const chai = require("chai");
 const expect = chai.expect;
-// const expect = chai.expect;
 
-describe("On user wallet changed update safe array", function() {
+describe("On user wallet changed update safe array", function () {
     this.timeout(15000);
     it("should update the safes field", async () => {
         const userId = "testUser123";
         const teamId = "testTeam123";
-        const documentPath = `/users/${userId}/teams/${teamId}`;
+        const documentPath = `users/${userId}/teams/${teamId}`;
 
         const data = {
             userWalletAddress: "0x88A26A07AC1d80bb6544D85Da1C1d6089bC7D39f",

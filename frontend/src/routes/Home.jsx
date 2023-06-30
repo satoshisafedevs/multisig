@@ -45,7 +45,7 @@ function Home() {
                     'one three four'
                 "
                 >
-                    <GridItem minWidth="225px" area="one">
+                    <GridItem minWidth="270px" area="one">
                         <SafeCard />
                     </GridItem>
                     <GridItem minWidth="350px" minHeight="100%" area="two" ref={gridRef}>

@@ -1,0 +1,20 @@
+{
+    "arbitrum": {
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Farbitrum.svg?alt=media&token=13217f95-6fab-482f-b389-513d75100865",
+        "url": "https://arb1.arbitrum.io/rpc",
+        "currency": "ETH",
+        "title": "Arbitrum"
+    },
+    "mainnet": {
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Farbitrum.svg?alt=media&token=13217f95-6fab-482f-b389-513d75100865",
+        "url": "https://1rpc.io/eth",
+        "currency": "ETH",
+        "title": "Ethereum"
+    },
+    "optimism": {
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Foptimism.svg?alt=media&token=b24d0e93-d289-45cb-8dae-dd3decc2987e",
+        "url": "https://mainnet.optimism.io",
+        "currency": "ETH",
+        "title": "Optimism"
+    }
+}
