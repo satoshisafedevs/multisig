@@ -16,4 +16,3 @@ async function buildTransaction(contractAddress, abi, functionName, params) {
 module.exports = {
     buildTransaction,
 };
-

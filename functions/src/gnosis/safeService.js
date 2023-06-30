@@ -26,6 +26,16 @@ const getSafesByOwner = async (safeService, ownerAddress) => {
     }
 };
 
+const getSafeInfo = async (safeService, safeAddress) => {
+    try {
+        const safeInfo = await safeService.getSafeInfo(safeAddress);
+        return safeInfo;
+    } catch (error) {
+        console.error("Failed to get Safe info", error);
+        throw error;
+    }
+};
+
 const getAllTransactions = async (safeService, safeAddress) => {
     try {
         const transactions = await safeService.getAllTransactions(safeAddress);
@@ -61,6 +71,7 @@ const createAndApproveTransaction = async (safe, safeService, safeAddress, tx, w
 module.exports = {
     getSafeService,
     getSafesByOwner,
+    getSafeInfo,
     getAllTransactions,
     createAndApproveTransaction,
 };

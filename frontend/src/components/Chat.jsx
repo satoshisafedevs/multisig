@@ -26,7 +26,8 @@ export default function Chat() {
     const toast = useToast();
     const { firestoreUser, teamsData, currentTeam, teamUsersDisplayNames } = useUser();
     const { slug } = useParams();
-    const colorValue = useColorModeValue("gray.200", "whiteAlpha.200");
+    const backgroundHover = useColorModeValue("gray.200", "whiteAlpha.200");
+    const satoshiColor = useColorModeValue("green300.700", "green300.200");
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -165,6 +166,21 @@ export default function Chat() {
         setMessageID(key);
     };
 
+    const highlightSatoshi = (msg) =>
+        msg
+            .split(" ")
+            .map((word) => {
+                if (word === "@satoshi") {
+                    return (
+                        <Box as="span" color={satoshiColor} key={word}>
+                            {word}
+                        </Box>
+                    );
+                }
+                return word;
+            })
+            .reduce((prev, curr, i) => (i === 0 ? [curr] : [prev, " ", curr]), []);
+
     return (
         <Card height="100%">
             <CardHeader paddingBottom="0">
@@ -187,7 +203,7 @@ export default function Chat() {
                             paddingLeft="3px"
                             paddingTop="2px"
                             paddingBottom="2px"
-                            _hover={{ backgroundColor: colorValue, borderRadius: "3px" }}
+                            _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
                             onMouseEnter={() => setHoverID(msg.id)}
                             onMouseLeave={() => setHoverID(null)}
                         >
@@ -199,7 +215,9 @@ export default function Chat() {
                                     </Text>
                                     <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
                                 </Stack>
-                                <Text fontSize="xs">{msg.message}</Text>
+                                <Text fontSize="xs">
+                                    {msg.message.includes("@satoshi") ? highlightSatoshi(msg.message) : msg.message}
+                                </Text>
                             </Box>
                             {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
                                 <IconButton

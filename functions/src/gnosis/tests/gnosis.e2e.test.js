@@ -4,7 +4,7 @@ const { utils } = require("ethers");
 const expect = chai.expect;
 const { setupWallet } = require("../../wallet");
 const { createSafe, loadSafe } = require("../manageSafes");
-const { getSafesByOwner, getAllTransactions } = require("../safeService");
+const { getSafesByOwner, getSafeInfo, getAllTransactions } = require("../safeService");
 
 describe("Gnosis Safe", async () => {
     const network = "arbitrum";
@@ -18,13 +18,15 @@ describe("Gnosis Safe", async () => {
         });
     });
 
-    describe("#getSafesByOwner", () => {
+    describe("#getSafesByOwner, #getSafeInfo", () => {
         it("should return a list of safes for a valid owner", async () => {
             const { safes } = await getSafesByOwner(safeService, "0x15C3c3E0444bC58aad1c3b27d196016F9E28bC70");
             expect(safes).to.be.an("array");
-            safes.forEach((safe) => {
+            safes.map(async (safe) => {
                 expect(utils.isAddress(safe)).to.be.true;
                 // add more assertions based on the properties each safe is expected to have
+                const safeInfo = await getSafeInfo(safeService, safe);
+                expect(safeInfo).to.have.property("owners");
             });
             safeAddress = safes[0];
         });

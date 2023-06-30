@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { Navigate, useParams, useNavigate, useLocation } from "react-router-dom";
 import { Spinner, useToast } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { db, doc, getDoc } from "../firebase";
@@ -21,15 +21,16 @@ function AuthenticatedRoute({ children }) {
     const toast = useToast();
     const { slug } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (teamsData && teamsData.length > 0) {
             const team = teamsData.find((t) => t.slug === slug);
-            if (!team) {
+            if (!team && location.pathname !== "/") {
                 return navigate("/");
             }
             if (team) {
-                const getUserWallet = async () => {
+                const getUserSafesAndWallet = async () => {
                     try {
                         const docRef = doc(db, "users", user.uid, "teams", team.id);
                         const docSnap = await getDoc(docRef);
@@ -37,6 +38,7 @@ function AuthenticatedRoute({ children }) {
                             const docData = docSnap.data();
                             setCurrentTeam((prevState) => ({
                                 ...prevState,
+                                userSafes: docData.safes,
                                 userWalletAddress: docData.userWalletAddress,
                             }));
                         } else {
@@ -47,7 +49,7 @@ function AuthenticatedRoute({ children }) {
                         }
                     } catch (error) {
                         toast({
-                            description: `Failed to get user wallet: ${error.message}`,
+                            description: `Failed to get user safes and wallet: ${error.message}`,
                             position: "top",
                             status: "error",
                             duration: 5000,
@@ -55,7 +57,7 @@ function AuthenticatedRoute({ children }) {
                         });
                     }
                 };
-                getUserWallet();
+                getUserSafesAndWallet();
             }
             // fetch each user id and get displayName and add to team
             if (team?.users) {
