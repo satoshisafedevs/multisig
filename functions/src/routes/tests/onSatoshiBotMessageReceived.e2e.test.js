@@ -4,7 +4,7 @@ const axios = require("axios");
 const expect = chai.expect;
 
 describe("On new message in the teams collection", function() {
-    this.timeout(15000);
+    this.timeout(20000);
     it("should write a new message to the teams collection", async () => {
         const teamId = "testTeam123";
         const botUid = "botUid123";

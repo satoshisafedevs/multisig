@@ -21,7 +21,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
-import { db, addDoc, collection, setDoc, doc } from "../firebase";
+import { db, addDoc, collection, setDoc, doc, Timestamp } from "../firebase";
 import { useUser } from "../providers/User";
 import Header from "../components/Header";
 
@@ -53,13 +53,21 @@ function TeamPicker() {
 
     const handleNewTeamSubmit = async () => {
         setLoading(true);
-        const newTeamData = {
-            name: teamName,
-            users: [firestoreUser.uid],
-            // generate a slug from the team name
-            slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
-        };
+
         try {
+            const newSatoshiBotData = {
+                displayName: "Satoshi Bot",
+                email: "support@satoshisafe.ai",
+                creationTime: Timestamp.now(),
+            };
+            const newSatoshiBotDoc = await addDoc(collection(db, "users"), newSatoshiBotData);
+            const newTeamData = {
+                name: teamName,
+                users: [firestoreUser.uid],
+                // generate a slug from the team name
+                slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
+                botUid: newSatoshiBotDoc.id,
+            };
             const newDoc = await addDoc(collection(db, "teams"), newTeamData);
             const teamRef = doc(db, "users", firestoreUser.uid, "teams", newDoc.id);
             await setDoc(
