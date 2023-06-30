@@ -81,17 +81,22 @@ export default function Chat() {
             const messagesCollectionRef = collection(db, "teams", currentTeam.id, "messages");
             // Add a new document with 'newMessage' object. Firestore will auto-generate an ID.
             await addDoc(messagesCollectionRef, newMessage);
-            const response = await fetch("https://api-onsatoshibotmessagereceived-mojsb2l5zq-uc.a.run.app", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    teamid: currentTeam.id,
-                }),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (type === "satoshibot") {
+                const response = await fetch("https://api-onsatoshibotmessagereceived-mojsb2l5zq-uc.a.run.app", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        teamid: currentTeam.id,
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                } else {
+                    const json = await response.json();
+                    console.log(json);
+                }
             }
         } catch (error) {
             toast({

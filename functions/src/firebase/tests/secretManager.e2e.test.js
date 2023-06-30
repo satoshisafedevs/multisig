@@ -30,10 +30,10 @@ describe("Secret Manager", function () {
     });
 
     it("should create a new version of the secret", async () => {
-        this.timeout(5000); // wonder if this will help with test intermittent failure
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         const secret = await secrets.createOrUpdatePrivateKey(testSecretId, "newTestPrivateKey");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         expect(secret).to.have.property("name");
-        this.timeout(5000); // wonder if this will help with test intermittent failure
         const newSecret = await secrets.getPrivateKey(keyLocationWithVersion);
         expect(newSecret).to.equal("newTestPrivateKey");
     });
