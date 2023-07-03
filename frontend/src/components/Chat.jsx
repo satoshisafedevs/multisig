@@ -21,13 +21,15 @@ import { IoSend, IoTrash } from "react-icons/io5";
 import { db, collection, addDoc, onSnapshot, Timestamp } from "../firebase";
 import DeleteMessageModal from "./DeleteMessageModal";
 import { useUser } from "../providers/User";
+import theme from "../theme";
 
 export default function Chat() {
     const toast = useToast();
     const { firestoreUser, teamsData, currentTeam, teamUsersDisplayNames } = useUser();
     const { slug } = useParams();
     const backgroundHover = useColorModeValue("gray.200", "whiteAlpha.200");
-    const satoshiColor = useColorModeValue("green300.700", "green300.200");
+    const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
+    // chakra ui themeing not working on html tags
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -171,20 +173,21 @@ export default function Chat() {
         setMessageID(key);
     };
 
-    const highlightSatoshi = (msg) =>
-        msg
-            .split(" ")
-            .map((word) => {
-                if (word === "@satoshi") {
-                    return (
-                        <Box as="span" color={satoshiColor} key={word}>
-                            {word}
-                        </Box>
-                    );
-                }
-                return word;
-            })
-            .reduce((prev, curr, i) => (i === 0 ? [curr] : [prev, " ", curr]), []);
+    const highlightSatoshi = (msg) => {
+        const user = "@satoshi";
+        const parts = msg.split(user);
+
+        return (
+            <>
+                {parts.map((part, index) => (
+                    <>
+                        {part}
+                        {index < parts.length - 1 && <span style={{ color: satoshiColor }}>{user}</span>}
+                    </>
+                ))}
+            </>
+        );
+    };
 
     return (
         <Card height="100%">
