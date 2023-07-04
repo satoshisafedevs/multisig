@@ -173,20 +173,21 @@ export default function Chat() {
         setMessageID(key);
     };
 
-    const highlightSatoshi = (msg) => {
-        const user = "@satoshi";
-        const parts = msg.split(user);
-
-        return (
-            <>
-                {parts.map((part, index) => (
-                    <>
-                        {part}
-                        {index < parts.length - 1 && <span style={{ color: satoshiColor }}>{user}</span>}
-                    </>
-                ))}
-            </>
-        );
+    const renderMessage = (msg) => {
+        const satoshi = "@satoshi";
+        if (msg.message.length === 0) {
+            return "(no message)";
+        }
+        if (msg.message.includes(satoshi)) {
+            const textParts = msg.message.split(satoshi);
+            return textParts.map((part, index) => (
+                <React.Fragment key={part}>
+                    {index > 0 && <span style={{ color: satoshiColor }}>@satoshi</span>}
+                    {part}
+                </React.Fragment>
+            ));
+        }
+        return msg.message;
     };
 
     return (
@@ -223,9 +224,7 @@ export default function Chat() {
                                     </Text>
                                     <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
                                 </Stack>
-                                <Text fontSize="xs">
-                                    {msg.message.includes("@satoshi") ? highlightSatoshi(msg.message) : msg.message}
-                                </Text>
+                                <Text fontSize="xs">{renderMessage(msg)}</Text>
                             </Box>
                             {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
                                 <IconButton

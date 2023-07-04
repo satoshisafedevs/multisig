@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
 import { PropTypes } from "prop-types";
 import {
@@ -37,7 +37,7 @@ export default function Header({ withTeam }) {
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { firestoreUser, currentTeam } = useUser();
+    const { firestoreUser } = useUser();
     const { signOutUser, isSigningOut } = useAuth();
     const {
         preflightCheck,
@@ -48,23 +48,13 @@ export default function Header({ withTeam }) {
         connectIsLoading,
         address,
         wallet,
+        walletMismatch,
         chain,
         chains,
         switchNetwork,
         switchNetworkIsLoading,
     } = useWagmi();
-    const [walletMismatch, setWalletMismatch] = useState(false);
     const [updateProfileModalOpen, setUpdateProfileModalOpen] = useState(false);
-
-    useEffect(() => {
-        if (address && currentTeam?.userWalletAddress) {
-            if (address !== currentTeam.userWalletAddress) {
-                setWalletMismatch(true);
-            } else {
-                setWalletMismatch(false);
-            }
-        }
-    }, [address, currentTeam]);
 
     const StyledAvatarButton = styled(MenuButton)`
         border-radius: 16px;
