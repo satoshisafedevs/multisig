@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Box, Card, CardBody, Grid, GridItem, Heading, Spinner } from "@chakra-ui/react";
+import { Grid, GridItem, Spinner } from "@chakra-ui/react";
 import Header from "../components/Header";
-import LineChart from "../components/LineChart";
+import Portfolio from "../components/Portfolio";
 import Chat from "../components/Chat";
 import ActionCard from "../actions/ActionCard";
 import SafeCard from "../safes/SafeCard";
 import { useUser } from "../providers/User";
+import { useWagmi } from "../providers/Wagmi";
 
 function Home() {
     const { currentTeam, teamUsersDisplayNames } = useUser();
+    const { walletMismatch } = useWagmi();
     const [chartHeight, setChartHeight] = useState();
     const gridRef = useRef();
 
@@ -27,7 +29,7 @@ function Home() {
             window.addEventListener("resize", updateSize);
             return () => window.removeEventListener("resize", updateSize);
         }
-    }, [currentTeam, teamUsersDisplayNames]);
+    }, [currentTeam, teamUsersDisplayNames, walletMismatch]);
 
     return (
         <>
@@ -45,27 +47,11 @@ function Home() {
                     'one three four'
                 "
                 >
-                    <GridItem minWidth="270px" area="one">
+                    <GridItem minWidth="275px" area="one">
                         <SafeCard />
                     </GridItem>
                     <GridItem minWidth="350px" minHeight="100%" area="two" ref={gridRef}>
-                        <Card height="100%">
-                            <CardBody>
-                                <Heading size="md">Portfolio</Heading>
-                                {/* deducting the heigh of top/bottom padding and card title
-                                 for perfect chart resize */}
-                                {chartHeight && (
-                                    <Box
-                                        position="relative"
-                                        display="inline-block"
-                                        width="100%"
-                                        height={chartHeight - 20 * 2 - 28}
-                                    >
-                                        <LineChart />
-                                    </Box>
-                                )}
-                            </CardBody>
-                        </Card>
+                        <Portfolio chartHeight={chartHeight} />
                     </GridItem>
                     <GridItem minWidth="350px" minHeight="100%" area="three">
                         <Chat />

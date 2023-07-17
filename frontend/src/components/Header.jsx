@@ -25,7 +25,7 @@ import {
 import { IoWalletOutline } from "react-icons/io5";
 import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
-import useWagmi from "../hooks/useWagmi";
+import { useWagmi } from "../providers/Wagmi";
 import UpdateProfileModal from "./UpdateProfileModal";
 
 const logo =
@@ -134,7 +134,7 @@ export default function Header({ withTeam }) {
                         )}
                     </Stack>
                     <Stack direction="row" spacing={4} align="center">
-                        {!isConnected && (
+                        {!isConnected && withTeam && (
                             <Button
                                 leftIcon={<IoWalletOutline />}
                                 size="sm"

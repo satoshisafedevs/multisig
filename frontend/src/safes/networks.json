@@ -6,7 +6,7 @@
         "title": "Arbitrum"
     },
     "mainnet": {
-        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Farbitrum.svg?alt=media&token=13217f95-6fab-482f-b389-513d75100865",
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Fmainnet.svg?alt=media&token=da7326f3-c37e-4952-b071-f7cefb65cb06",
         "url": "https://1rpc.io/eth",
         "currency": "ETH",
         "title": "Ethereum"

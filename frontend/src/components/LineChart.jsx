@@ -1,10 +1,11 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useColorModeValue } from "@chakra-ui/react";
 import theme from "../theme";
 
-export default function LineChart() {
+function LineChart({ xData, yData }) {
     const legendColor = useColorModeValue(theme.colors.blackAlpha[700], theme.colors.whiteAlpha[900]);
     const axisBorderColor = useColorModeValue(theme.colors.blackAlpha[200], theme.colors.whiteAlpha[700]);
 
@@ -45,7 +46,7 @@ export default function LineChart() {
             },
             title: {
                 display: true,
-                text: "Ethereum prediction",
+                text: xData || yData ? "" : "Ethereum prediction",
                 color: legendColor,
             },
             tooltip: {
@@ -98,15 +99,15 @@ export default function LineChart() {
         },
     };
 
-    const labels = ["2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032"];
+    const labels = xData || ["2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032"];
 
     const data = {
         labels,
         datasets: [
             {
                 fill: true,
-                label: "Price",
-                data: [2299, 3438, 4805, 7050, 10244, 15325, 22263, 32035, 45210, 66342],
+                label: xData && yData ? "Balance" : "Price",
+                data: yData || [2299, 3438, 4805, 7050, 10244, 15325, 22263, 32035, 45210, 66342],
                 borderWidth: 2,
                 borderColor: theme.colors.green300[500],
                 backgroundColor: theme.colors.green300[100],
@@ -116,3 +117,10 @@ export default function LineChart() {
 
     return <Line id="chart" options={options} data={data} />;
 }
+
+LineChart.propTypes = {
+    xData: PropTypes.arrayOf(PropTypes.string),
+    yData: PropTypes.arrayOf(PropTypes.number),
+};
+
+export default LineChart;

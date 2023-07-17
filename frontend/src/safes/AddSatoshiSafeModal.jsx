@@ -33,7 +33,7 @@ import { db, doc, getDoc, updateDoc } from "../firebase";
 function WelcomeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");
     const toast = useToast();
-    const { currentTeam, setCurrentTeam } = useUser();
+    const { currentTeam, setCurrentTeam, userTeamData } = useUser();
     const [importFlow, setImportFlow] = useState(false);
     const [checkedSafes, setCheckedSafes] = useState({});
     const [loading, setLoading] = useState(false);
@@ -56,7 +56,7 @@ function WelcomeModal({ isOpen, setIsOpen }) {
                 textTransform: "capitalize",
             }}
             borderColor={tableBorderColor}
-            borderBottom={currentTeam.userSafes.length - 1 === idx ? "none" : "inherit"}
+            borderBottom={userTeamData.userSafes.length - 1 === idx ? "none" : "inherit"}
         >
             {content}
         </Td>
@@ -74,7 +74,7 @@ function WelcomeModal({ isOpen, setIsOpen }) {
         Object.entries(checkedSafes).map(async ([key, value]) => {
             if (value === true) {
                 try {
-                    const safeData = currentTeam.userSafes.find((safe) => safe.safeAddress === key);
+                    const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
                     const teamRef = doc(db, "teams", currentTeam.id);
                     const teamSnap = await getDoc(teamRef);
                     const teamData = teamSnap.data();
@@ -106,7 +106,7 @@ function WelcomeModal({ isOpen, setIsOpen }) {
             return (
                 <>
                     Select the Safe(s) from the list below that you would like to import for this team.
-                    {currentTeam?.userSafes?.length > 0 ? (
+                    {userTeamData?.userSafes?.length > 0 ? (
                         <TableContainer
                             marginTop="20px"
                             paddingTop="10px"
@@ -124,7 +124,7 @@ function WelcomeModal({ isOpen, setIsOpen }) {
                                     </Tr>
                                 </Thead>
                                 <Tbody>
-                                    {currentTeam.userSafes.map((safe, idx) => {
+                                    {userTeamData.userSafes.map((safe, idx) => {
                                         const isAddressInSafes = (currentTeam.safes || []).some(
                                             (el) => el.safeAddress === safe.safeAddress,
                                         );
@@ -221,7 +221,7 @@ function WelcomeModal({ isOpen, setIsOpen }) {
                                 onClick={importSafes}
                                 isLoading={loading}
                                 isDisabled={
-                                    currentTeam?.userSafes?.length === 0 ||
+                                    userTeamData?.userSafes?.length === 0 ||
                                     !Object.values(checkedSafes).some((value) => value === true)
                                 }
                             >
