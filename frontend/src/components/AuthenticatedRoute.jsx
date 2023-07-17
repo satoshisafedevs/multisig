@@ -12,6 +12,7 @@ function AuthenticatedRoute({ children }) {
         gettingUserAuthStatus,
         teamsData,
         setTeamsData,
+        setUserTeamData,
         setCurrentTeam,
         setTeamUsersDisplayNames,
         getFirestoreUserData,
@@ -30,17 +31,17 @@ function AuthenticatedRoute({ children }) {
                 return navigate("/");
             }
             if (team) {
+                setCurrentTeam(team);
                 const getUserSafesAndWallet = async () => {
                     try {
                         const docRef = doc(db, "users", user.uid, "teams", team.id);
                         const docSnap = await getDoc(docRef);
                         if (docSnap.exists()) {
                             const docData = docSnap.data();
-                            setCurrentTeam((prevState) => ({
-                                ...prevState,
+                            setUserTeamData({
                                 userSafes: docData.safes,
                                 userWalletAddress: docData.userWalletAddress,
-                            }));
+                            });
                         } else {
                             // when user has no access to a team but UI does not know yet
                             setTeamsData(null);
@@ -82,7 +83,6 @@ function AuthenticatedRoute({ children }) {
                     .then(() => setTeamUsersDisplayNames(displayNames))
                     .catch(() => {});
             }
-            setCurrentTeam((prevState) => ({ ...prevState, ...team }));
         }
     }, [teamsData, slug]);
 

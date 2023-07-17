@@ -6,6 +6,8 @@ import { mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import User from "./providers/User";
+import Wagmi from "./providers/Wagmi";
+import SafeBalance from "./providers/SafeBalance";
 import TeamPicker from "./routes/TeamPicker";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import Home from "./routes/Home";
@@ -70,7 +72,11 @@ function App() {
                 <Flex height="100%" direction="column">
                     <WagmiConfig config={config}>
                         <User>
-                            <RouterProvider router={router} />
+                            <Wagmi>
+                                <SafeBalance>
+                                    <RouterProvider router={router} />
+                                </SafeBalance>
+                            </Wagmi>
                         </User>
                     </WagmiConfig>
                 </Flex>

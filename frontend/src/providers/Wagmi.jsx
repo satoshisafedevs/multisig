@@ -1,9 +1,17 @@
-import { useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import PropTypes from "prop-types";
 import { useToast } from "@chakra-ui/react";
 import { useAccount, useBalance, useConnect, useNetwork, useSwitchNetwork } from "wagmi";
-import { useUser } from "../providers/User";
+import { useUser } from "./User";
 
-const useWagmi = () => {
+const WagmiContext = createContext();
+const WagmiProvider = WagmiContext.Provider;
+
+export function useWagmi() {
+    return useContext(WagmiContext);
+}
+
+function Wagmi({ children }) {
     const toast = useToast();
     const { currentTeam } = useUser();
     const [pagedOpened, setPageOpened] = useState(false);
@@ -45,6 +53,9 @@ const useWagmi = () => {
                 setWalletMismatch(false);
             }
         }
+        if (!address) {
+            setWalletMismatch(false);
+        }
     }, [address, currentTeam]);
 
     useEffect(() => {
@@ -59,23 +70,48 @@ const useWagmi = () => {
         }
     }, [address]);
 
-    return {
-        preflightCheck,
-        metaMaskInstalled,
-        pendingConnector,
-        isConnected,
-        connectIsLoading,
-        address,
-        wallet,
-        walletMismatch,
-        connector,
-        connectors,
-        connect,
-        chain,
-        chains,
-        switchNetwork,
-        switchNetworkIsLoading,
-    };
+    const values = useMemo(
+        () => ({
+            preflightCheck,
+            metaMaskInstalled,
+            pendingConnector,
+            isConnected,
+            connectIsLoading,
+            address,
+            wallet,
+            walletMismatch,
+            connector,
+            connectors,
+            connect,
+            chain,
+            chains,
+            switchNetwork,
+            switchNetworkIsLoading,
+        }),
+        [
+            preflightCheck,
+            metaMaskInstalled,
+            pendingConnector,
+            isConnected,
+            connectIsLoading,
+            address,
+            wallet,
+            walletMismatch,
+            connector,
+            connectors,
+            connect,
+            chain,
+            chains,
+            switchNetwork,
+            switchNetworkIsLoading,
+        ],
+    );
+
+    return <WagmiProvider value={values}>{children}</WagmiProvider>;
+}
+
+Wagmi.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
-export default useWagmi;
+export default Wagmi;

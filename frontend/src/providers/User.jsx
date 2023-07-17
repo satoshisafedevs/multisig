@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
-import { PropTypes } from "prop-types";
+import PropTypes from "prop-types";
 import { useToast } from "@chakra-ui/react";
 import { auth, onAuthStateChanged, db, collection, doc, getDoc, getDocs } from "../firebase";
 
@@ -16,6 +16,7 @@ function User({ children }) {
     const [gettingUserAuthStatus, setGettingUserAuthStatus] = useState(true);
     const [firestoreUser, setFirestoreUser] = useState(null);
     const [teamsData, setTeamsData] = useState(null);
+    const [userTeamData, setUserTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
     const [teamUsersDisplayNames, setTeamUsersDisplayNames] = useState(null);
 
@@ -92,6 +93,8 @@ function User({ children }) {
             setFirestoreUser,
             teamsData,
             setTeamsData,
+            userTeamData,
+            setUserTeamData,
             currentTeam,
             setCurrentTeam,
             teamUsersDisplayNames,
@@ -107,6 +110,8 @@ function User({ children }) {
             setFirestoreUser,
             teamsData,
             setTeamsData,
+            userTeamData,
+            setUserTeamData,
             currentTeam,
             setCurrentTeam,
             teamUsersDisplayNames,
