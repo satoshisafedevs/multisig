@@ -7,9 +7,9 @@ const {
     onDocumentCreated,
     onDocumentUpdated,
     onDocumentWritten,
+    onSchedule,
     Timestamp,
     onCall,
-    functions,
 } = require("./firebase");
 const {
     createOrUpdatePrivateKey,
@@ -33,7 +33,7 @@ module.exports = {
     getPrivateKeyVersion,
     onDocumentWritten,
     onDocumentUpdated,
+    onSchedule,
     Timestamp,
     onCall,
-    functions,
 };

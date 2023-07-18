@@ -1,9 +1,7 @@
-const { createUpdateTeam } = require("./createUpdateTeam");
 const { createUser, deleteUser } = require("./manageUsers");
 const { onUserWalletChange } = require("./onUserWalletChange");
 
 module.exports = {
-    createUpdateTeam,
     createUser,
     deleteUser,
     onUserWalletChange,

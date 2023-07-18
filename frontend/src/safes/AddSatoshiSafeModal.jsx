@@ -28,7 +28,7 @@ import {
 } from "@chakra-ui/react";
 import { IoAddCircleOutline, IoEnterOutline, IoChevronBackOutline } from "react-icons/io5";
 import { useUser } from "../providers/User";
-import { db, doc, getDoc, updateDoc } from "../firebase";
+import { db, doc, getDoc, updateDoc, Timestamp } from "../firebase";
 
 function WelcomeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");
@@ -71,34 +71,41 @@ function WelcomeModal({ isOpen, setIsOpen }) {
 
     const importSafes = () => {
         setLoading(true);
-        Object.entries(checkedSafes).map(async ([key, value]) => {
-            if (value === true) {
-                try {
-                    const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
-                    const teamRef = doc(db, "teams", currentTeam.id);
-                    const teamSnap = await getDoc(teamRef);
-                    const teamData = teamSnap.data();
-                    await updateDoc(teamRef, {
-                        safes: [...(teamData?.safes || []), { ...safeData }],
-                    });
-                    setCurrentTeam((prevState) => ({
-                        ...prevState,
-                        safes: [...(teamData?.safes || []), { ...safeData }],
-                    }));
-                    onClose();
-                    setLoading(false);
-                } catch (error) {
-                    toast({
-                        description: `Failed to update team safe: ${error.message}`,
-                        position: "top",
-                        status: "error",
-                        duration: 5000,
-                        isClosable: true,
-                    });
-                    setLoading(false);
-                }
-            }
-        });
+        const entries = Object.entries(checkedSafes);
+        entries
+            .reduce(
+                (promiseChain, [key, value]) =>
+                    promiseChain.then(async () => {
+                        if (value === true) {
+                            try {
+                                const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
+                                const teamRef = doc(db, "teams", currentTeam.id);
+                                const teamSnap = await getDoc(teamRef);
+                                const teamData = teamSnap.data();
+                                await updateDoc(teamRef, {
+                                    safes: [...(teamData?.safes || []), { ...safeData, addedAt: Timestamp.now() }],
+                                });
+                                setCurrentTeam((prevState) => ({
+                                    ...prevState,
+                                    safes: [...(prevState?.safes || []), { ...safeData, addedAt: Timestamp.now() }],
+                                }));
+                            } catch (error) {
+                                toast({
+                                    description: `Failed to update team safe: ${error.message}`,
+                                    position: "top",
+                                    status: "error",
+                                    duration: 5000,
+                                    isClosable: true,
+                                });
+                            }
+                        }
+                    }),
+                Promise.resolve(),
+            )
+            .then(() => {
+                onClose();
+                setLoading(false);
+            });
     };
 
     const renderBody = () => {

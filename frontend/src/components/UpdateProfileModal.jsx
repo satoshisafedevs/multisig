@@ -22,7 +22,7 @@ import { useUser } from "../providers/User";
 
 export default function UpdateProfileModal({ isOpen, setIsOpen }) {
     const toast = useToast();
-    const { user, firestoreUser, setFirestoreUser, currentTeam, setTeamUsersDisplayNames } = useUser();
+    const { user, firestoreUser, setFirestoreUser, currentTeam, userTeamData, setTeamUsersDisplayNames } = useUser();
     const [displayName, setDisplayName] = useState("");
     const [team, setTeam] = useState("");
     const [userWalletAddress, setUserWalletAddress] = useState("");
@@ -46,10 +46,10 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
         if (currentTeam?.name) {
             setTeam(currentTeam.name);
         }
-        if (currentTeam?.userWalletAddress) {
-            setUserWalletAddress(currentTeam.userWalletAddress);
+        if (userTeamData?.userWalletAddress) {
+            setUserWalletAddress(userTeamData.userWalletAddress);
         }
-    }, [firestoreUser, currentTeam]);
+    }, [firestoreUser, currentTeam, userTeamData]);
 
     const handleDisplayName = (event) => setDisplayName(event.target.value);
 
