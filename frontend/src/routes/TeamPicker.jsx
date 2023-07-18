@@ -135,7 +135,7 @@ function TeamPicker() {
                 <Modal isOpen={isOpen} onClose={onClose} size="lg">
                     <ModalOverlay />
                     <ModalContent>
-                        <ModalHeader>Create new team</ModalHeader>
+                        <ModalHeader>Create a new team</ModalHeader>
                         <ModalCloseButton top="var(--chakra-space-3)" />
                         <ModalBody>
                             <FormControl>

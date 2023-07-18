@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useToast } from "@chakra-ui/react";
-import { db, collection, query, orderBy, limit, getDocs } from "../firebase";
+import { db, collection, query, orderBy, limit, where, getDocs } from "../firebase";
 import { useUser } from "./User";
 
 const BalanceContext = createContext();
@@ -21,7 +21,7 @@ const formatDate = (firebaseTimestamp) => {
 
 const fetchAndProcessSafeData = async (safe) => {
     try {
-        const { safeAddress } = safe;
+        const { safeAddress, addedAt } = safe;
         const docsRef = collection(db, "assetsByWalletAddress", safeAddress, "totalBalances");
 
         const latestBalance = await getDocs(query(docsRef, orderBy("createdAt", "desc"), limit(1)));
@@ -29,7 +29,7 @@ const fetchAndProcessSafeData = async (safe) => {
             [safeAddress]: doc.data(),
         }));
 
-        const allBalances = await getDocs(query(docsRef, orderBy("createdAt", "asc")));
+        const allBalances = await getDocs(query(docsRef, where("createdAt", ">=", addedAt)));
         const historicalBalances = allBalances.docs.reduce((accumulator, doc) => {
             const data = doc.data();
             const dateStr = formatDate(data.createdAt);
@@ -57,12 +57,25 @@ const fetchAndProcessSafeData = async (safe) => {
     }
 };
 
+const sortObjectByDate = (object) => {
+    const array = Object.entries(object);
+
+    array.sort((a, b) => {
+        const dateA = new Date(a[0]);
+        const dateB = new Date(b[0]);
+        return dateA - dateB;
+    });
+
+    return Object.fromEntries(array);
+};
+
 function SafeBalance({ children }) {
     const { currentTeam } = useUser();
     const [safesPortfolio, setSafesPortfolio] = useState();
     const [todaysAggregatedBalance, setTodaysAggregatedBalance] = useState();
     const [historicalTotalBalance, setHistoricalTotalBalance] = useState();
     const [gettingData, setGettingData] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
@@ -85,11 +98,15 @@ function SafeBalance({ children }) {
                 });
 
                 setSafesPortfolio(portfolios);
-                setHistoricalTotalBalance(balance);
+                setHistoricalTotalBalance(sortObjectByDate(balance));
                 setGettingData(false);
+                setInitialLoading(false);
+            } else {
+                setInitialLoading(false);
             }
         };
 
+        setInitialLoading(true);
         fetchAndProcessData();
     }, [currentTeam]);
 
@@ -133,8 +150,9 @@ function SafeBalance({ children }) {
             todaysAggregatedBalance,
             historicalTotalBalance,
             resetBalanceData,
+            initialLoading,
         }),
-        [safesPortfolio, todaysAggregatedBalance, historicalTotalBalance, resetBalanceData],
+        [safesPortfolio, todaysAggregatedBalance, historicalTotalBalance, resetBalanceData, initialLoading],
     );
 
     return <BalanceProvider value={values}>{children}</BalanceProvider>;

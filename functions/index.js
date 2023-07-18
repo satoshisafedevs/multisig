@@ -3,3 +3,4 @@
 // exports.stripe = require("./src/stripe");
 exports.triggers = require("./src/triggers");
 exports.api = require("./src/routes");
+exports.schedules = require("./src/schedules");
