@@ -23,12 +23,14 @@ import {
 import { IoAdd } from "react-icons/io5";
 import { db, addDoc, collection, setDoc, doc, Timestamp } from "../firebase";
 import { useUser } from "../providers/User";
+import { useWagmi } from "../providers/Wagmi";
 import { useSafeBalance } from "../providers/SafeBalance";
 import Header from "../components/Header";
 
 function TeamPicker() {
     const toast = useToast();
     const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersDisplayNames, getUserTeamsData } = useUser();
+    const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -41,6 +43,7 @@ function TeamPicker() {
         document.title = "Select your team - Satoshi Safe";
         setCurrentTeam(null);
         setTeamUsersDisplayNames(null);
+        setWalletMismatch(false);
         resetBalanceData();
         getUserTeamsData(user);
     }, []);

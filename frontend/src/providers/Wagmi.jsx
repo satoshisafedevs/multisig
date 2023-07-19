@@ -13,7 +13,7 @@ export function useWagmi() {
 
 function Wagmi({ children }) {
     const toast = useToast();
-    const { currentTeam } = useUser();
+    const { userTeamData } = useUser();
     const [pagedOpened, setPageOpened] = useState(false);
     const [preflightCheck, setPreflightCheck] = useState(true);
     const [metaMaskInstalled, setMetaMaskInstalled] = useState(false);
@@ -46,8 +46,8 @@ function Wagmi({ children }) {
     }, [connectError, switchNetworkError]);
 
     useEffect(() => {
-        if (address && currentTeam?.userWalletAddress) {
-            if (address !== currentTeam.userWalletAddress) {
+        if (address && userTeamData?.userWalletAddress) {
+            if (address !== userTeamData.userWalletAddress) {
                 setWalletMismatch(true);
             } else {
                 setWalletMismatch(false);
@@ -56,7 +56,7 @@ function Wagmi({ children }) {
         if (!address) {
             setWalletMismatch(false);
         }
-    }, [address, currentTeam]);
+    }, [address, userTeamData]);
 
     useEffect(() => {
         if (pagedOpened && address) {
@@ -80,6 +80,7 @@ function Wagmi({ children }) {
             address,
             wallet,
             walletMismatch,
+            setWalletMismatch,
             connector,
             connectors,
             connect,
