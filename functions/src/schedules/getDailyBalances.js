@@ -1,5 +1,44 @@
 const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 const { onSchedule, log, db, Timestamp } = require("../firebase");
+const networks = require("../networks");
+
+const getAndWriteTotalBalance = async (safe, options) => {
+    log(`Getting total balance for ${safe.safeAddress}`);
+    const url = `https://pro-openapi.debank.com/v1/user/total_balance?id=${safe.safeAddress}`;
+    const response = await fetch(url, options);
+    const data = await response.json();
+    const docRef = db.collection("assetsByWalletAddress").doc(safe.safeAddress).collection("totalBalance");
+    await docRef.add({
+        createdAt: Timestamp.now(),
+        ...data,
+    });
+};
+
+const getAndWriteComplexProtocolList = async (safe, options) => {
+    log(`Getting complex protocol list for ${safe.safeAddress}`);
+    const url = `https://pro-openapi.debank.com/v1/user/complex_protocol_list?id=${safe.safeAddress}&chain_id=${
+        networks[safe.network].deBankChainID
+    }`;
+    const response = await fetch(url, options);
+    const data = await response.json();
+    const docRef = db.collection("assetsByWalletAddress").doc(safe.safeAddress).collection("complexProtocolList");
+    await docRef.add({
+        createdAt: Timestamp.now(),
+        ...data,
+    });
+};
+
+const getAndWriteAllTokenList = async (safe, options) => {
+    log(`Getting all token list for ${safe.safeAddress}`);
+    const url = `https://pro-openapi.debank.com/v1/user/all_token_list?id=${safe.safeAddress}`;
+    const response = await fetch(url, options);
+    const data = await response.json();
+    const docRef = db.collection("assetsByWalletAddress").doc(safe.safeAddress).collection("allTokenList");
+    await docRef.add({
+        createdAt: Timestamp.now(),
+        ...data,
+    });
+};
 
 exports.getDailyBalances = onSchedule(
     { schedule: "every day 00:01", timeZone: "America/Los_Angeles" },
@@ -18,7 +57,6 @@ exports.getDailyBalances = onSchedule(
                 const teamData = teamDoc.data();
                 for (const safe of teamData.safes || []) {
                     if (safe.safeAddress) {
-                        const url = `https://pro-openapi.debank.com/v1/user/total_balance?id=${safe.safeAddress}`;
                         const options = {
                             method: "GET",
                             headers: {
@@ -26,16 +64,13 @@ exports.getDailyBalances = onSchedule(
                                 AccessKey: ACCESS_KEY,
                             },
                         };
-                        const response = await fetch(url, options);
-                        const balance = await response.json();
-                        const balancesRef = db
-                            .collection("assetsByWalletAddress")
-                            .doc(safe.safeAddress)
-                            .collection("totalBalances");
-                        await balancesRef.add({
-                            createdAt: Timestamp.now(),
-                            ...balance,
-                        });
+                        await getAndWriteTotalBalance(safe, options);
+
+                        // complex protocol list - stacked assets
+                        await getAndWriteComplexProtocolList(safe, options);
+
+                        // all token list - wallet assets
+                        await getAndWriteAllTokenList(safe, options);
                     }
                 }
             }

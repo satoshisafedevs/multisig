@@ -1,6 +1,7 @@
 module.exports = {
     mainnet: {
         safeTransactionService: "https://safe-transaction-mainnet.safe.global/",
+        deBankChainID: "eth",
     },
     // goerli: {
     //     safeTransactionService: "https://safe-transaction-goerli.safe.global/",
@@ -13,6 +14,7 @@ module.exports = {
     // },
     arbitrum: {
         safeTransactionService: "https://safe-transaction-arbitrum.safe.global/",
+        deBankChainID: "arb",
     },
     // avalanche: {
     //     safeTransactionService: "https://safe-transaction-avalanche.safe.global/",
@@ -33,6 +35,7 @@ module.exports = {
             snxToken: "0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4",
             usdcToken: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
         },
+        deBankChainID: "op",
     },
     // polygon: {
     //     safeTransactionService: "https://safe-transaction-polygon.safe.global/",
