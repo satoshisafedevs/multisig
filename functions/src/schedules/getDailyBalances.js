@@ -24,7 +24,7 @@ const getAndWriteComplexProtocolList = async (safe, options) => {
     const docRef = db.collection("assetsByWalletAddress").doc(safe.safeAddress).collection("complexProtocolList");
     await docRef.add({
         createdAt: Timestamp.now(),
-        ...data,
+        data,
     });
 };
 
@@ -36,7 +36,7 @@ const getAndWriteAllTokenList = async (safe, options) => {
     const docRef = db.collection("assetsByWalletAddress").doc(safe.safeAddress).collection("allTokenList");
     await docRef.add({
         createdAt: Timestamp.now(),
-        ...data,
+        data,
     });
 };
 
