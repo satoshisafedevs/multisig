@@ -4,7 +4,6 @@ import {
     Box,
     Card,
     CardBody,
-    Image,
     Flex,
     Spinner,
     Center,
@@ -22,11 +21,8 @@ import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import ReactLogo from "../img/ReactLogo";
 import theme from "../theme";
-
-const logo =
-    "https://firebasestorage.googleapis.com/v0/b/" +
-    "prontoai-playground.appspot.com/o/logo%2Fsatoshi_safe.png?alt=media&token=b5333920-3b92-447c-93b3-2b5f6e34c09e";
 
 function Signin() {
     const { user, gettingUserAuthStatus } = useUser();
@@ -109,7 +105,9 @@ function Signin() {
                 <Card margin="20px">
                     <CardBody>
                         <Stack spacing="15px" width="300px">
-                            <Image src={logo} paddingTop="10px" paddingBottom="20px" />
+                            <Box width="250px" display="flex" margin="auto" padding="20px 0">
+                                <ReactLogo />
+                            </Box>
                             <Center>
                                 <Heading size="lg" paddingBottom="40px" color={colorValue}>
                                     {formTitle()}

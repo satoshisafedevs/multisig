@@ -22,7 +22,7 @@ const formatDate = (firebaseTimestamp) => {
 const fetchAndProcessSafeData = async (safe) => {
     try {
         const { safeAddress, addedAt } = safe;
-        const docsRef = collection(db, "assetsByWalletAddress", safeAddress, "totalBalances");
+        const docsRef = collection(db, "assetsByWalletAddress", safeAddress, "totalBalance");
 
         const latestBalance = await getDocs(query(docsRef, orderBy("createdAt", "desc"), limit(1)));
         const portfolio = latestBalance.docs.map((doc) => ({

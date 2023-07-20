@@ -17,7 +17,6 @@ import {
     MenuDivider,
     Stack,
     Flex,
-    Image,
     Switch,
     useColorModeValue,
     useColorMode,
@@ -26,11 +25,8 @@ import { IoWalletOutline } from "react-icons/io5";
 import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import { useWagmi } from "../providers/Wagmi";
+import ReactLogo from "../img/ReactLogo";
 import UpdateProfileModal from "./UpdateProfileModal";
-
-const logo =
-    "https://firebasestorage.googleapis.com/v0/b/" +
-    "prontoai-playground.appspot.com/o/logo%2Fsatoshi_safe.png?alt=media&token=b5333920-3b92-447c-93b3-2b5f6e34c09e";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("green300.500", "green300.300");
@@ -118,7 +114,9 @@ export default function Header({ withTeam }) {
             <Card direction="column" width="100%">
                 <Flex direction="row" justify="space-between" padding="10px">
                     <Stack direction="row" spacing={8}>
-                        <Image src={logo} width="170px" height="40px" />
+                        <Box paddingLeft="10px" height="40px" width="150px" display="flex">
+                            <ReactLogo />
+                        </Box>
                         {withTeam && (
                             <>
                                 <Button variant="link" size="sm">
