@@ -6,6 +6,7 @@ export default function ThemeSwitcher() {
 
     return (
         <IconButton
+            background="none"
             margin="10px 10px 0 0"
             aria-label="Color mode"
             onClick={toggleColorMode}

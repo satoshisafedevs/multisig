@@ -17,6 +17,7 @@ const styles = {
             scrollbarColor: props.colorMode === "light" ? "lightgray transparent" : "dimgray transparent",
             "*::-webkit-scrollbar": {
                 width: "8px",
+                height: "8px",
             },
             "*::-webkit-scrollbar-thumb": {
                 background: props.colorMode === "light" ? "lightgray" : "dimgray",

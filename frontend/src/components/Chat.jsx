@@ -11,17 +11,20 @@ import {
     CardHeader,
     CardFooter,
     Input,
+    Image,
+    Flex,
     Text,
     Stack,
     useColorModeValue,
     Heading,
     useToast,
 } from "@chakra-ui/react";
-import { IoSend, IoTrash } from "react-icons/io5";
+import { IoSend, IoTrash, IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
 import { db, collection, addDoc, onSnapshot, Timestamp } from "../firebase";
 import DeleteMessageModal from "./DeleteMessageModal";
 import { useUser } from "../providers/User";
 import theme from "../theme";
+import actions from "../actions/actions.json";
 
 export default function Chat() {
     const toast = useToast();
@@ -35,6 +38,7 @@ export default function Chat() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [messageID, setMessageID] = useState();
     const [hoverID, setHoverID] = useState();
+    const [activeTab, setActiveTab] = useState("all");
     const lastMessage = useRef();
 
     const StyledTrashIcon = styled(IoTrash)`
@@ -48,7 +52,7 @@ export default function Chat() {
         if (messages && lastMessage.current) {
             lastMessage.current.scrollIntoView();
         }
-    }, [messages]);
+    }, [messages, activeTab]);
 
     useEffect(() => {
         if (!currentTeam || !currentTeam.id) return;
@@ -190,10 +194,46 @@ export default function Chat() {
         return msg.message;
     };
 
+    const transactionsMock = [
+        {
+            id: 1,
+            type: "new",
+            action: "Swap",
+            protocol: "Uniswap",
+            status: "Awaiting approvals (2/4)",
+            send: 9999999999,
+            sendCurrency: "SNX",
+            receive: 1000000000,
+            receiveCurrency: "USDC",
+        },
+    ];
+
+    const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
+
     return (
         <Card height="100%">
-            <CardHeader paddingBottom="0">
-                <Heading size="md">Control panel</Heading>
+            <CardHeader paddingBottom="3px">
+                <Stack spacing="24px" display="flex" direction="row" align="baseline">
+                    <Heading size="md">Control Panel</Heading>
+                    <Button
+                        variant="link"
+                        size="xs"
+                        fontWeight={activeTab === "all" && "bold"}
+                        minWidth="24px"
+                        onClick={() => setActiveTab("all")}
+                    >
+                        All
+                    </Button>
+                    <Button
+                        variant="link"
+                        size="xs"
+                        fontWeight={activeTab === "transactions" && "bold"}
+                        minWidth="78px"
+                        onClick={() => setActiveTab("transactions")}
+                    >
+                        Transactions
+                    </Button>
+                </Stack>
             </CardHeader>
             <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px">
                 <DeleteMessageModal
@@ -203,43 +243,115 @@ export default function Chat() {
                     setHoverID={setHoverID}
                 />
                 <Stack spacing="2">
-                    {messages.map((msg) => (
-                        <Stack
-                            direction="row"
-                            align="center"
-                            key={msg.id}
-                            spacing="0"
-                            paddingLeft="3px"
-                            paddingTop="2px"
-                            paddingBottom="2px"
-                            _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
-                            onMouseEnter={() => setHoverID(msg.id)}
-                            onMouseLeave={() => setHoverID(null)}
-                        >
-                            <Avatar name={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : null} size="sm" />
-                            <Box flexGrow="1" paddingLeft="6px">
-                                <Stack direction="row" spacing="5px">
-                                    <Text fontSize="xs" fontWeight="bold">
-                                        {teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : "No name"}
-                                    </Text>
-                                    <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
-                                </Stack>
-                                <Text fontSize="xs">{renderMessage(msg)}</Text>
-                            </Box>
-                            {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
-                                <IconButton
-                                    icon={<StyledTrashIcon />}
-                                    onClick={() => handleDelete(msg.id)}
-                                    height="36px"
-                                    width="36px"
-                                    borderRadius="3px"
-                                    background="none"
-                                    _hover={{ background: "none", cursor: "default" }}
+                    {activeTab === "all" &&
+                        messages.map((msg) => (
+                            <Stack
+                                direction="row"
+                                align="center"
+                                key={msg.id}
+                                spacing="0"
+                                paddingLeft="3px"
+                                paddingTop="2px"
+                                paddingBottom="2px"
+                                _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
+                                onMouseEnter={() => setHoverID(msg.id)}
+                                onMouseLeave={() => setHoverID(null)}
+                            >
+                                <Avatar
+                                    name={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : null}
+                                    size="sm"
                                 />
-                            )}
-                            <Box ref={lastMessage} />
-                        </Stack>
-                    ))}
+                                <Box flexGrow="1" paddingLeft="6px">
+                                    <Stack direction="row" spacing="5px">
+                                        <Text fontSize="xs" fontWeight="bold">
+                                            {teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : "No name"}
+                                        </Text>
+                                        <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
+                                    </Stack>
+                                    <Text fontSize="xs">{renderMessage(msg)}</Text>
+                                </Box>
+                                {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
+                                    <IconButton
+                                        icon={<StyledTrashIcon />}
+                                        onClick={() => handleDelete(msg.id)}
+                                        height="36px"
+                                        width="36px"
+                                        borderRadius="3px"
+                                        background="none"
+                                        _hover={{ background: "none", cursor: "default" }}
+                                    />
+                                )}
+                                <Box ref={lastMessage} />
+                            </Stack>
+                        ))}
+                    {activeTab === "transactions" &&
+                        transactionsMock.map((transaction) => (
+                            <Stack
+                                direction="row"
+                                align="stretch"
+                                justify="space-between"
+                                key={transaction.id}
+                                spacing="4"
+                                padding="5px"
+                                fontSize="sm"
+                                backgroundColor={backgroundHover}
+                                borderRadius="5px"
+                                boxShadow="md"
+                            >
+                                <Flex direction="column" align="center" justify="space-evenly">
+                                    <Image boxSize="24px" src={actions[transaction.protocol.toLowerCase()].icon} />
+                                    <Text fontSize="xs" fontWeight="bold">
+                                        {transaction.protocol}
+                                    </Text>
+                                </Flex>
+                                <Stack spacing="2">
+                                    <Flex direction={responsiveStyles}>
+                                        <Text fontWeight="bold" paddingRight="5px">
+                                            Action:
+                                        </Text>
+                                        {transaction.action}
+                                    </Flex>
+                                    <Flex direction={responsiveStyles}>
+                                        <Text fontWeight="bold" paddingRight="5px">
+                                            Send:
+                                        </Text>
+                                        {transaction.send} {transaction.sendCurrency}
+                                    </Flex>
+                                </Stack>
+                                <Stack spacing="2">
+                                    <Flex direction={responsiveStyles}>
+                                        <Text fontWeight="bold" paddingRight="5px">
+                                            Status:
+                                        </Text>
+                                        {transaction.status}
+                                    </Flex>
+                                    <Flex direction={responsiveStyles}>
+                                        <Text fontWeight="bold" paddingRight="5px">
+                                            Receive:
+                                        </Text>
+                                        {transaction.receive} {transaction.receiveCurrency}
+                                    </Flex>
+                                </Stack>
+                                <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
+                                    <Button
+                                        variant="outline"
+                                        colorScheme="red"
+                                        size="sm"
+                                        rightIcon={<IoCloseOutline />}
+                                    >
+                                        Reject
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        colorScheme="green300"
+                                        size="sm"
+                                        rightIcon={<IoCheckmarkOutline />}
+                                    >
+                                        Approve
+                                    </Button>
+                                </Stack>
+                            </Stack>
+                        ))}
                 </Stack>
             </CardBody>
             <CardFooter paddingTop="5px">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import styled from "@emotion/styled";
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, TableCaption, useColorModeValue } from "@chakra-ui/react";
@@ -6,26 +6,27 @@ import { useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/rea
 import { IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
 import theme from "../theme";
 
-function AssetsTable({ todaysAggregatedBalance }) {
+function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
     const tableBorderColor = useColorModeValue(theme.colors.gray[100], theme.colors.gray[600]);
     const hoverColor = useColorModeValue("blackAlpha.900", "whiteAlpha.900");
+    const [sorting, setSorting] = useState([{ id: "USD Value", desc: true }]);
 
     const StyledTd = styled(Td)`
         border-color: ${tableBorderColor};
     `;
 
-    const data = React.useMemo(() => todaysAggregatedBalance.nonZeroUSDValueChains, [todaysAggregatedBalance]);
+    const data = React.useMemo(() => todaysAggregatedSafesStakedAssets.balances, [todaysAggregatedSafesStakedAssets]);
 
     const columns = React.useMemo(
         () => [
             {
-                accessorFn: (row) => Object.keys(row)[0],
+                accessorFn: (row) => Object.values(row)[0],
                 header: "Asset Name",
                 meta: {
                     isFirst: true,
                 },
             },
-            { accessorFn: (row) => Object.values(row)[0], header: "USD Value" },
+            { accessorFn: (row) => Object.values(row)[1], header: "USD Value" },
         ],
         [],
     );
@@ -35,13 +36,32 @@ function AssetsTable({ todaysAggregatedBalance }) {
         data,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        onSortingChange: setSorting,
+        state: { sorting },
         enableSortingRemoval: false,
     });
 
-    const formatter = new Intl.NumberFormat("en-US", {
+    const usdFormatter = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
     });
+
+    const renderCell = (cell) => {
+        const { getValue } = cell;
+        const value = getValue();
+
+        if (cell.column.id === "USD Value") {
+            if (value === 0) {
+                return "$0.00";
+            }
+            if (value < 0.01) {
+                return "<$0.01";
+            }
+            return usdFormatter.format(value);
+        }
+
+        return value;
+    };
 
     const sortingIcon = (header) => {
         const iconStyle = { display: "inline", marginLeft: "5px", verticalAlign: "sub" };
@@ -88,18 +108,16 @@ function AssetsTable({ todaysAggregatedBalance }) {
                                     paddingLeft={cell.column.columnDef?.meta?.isFirst && "0"}
                                     paddingRight={!cell.column.columnDef?.meta?.isFirst && "0"}
                                 >
-                                    {(() => {
-                                        const { getValue } = cell;
-                                        const value = getValue();
-                                        return typeof value === "number" ? formatter.format(value) : value;
-                                    })()}
+                                    {renderCell(cell)}
                                 </StyledTd>
                             ))}
                         </Tr>
                     ))}
                     <Tr>
                         <StyledTd paddingLeft="0">Total</StyledTd>
-                        <StyledTd paddingRight="0">{formatter.format(todaysAggregatedBalance.totalUSDValue)}</StyledTd>
+                        <StyledTd paddingRight="0">
+                            {usdFormatter.format(todaysAggregatedSafesStakedAssets.totalUSDValue)}
+                        </StyledTd>
                     </Tr>
                 </Tbody>
                 <TableCaption>Combined USD value(s) across all safes for today.</TableCaption>
@@ -108,10 +126,10 @@ function AssetsTable({ todaysAggregatedBalance }) {
     );
 }
 
-AssetsTable.propTypes = {
-    todaysAggregatedBalance: PropTypes.shape({
-        nonZeroUSDValueChains: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+StakedAssetsTable.propTypes = {
+    todaysAggregatedSafesStakedAssets: PropTypes.shape({
+        balances: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
         totalUSDValue: PropTypes.number.isRequired,
     }).isRequired,
 };
-export default AssetsTable;
+export default StakedAssetsTable;

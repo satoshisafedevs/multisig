@@ -27,6 +27,7 @@ import useAuth from "../hooks/useAuth";
 import { useWagmi } from "../providers/Wagmi";
 import ReactLogo from "../img/ReactLogo";
 import UpdateProfileModal from "./UpdateProfileModal";
+import SafesModal from "./SafesModal";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("green300.500", "green300.300");
@@ -51,6 +52,7 @@ export default function Header({ withTeam }) {
         switchNetworkIsLoading,
     } = useWagmi();
     const [updateProfileModalOpen, setUpdateProfileModalOpen] = useState(false);
+    const [safesModalOpen, setSafesModalOpen] = useState(false);
 
     const StyledAvatarButton = styled(MenuButton)`
         border-radius: 16px;
@@ -111,6 +113,7 @@ export default function Header({ withTeam }) {
     return (
         <Flex margin="10px 10px 0 10px">
             <UpdateProfileModal isOpen={updateProfileModalOpen} setIsOpen={setUpdateProfileModalOpen} />
+            <SafesModal isOpen={safesModalOpen} setIsOpen={setSafesModalOpen} />
             <Card direction="column" width="100%">
                 <Flex direction="row" justify="space-between" padding="10px">
                     <Stack direction="row" spacing={8}>
@@ -120,10 +123,10 @@ export default function Header({ withTeam }) {
                         {withTeam && (
                             <>
                                 <Button variant="link" size="sm">
-                                    Security center
+                                    Home
                                 </Button>
-                                <Button variant="link" size="sm">
-                                    Reports
+                                <Button variant="link" size="sm" onClick={() => setSafesModalOpen(true)}>
+                                    Safes
                                 </Button>
                                 <Button variant="link" size="sm">
                                     Docs
