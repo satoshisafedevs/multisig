@@ -14,6 +14,9 @@ module.exports = {
     // },
     arbitrum: {
         safeTransactionService: "https://safe-transaction-arbitrum.safe.global/",
+        contracts: {
+            gmxRewardRouter: "0xA906F338CB21815cBc4Bc87ace9e68c87eF8d8F1",
+        },
         deBankChainID: "arb",
     },
     // avalanche: {
@@ -30,6 +33,7 @@ module.exports = {
     // },
     optimism: {
         safeTransactionService: "https://safe-transaction-optimism.safe.global/",
+        oneInchBaseUrl: "https://api.1inch.io/v5.0/10",
         contracts: {
             uniswapv3: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
             snxToken: "0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4",
