@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Spinner, Box, Stack, Button, Card, CardHeader, CardBody, Heading, Flex } from "@chakra-ui/react";
+import { Spinner, Box, Stack, Button, Card, CardHeader, CardBody, Heading, Flex, IconButton } from "@chakra-ui/react";
+import { IoExpandOutline, IoContractOutline } from "react-icons/io5";
 import { useSafeBalance } from "../providers/SafeBalance";
 import LineChart from "./LineChart";
-import AssetsTable from "./AssetsTable";
+import WalletAssetsTable from "./WalletAssetsTable";
+import StakedAssetsTable from "./StakedAssetsTable";
 
-function Portfolio({ chartHeight }) {
-    const [chartActive, setChartActive] = useState(true);
-    const { safesPortfolio, todaysAggregatedBalance, historicalTotalBalance, initialLoading } = useSafeBalance();
+function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
+    const [activeTab, setActiveTab] = useState("chart");
+    const {
+        safesPortfolio,
+        todaysAggregatedSafesWalletAssets,
+        todaysAggregatedSafesStakedAssets,
+        historicalTotalBalance,
+        initialLoading,
+    } = useSafeBalance();
 
     const convertedDates = (data) => {
         const converted = {};
@@ -30,11 +38,11 @@ function Portfolio({ chartHeight }) {
                 </Flex>
             );
         }
-        if (chartHeight && chartActive) {
+        if (chartHeight && activeTab === "chart") {
             // deducting the heigh of top/bottom padding and card title for perfect chart resize
             if (historicalTotalBalance) {
                 return (
-                    <Box position="relative" display="inline-block" width="100%" height={chartHeight - 20 * 2 - 30}>
+                    <Box position="relative" display="inline-block" width="100%" height={chartHeight - 20 * 2 - 32}>
                         <LineChart
                             xData={Object.keys(convertedDates(historicalTotalBalance))}
                             yData={Object.values(historicalTotalBalance)}
@@ -43,18 +51,21 @@ function Portfolio({ chartHeight }) {
                 );
             }
             return (
-                <Box position="relative" display="inline-block" width="100%" height={chartHeight - 20 * 2 - 30}>
+                <Box position="relative" display="inline-block" width="100%" height={chartHeight - 20 * 2 - 32}>
                     <LineChart />
                 </Box>
             );
         }
-        if (todaysAggregatedBalance) {
-            return <AssetsTable todaysAggregatedBalance={todaysAggregatedBalance} />;
+        if (todaysAggregatedSafesWalletAssets && activeTab === "wallet") {
+            return <WalletAssetsTable todaysAggregatedSafesWalletAssets={todaysAggregatedSafesWalletAssets} />;
+        }
+        if (todaysAggregatedSafesStakedAssets && activeTab === "staked") {
+            return <StakedAssetsTable todaysAggregatedSafesStakedAssets={todaysAggregatedSafesStakedAssets} />;
         }
     };
 
     return (
-        <Card height="100%">
+        <Card height="100%" overflow="auto">
             <CardHeader paddingBottom="0">
                 <Stack spacing="24px" display="flex" direction="row" align="baseline">
                     <Heading size="md">Portfolio</Heading>
@@ -63,22 +74,41 @@ function Portfolio({ chartHeight }) {
                             <Button
                                 variant="link"
                                 size="xs"
-                                fontWeight={chartActive && "bold"}
-                                onClick={() => setChartActive(true)}
+                                fontWeight={activeTab === "chart" && "bold"}
+                                minWidth="34px"
+                                onClick={() => setActiveTab("chart")}
                             >
                                 Chart
                             </Button>
                             <Button
                                 variant="link"
                                 size="xs"
-                                fontWeight={!chartActive && "bold"}
-                                onClick={() => setChartActive(false)}
+                                fontWeight={activeTab === "wallet" && "bold"}
+                                minWidth="82px"
+                                onClick={() => setActiveTab("wallet")}
                             >
-                                Assets
+                                Wallet Assets
+                            </Button>
+                            <Button
+                                variant="link"
+                                size="xs"
+                                fontWeight={activeTab === "staked" && "bold"}
+                                minWidth="86px"
+                                onClick={() => setActiveTab("staked")}
+                            >
+                                Staked Assets
                             </Button>
                         </>
                     )}
                 </Stack>
+                <IconButton
+                    icon={expandPortfolio ? <IoContractOutline /> : <IoExpandOutline />}
+                    onClick={expandAction}
+                    position="absolute"
+                    top="0"
+                    right="0"
+                    background="none"
+                />
             </CardHeader>
             <CardBody paddingTop="0" overflow="auto">
                 {renderBody()}
@@ -89,5 +119,7 @@ function Portfolio({ chartHeight }) {
 
 Portfolio.propTypes = {
     chartHeight: PropTypes.number,
+    expandPortfolio: PropTypes.bool,
+    expandAction: PropTypes.func,
 };
 export default Portfolio;

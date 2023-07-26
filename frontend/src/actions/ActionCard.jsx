@@ -7,7 +7,7 @@ import actions from "./actions.json";
 export default function ActionCard() {
     return (
         <Card height="100%">
-            <CardBody>
+            <CardBody overflow="auto" paddingBottom="0">
                 <Heading size="md">Actions</Heading>
                 <Input marginTop="10px" placeholder="Filter actions" />
                 <ActionList data={actions} />

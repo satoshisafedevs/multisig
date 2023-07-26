@@ -4,7 +4,6 @@ import Header from "../components/Header";
 import Portfolio from "../components/Portfolio";
 import Chat from "../components/Chat";
 import ActionCard from "../actions/ActionCard";
-import SafeCard from "../safes/SafeCard";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 
@@ -12,6 +11,7 @@ function Home() {
     const { currentTeam, teamUsersDisplayNames } = useUser();
     const { walletMismatch } = useWagmi();
     const [chartHeight, setChartHeight] = useState();
+    const [expandPortfolio, setExpandPortfolio] = useState(false);
     const gridRef = useRef();
 
     useEffect(() => {
@@ -22,14 +22,18 @@ function Home() {
         if (currentTeam && teamUsersDisplayNames) {
             const updateSize = () => {
                 if (gridRef.current) {
-                    setChartHeight(gridRef.current.clientHeight);
+                    setTimeout(() => {
+                        setChartHeight(gridRef.current.clientHeight);
+                    }, 25);
                 }
             };
             updateSize();
             window.addEventListener("resize", updateSize);
             return () => window.removeEventListener("resize", updateSize);
         }
-    }, [currentTeam, teamUsersDisplayNames, walletMismatch]);
+    }, [currentTeam, teamUsersDisplayNames, walletMismatch, expandPortfolio]);
+
+    const expandAction = () => setExpandPortfolio((prevState) => !prevState);
 
     return (
         <>
@@ -40,23 +44,22 @@ function Home() {
                     minHeight="500px"
                     gap="20px"
                     padding="10px"
-                    gridTemplateRows="1fr 1fr"
-                    gridTemplateColumns="0.75fr 2fr 1fr"
-                    gridTemplateAreas="
-                    'one two four'
-                    'one three four'
-                "
+                    gridTemplateRows={expandPortfolio ? "1fr" : "1fr 1fr"}
+                    gridTemplateColumns={expandPortfolio ? "1fr" : "1fr 1fr"}
+                    gridTemplateAreas={expandPortfolio ? "'two''two'" : "'two three''four three'"}
+                    transition="all 0.5s"
                 >
-                    <GridItem minWidth="275px" area="one">
-                        <SafeCard />
+                    <GridItem minWidth="350px" minHeight="100%" area="two" ref={gridRef} transition="all 0.5s">
+                        <Portfolio
+                            chartHeight={chartHeight}
+                            expandAction={expandAction}
+                            expandPortfolio={expandPortfolio}
+                        />
                     </GridItem>
-                    <GridItem minWidth="350px" minHeight="100%" area="two" ref={gridRef}>
-                        <Portfolio chartHeight={chartHeight} />
-                    </GridItem>
-                    <GridItem minWidth="350px" minHeight="100%" area="three">
+                    <GridItem minWidth="350px" area="three" display={expandPortfolio ? "none" : "auto"}>
                         <Chat />
                     </GridItem>
-                    <GridItem minWidth="270px" area="four">
+                    <GridItem minWidth="270px" minHeight="100%" area="four" display={expandPortfolio ? "none" : "auto"}>
                         <ActionCard />
                     </GridItem>
                 </Grid>
