@@ -43,10 +43,15 @@ function User({ children }) {
             const userTeamsSnap = await getDocs(userTeamsRef);
             const userTeamsData = await Promise.all(
                 userTeamsSnap.docs.map(async (teamDoc) => {
+                    // get user teams
                     const teamRef = doc(db, "teams", teamDoc.id);
                     const teamSnap = await getDoc(teamRef);
                     if (teamSnap.exists()) {
-                        return { ...teamSnap.data(), id: teamSnap.id };
+                        const teamData = teamSnap.data();
+                        // check that user also added to the team
+                        if (teamData.users.includes(userAuth.uid)) {
+                            return { ...teamData, id: teamSnap.id };
+                        }
                     }
                     return null;
                 }),

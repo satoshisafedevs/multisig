@@ -1,10 +1,27 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import styled from "@emotion/styled";
-import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, TableCaption, useColorModeValue } from "@chakra-ui/react";
+import {
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    TableContainer,
+    TableCaption,
+    useColorModeValue,
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon,
+} from "@chakra-ui/react";
 import { useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
 import { IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
+import { usdFormatter } from "../utils";
 import theme from "../theme";
+import WalletAssetsTable from "./WalletAssetsTable";
 
 function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
     const tableBorderColor = useColorModeValue(theme.colors.gray[100], theme.colors.gray[600]);
@@ -39,11 +56,6 @@ function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
         onSortingChange: setSorting,
         state: { sorting },
         enableSortingRemoval: false,
-    });
-
-    const usdFormatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
     });
 
     const renderCell = (cell) => {
@@ -108,7 +120,25 @@ function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
                                     paddingLeft={cell.column.columnDef?.meta?.isFirst && "0"}
                                     paddingRight={!cell.column.columnDef?.meta?.isFirst && "0"}
                                 >
-                                    {renderCell(cell)}
+                                    {cell.column.id === "Asset Name" ? (
+                                        <Accordion allowMultiple>
+                                            <AccordionItem border="none">
+                                                <AccordionButton padding="0" fontSize="sm">
+                                                    <AccordionIcon />
+                                                    {renderCell(cell)}
+                                                </AccordionButton>
+                                                <AccordionPanel>
+                                                    <WalletAssetsTable
+                                                        todaysAggregatedSafesWalletAssets={{
+                                                            balances: cell.row.original.assets,
+                                                        }}
+                                                    />
+                                                </AccordionPanel>
+                                            </AccordionItem>
+                                        </Accordion>
+                                    ) : (
+                                        renderCell(cell)
+                                    )}
                                 </StyledTd>
                             ))}
                         </Tr>
