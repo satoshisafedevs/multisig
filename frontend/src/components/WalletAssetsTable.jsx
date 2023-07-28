@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, TableCaption, useColorModeValue } from "@chakra-ui/react";
 import { useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
 import { IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
+import { usdFormatter, formatNumber } from "../utils";
 import theme from "../theme";
 
 function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
@@ -42,29 +43,6 @@ function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
         state: { sorting },
         enableSortingRemoval: false,
     });
-
-    const usdFormatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    });
-
-    const formatNumber = (num, price = false) => {
-        if (price) {
-            if (num !== 0 && num < 1) {
-                return `$${Number(num.toPrecision(4))}`;
-            }
-            // Otherwise round to 2 decimal places
-            return usdFormatter.format((Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2));
-        }
-
-        // If number is less than 1 and not 0, round to 4 significant figures
-        if (num !== 0 && num < 1) {
-            return Number(num.toPrecision(4));
-        }
-        // Otherwise round to 2 decimal places
-
-        return Intl.NumberFormat("en-US", { style: "decimal" }).format(Math.round((num + Number.EPSILON) * 100) / 100);
-    };
 
     const renderCell = (cell) => {
         const { getValue } = cell;
@@ -141,16 +119,20 @@ function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
                             ))}
                         </Tr>
                     ))}
-                    <Tr>
-                        <StyledTd paddingLeft="0">Total</StyledTd>
-                        <StyledTd> </StyledTd>
-                        <StyledTd> </StyledTd>
-                        <StyledTd paddingRight="0">
-                            {usdFormatter.format(todaysAggregatedSafesWalletAssets.totalUSDValue)}
-                        </StyledTd>
-                    </Tr>
+                    {todaysAggregatedSafesWalletAssets.totalUSDValue && (
+                        <Tr>
+                            <StyledTd paddingLeft="0">Total</StyledTd>
+                            <StyledTd> </StyledTd>
+                            <StyledTd> </StyledTd>
+                            <StyledTd paddingRight="0">
+                                {usdFormatter.format(todaysAggregatedSafesWalletAssets.totalUSDValue)}
+                            </StyledTd>
+                        </Tr>
+                    )}
                 </Tbody>
-                <TableCaption>Combined USD value(s) across all safes for today.</TableCaption>
+                {todaysAggregatedSafesWalletAssets.totalUSDValue && (
+                    <TableCaption>Combined USD value(s) across all safes for today.</TableCaption>
+                )}
             </Table>
         </TableContainer>
     );
@@ -159,7 +141,7 @@ function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
 WalletAssetsTable.propTypes = {
     todaysAggregatedSafesWalletAssets: PropTypes.shape({
         balances: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-        totalUSDValue: PropTypes.number.isRequired,
+        totalUSDValue: PropTypes.number,
     }).isRequired,
 };
 export default WalletAssetsTable;

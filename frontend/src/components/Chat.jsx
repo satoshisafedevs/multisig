@@ -2,6 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import {
+    Accordion,
+    AccordionItem,
+    AccordionButton,
+    AccordionPanel,
+    AccordionIcon,
     Avatar,
     Box,
     Button,
@@ -30,7 +35,7 @@ export default function Chat() {
     const toast = useToast();
     const { firestoreUser, teamsData, currentTeam, teamUsersDisplayNames } = useUser();
     const { slug } = useParams();
-    const backgroundHover = useColorModeValue("gray.200", "whiteAlpha.200");
+    const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
     // chakra ui themeing not working on html tags
     const [message, setMessage] = useState("");
@@ -101,6 +106,7 @@ export default function Chat() {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 } else {
                     const json = await response.json();
+                    // eslint-disable-next-line no-console
                     console.log(json);
                 }
             }
@@ -228,7 +234,7 @@ export default function Chat() {
                         variant="link"
                         size="xs"
                         fontWeight={activeTab === "transactions" && "bold"}
-                        minWidth="78px"
+                        minWidth="79px"
                         onClick={() => setActiveTab("transactions")}
                     >
                         Transactions
@@ -286,71 +292,99 @@ export default function Chat() {
                         ))}
                     {activeTab === "transactions" &&
                         transactionsMock.map((transaction) => (
-                            <Stack
-                                direction="row"
-                                align="stretch"
-                                justify="space-between"
+                            <Accordion
+                                allowMultiple
                                 key={transaction.id}
-                                spacing="4"
-                                padding="5px"
-                                fontSize="sm"
+                                padding="5px 10px"
                                 backgroundColor={backgroundHover}
                                 borderRadius="5px"
                                 boxShadow="md"
                             >
-                                <Flex direction="column" align="center" justify="space-evenly">
-                                    <Image boxSize="24px" src={actions[transaction.protocol.toLowerCase()].icon} />
-                                    <Text fontSize="xs" fontWeight="bold">
-                                        {transaction.protocol}
-                                    </Text>
-                                </Flex>
-                                <Stack spacing="2">
-                                    <Flex direction={responsiveStyles}>
-                                        <Text fontWeight="bold" paddingRight="5px">
-                                            Action:
-                                        </Text>
-                                        {transaction.action}
-                                    </Flex>
-                                    <Flex direction={responsiveStyles}>
-                                        <Text fontWeight="bold" paddingRight="5px">
-                                            Send:
-                                        </Text>
-                                        {transaction.send} {transaction.sendCurrency}
-                                    </Flex>
-                                </Stack>
-                                <Stack spacing="2">
-                                    <Flex direction={responsiveStyles}>
-                                        <Text fontWeight="bold" paddingRight="5px">
-                                            Status:
-                                        </Text>
-                                        {transaction.status}
-                                    </Flex>
-                                    <Flex direction={responsiveStyles}>
-                                        <Text fontWeight="bold" paddingRight="5px">
-                                            Receive:
-                                        </Text>
-                                        {transaction.receive} {transaction.receiveCurrency}
-                                    </Flex>
-                                </Stack>
-                                <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
-                                    <Button
-                                        variant="outline"
-                                        colorScheme="red"
-                                        size="sm"
-                                        rightIcon={<IoCloseOutline />}
-                                    >
-                                        Reject
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        colorScheme="green300"
-                                        size="sm"
-                                        rightIcon={<IoCheckmarkOutline />}
-                                    >
-                                        Approve
-                                    </Button>
-                                </Stack>
-                            </Stack>
+                                <AccordionItem border="none">
+                                    <Stack direction="row" justify="space-between">
+                                        <AccordionButton
+                                            padding="0"
+                                            width="initial"
+                                            _hover={{ background: "none" }}
+                                            flexBasis={["none", "none", "none", "none", "none", "60%"]}
+                                        >
+                                            <Stack
+                                                direction="row"
+                                                spacing="4"
+                                                fontSize="sm"
+                                                width="100%"
+                                                justifyContent="space-between"
+                                            >
+                                                <Flex direction="column" align="center" justify="space-around">
+                                                    <Image
+                                                        boxSize="24px"
+                                                        src={actions[transaction.protocol.toLowerCase()].icon}
+                                                    />
+                                                    <Text fontSize="xs" fontWeight="bold">
+                                                        {transaction.protocol}
+                                                    </Text>
+                                                </Flex>
+                                                <Stack spacing="2" alignSelf="center">
+                                                    <Flex direction={responsiveStyles} alignItems="baseline">
+                                                        <Text fontWeight="bold" paddingRight="5px">
+                                                            Action:
+                                                        </Text>
+                                                        <Text textAlign="left">{transaction.action}</Text>
+                                                    </Flex>
+                                                    <Flex direction={responsiveStyles} alignItems="baseline">
+                                                        <Text fontWeight="bold" paddingRight="5px">
+                                                            Send:
+                                                        </Text>
+                                                        <Text textAlign="left">
+                                                            {transaction.send} {transaction.sendCurrency}
+                                                        </Text>
+                                                    </Flex>
+                                                </Stack>
+                                                <Stack spacing="2" alignSelf="center">
+                                                    <Flex direction={responsiveStyles} alignItems="baseline">
+                                                        <Text fontWeight="bold" paddingRight="5px">
+                                                            Status:
+                                                        </Text>
+                                                        <Text textAlign="left">{transaction.status}</Text>
+                                                    </Flex>
+                                                    <Flex direction={responsiveStyles} alignItems="baseline">
+                                                        <Text fontWeight="bold" paddingRight="5px">
+                                                            Receive:
+                                                        </Text>
+                                                        <Text textAlign="left">
+                                                            {transaction.receive} {transaction.receiveCurrency}
+                                                        </Text>
+                                                    </Flex>
+                                                </Stack>
+                                            </Stack>
+                                        </AccordionButton>
+                                        <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
+                                            <Button
+                                                variant="outline"
+                                                colorScheme="red"
+                                                size="sm"
+                                                rightIcon={<IoCloseOutline />}
+                                            >
+                                                Reject
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                colorScheme="green300"
+                                                size="sm"
+                                                rightIcon={<IoCheckmarkOutline />}
+                                            >
+                                                Approve
+                                            </Button>
+                                        </Stack>
+                                        <AccordionButton padding="0" width="initial" _hover={{ background: "none" }}>
+                                            <AccordionIcon />
+                                        </AccordionButton>
+                                    </Stack>
+                                    <AccordionPanel padding="15px 0px">
+                                        More transaction details goes here...
+                                    </AccordionPanel>
+                                </AccordionItem>
+                            </Accordion>
                         ))}
                 </Stack>
             </CardBody>

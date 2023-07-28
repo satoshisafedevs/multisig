@@ -51,7 +51,7 @@ export default function DeleteMessageModal({ messageID, isOpen, setIsOpen, setHo
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
                 <ModalCloseButton top="var(--chakra-space-3)" />

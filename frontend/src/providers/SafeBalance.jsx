@@ -209,24 +209,41 @@ function SafeBalance({ children }) {
 
         Object.keys(safesStackedAssets).forEach((safe) => {
             safesStackedAssets[safe].forEach((token) => {
-                let existingTokenIndex = "";
+                let existingTokenIndex = balances.findIndex((b) => b.name === token.name);
                 let tokenBalance = 0;
 
-                existingTokenIndex = balances.findIndex((b) => b.name === token.name);
+                if (existingTokenIndex === -1) {
+                    balances.push({ name: token.name, usdValue: tokenBalance, assets: [] });
+                    existingTokenIndex = balances.length - 1; // update the index to point to the new token
+                }
 
                 token.portfolio_item_list.forEach((item) => {
-                    if (existingTokenIndex !== -1) {
-                        balances[existingTokenIndex].usdValue += item.stats.net_usd_value;
-                        totalUSDValue += item.stats.net_usd_value;
-                    } else {
-                        tokenBalance += item.stats.net_usd_value;
-                        totalUSDValue += item.stats.net_usd_value;
-                    }
+                    tokenBalance += item.stats.net_usd_value;
+                    totalUSDValue += item.stats.net_usd_value;
+
+                    item.asset_token_list.forEach((asset) => {
+                        const existingAsset = balances[existingTokenIndex].assets.findIndex(
+                            (a) => a.optimized_symbol === asset.optimized_symbol,
+                        );
+
+                        if (existingAsset !== -1) {
+                            balances[existingTokenIndex].assets[existingAsset].amount += asset.amount;
+                            balances[existingTokenIndex].assets[existingAsset].value += asset.amount * asset.price;
+                        } else {
+                            balances[existingTokenIndex].assets.push({
+                                optimized_symbol: asset.optimized_symbol,
+                                price: asset.price,
+                                amount: asset.amount,
+                                value: asset.amount * asset.price,
+                            });
+                        }
+                    });
                 });
-                balances.push({ name: token.name, usdValue: tokenBalance });
+
+                balances[existingTokenIndex].usdValue += tokenBalance;
+                // update the usdValue of the token after summing up all items
             });
         });
-
         setTodaysAggregatedSafesStakedAssets({ balances, totalUSDValue });
     }, [safesStackedAssets]);
 

@@ -19,3 +19,26 @@ export const extractNumbers = (string) => {
     // If there are no numbers in the string, return an empty string
     return "";
 };
+
+export const usdFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+});
+
+export const formatNumber = (num, price = false) => {
+    if (price) {
+        if (num !== 0 && num < 1) {
+            return `$${Number(num.toPrecision(4))}`;
+        }
+        // Otherwise round to 2 decimal places
+        return usdFormatter.format((Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2));
+    }
+
+    // If number is less than 1 and not 0, round to 4 significant figures
+    if (num !== 0 && num < 1) {
+        return Number(num.toPrecision(4));
+    }
+    // Otherwise round to 2 decimal places
+
+    return Intl.NumberFormat("en-US", { style: "decimal" }).format(Math.round((num + Number.EPSILON) * 100) / 100);
+};
