@@ -6,6 +6,8 @@ function PreferenceTabs() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const colorValue = useColorModeValue("var(--chakra-colors-gray-600)", "var(--chakra-colors-gray-200)");
+    const selectedColor = useColorModeValue("white", "var(--chakra-colors-gray-700)");
+    const selectedBG = useColorModeValue("var(--chakra-colors-green300-300)", "var(--chakra-colors-green300-200)");
     const tab = searchParams.get("tab") || "Profile";
 
     const handleTabsChange = (index) => {
@@ -24,7 +26,7 @@ function PreferenceTabs() {
     return (
         <Tabs
             variant="soft-rounded"
-            colorScheme="blue"
+            colorScheme="green300"
             isLazy
             height="100%"
             width="100%"
@@ -34,19 +36,39 @@ function PreferenceTabs() {
             <Box display="flex" width="100%" height="100%" justifyContent="center">
                 <Card width="15%" pr="10px" pt="10px" marginRight="10px">
                     <TabList flexDirection="column">
-                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
                             Profile
                         </Tab>
-                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
                             Safes
                         </Tab>
-                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
                             Teams
                         </Tab>
-                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
                             Users
                         </Tab>
-                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
                             Notifications
                         </Tab>
                     </TabList>
