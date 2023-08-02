@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
 import { PropTypes } from "prop-types";
+import { useNavigate, useParams } from "react-router-dom";
 import {
     Alert,
     AlertIcon,
@@ -53,6 +54,8 @@ export default function Header({ withTeam }) {
     } = useWagmi();
     const [updateProfileModalOpen, setUpdateProfileModalOpen] = useState(false);
     const [safesModalOpen, setSafesModalOpen] = useState(false);
+    const { slug } = useParams();
+    const navigate = useNavigate();
 
     const StyledAvatarButton = styled(MenuButton)`
         border-radius: 16px;
@@ -122,7 +125,7 @@ export default function Header({ withTeam }) {
                         </Box>
                         {withTeam && (
                             <>
-                                <Button variant="link" size="sm">
+                                <Button variant="link" size="sm" onClick={() => navigate(`/team/${slug}`)}>
                                     Home
                                 </Button>
                                 <Button variant="link" size="sm" onClick={() => setSafesModalOpen(true)}>
