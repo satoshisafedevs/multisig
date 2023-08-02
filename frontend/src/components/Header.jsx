@@ -212,6 +212,7 @@ export default function Header({ withTeam }) {
                                             size="md"
                                             onChange={toggleColorMode}
                                             isChecked={colorMode !== "light"}
+                                            colorScheme="green300"
                                         />
                                     </Box>
                                 </MenuList>
