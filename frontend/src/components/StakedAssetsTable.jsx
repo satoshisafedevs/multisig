@@ -144,8 +144,10 @@ function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
                         </Tr>
                     ))}
                     <Tr>
-                        <StyledTd paddingLeft="0">Total</StyledTd>
-                        <StyledTd paddingRight="0">
+                        <StyledTd paddingLeft="0" border="none">
+                            Total
+                        </StyledTd>
+                        <StyledTd paddingRight="0" border="none">
                             {usdFormatter.format(todaysAggregatedSafesStakedAssets.totalUSDValue)}
                         </StyledTd>
                     </Tr>

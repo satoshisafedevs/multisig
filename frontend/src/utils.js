@@ -34,11 +34,13 @@ export const formatNumber = (num, price = false) => {
         return usdFormatter.format((Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2));
     }
 
+    const absNum = Math.abs(num);
     // If number is less than 1 and not 0, round to 4 significant figures
-    if (num !== 0 && num < 1) {
-        return Number(num.toPrecision(4));
+    if (absNum !== 0 && absNum < 1) {
+        return Number((num < 0 ? -1 : 1) * absNum.toPrecision(4));
     }
     // Otherwise round to 2 decimal places
-
-    return Intl.NumberFormat("en-US", { style: "decimal" }).format(Math.round((num + Number.EPSILON) * 100) / 100);
+    return Intl.NumberFormat("en-US", { style: "decimal" }).format(
+        ((num < 0 ? -1 : 1) * Math.round((absNum + Number.EPSILON) * 100)) / 100,
+    );
 };

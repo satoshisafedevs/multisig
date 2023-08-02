@@ -111,6 +111,7 @@ function LineChart({ xData, yData }) {
                 borderWidth: 2,
                 borderColor: theme.colors.green300[500],
                 backgroundColor: theme.colors.green300[100],
+                pointRadius: 0,
             },
         ],
     };

@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
@@ -11,6 +12,21 @@ export default defineConfig(() => {
         server: {
             // auto-open on yarn start
             open: true,
+        },
+        optimizeDeps: {
+            esbuildOptions: {
+                // Node.js global to browser globalThis
+                define: {
+                    global: "globalThis",
+                },
+                // Enable esbuild polyfill plugins
+                plugins: [
+                    NodeGlobalsPolyfillPlugin({
+                        process: true,
+                        buffer: true,
+                    }),
+                ],
+            },
         },
         // fix for build warning: "Some chunks are larger than 500 kBs after minification"
         // not sure we need it yet, this increases build assets count from 3 to ~30
