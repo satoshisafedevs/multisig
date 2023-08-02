@@ -12,6 +12,7 @@ import SafeBalance from "./providers/SafeBalance";
 import TeamPicker from "./routes/TeamPicker";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import Home from "./routes/Home";
+import Admin from "./routes/Admin";
 import Signin from "./routes/Signin";
 import Fourofour from "./routes/Fourofour";
 import theme from "./theme";
@@ -38,6 +39,14 @@ const router = createBrowserRouter([
         element: (
             <AuthenticatedRoute>
                 <Home />
+            </AuthenticatedRoute>
+        ),
+    },
+    {
+        path: "/team/:slug/admin",
+        element: (
+            <AuthenticatedRoute>
+                <Admin />
             </AuthenticatedRoute>
         ),
     },
