@@ -15,7 +15,7 @@ function Admin() {
         <>
             <Header withTeam />
             {currentTeam && teamUsersDisplayNames ? (
-                <Flex height="100%" minHeight="500px" padding="10px" justifyContent="center" maxWidth="100%">
+                <Flex height="100%" padding="10px" justifyContent="center" maxWidth="100%">
                     <PreferenceTabs /> {/* Use the PreferenceTabs component */}
                 </Flex>
             ) : (

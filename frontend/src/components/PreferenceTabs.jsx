@@ -1,10 +1,11 @@
 import React from "react";
-import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Card } from "@chakra-ui/react";
+import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Card, useColorModeValue } from "@chakra-ui/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function PreferenceTabs() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const colorValue = useColorModeValue("var(--chakra-colors-gray-600)", "var(--chakra-colors-gray-200)");
     const tab = searchParams.get("tab") || "Profile";
 
     const handleTabsChange = (index) => {
@@ -31,16 +32,26 @@ function PreferenceTabs() {
             onChange={handleTabsChange}
         >
             <Box display="flex" width="100%" height="100%" justifyContent="center">
-                <Card width="15%" pr="10px" pt="10px" backgroundColor="white" margin="10px">
+                <Card width="15%" pr="10px" pt="10px" marginRight="10px">
                     <TabList flexDirection="column">
-                        <Tab _selected={{ bg: "blue.100", borderRadius: "0 5px 5px 0" }}>Profile</Tab>
-                        <Tab _selected={{ bg: "blue.100", borderRadius: "0 5px 5px 0" }}>Safes</Tab>
-                        <Tab _selected={{ bg: "blue.100", borderRadius: "0 5px 5px 0" }}>Teams</Tab>
-                        <Tab _selected={{ bg: "blue.100", borderRadius: "0 5px 5px 0" }}>Users</Tab>
-                        <Tab _selected={{ bg: "blue.100", borderRadius: "0 5px 5px 0" }}>Notifications</Tab>
+                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                            Profile
+                        </Tab>
+                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                            Safes
+                        </Tab>
+                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                            Teams
+                        </Tab>
+                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                            Users
+                        </Tab>
+                        <Tab borderRadius="0 5px 5px 0" color={colorValue}>
+                            Notifications
+                        </Tab>
                     </TabList>
                 </Card>
-                <Card width="40%" padding="10px" backgroundColor="white" minWidth="500px" margin="10px">
+                <Card width="40%" padding="10px" minWidth="500px" marginLeft="10px">
                     <TabPanels>
                         <TabPanel>
                             <div>meowmeowmewomewoem</div>
