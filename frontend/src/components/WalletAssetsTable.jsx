@@ -60,7 +60,7 @@ function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
             if (value === 0) {
                 return "$0.00";
             }
-            if (value < 0.01) {
+            if (value > 0 && value < 0.01) {
                 return "<$0.01";
             }
             return usdFormatter.format(value);
@@ -106,25 +106,36 @@ function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
                     ))}
                 </Thead>
                 <Tbody>
-                    {tableInstance.getRowModel().rows.map((row) => (
-                        <Tr key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                                <StyledTd
-                                    key={cell.id}
-                                    paddingLeft={cell.column.columnDef?.meta?.isFirst && "0"}
-                                    paddingRight={!cell.column.columnDef?.meta?.isFirst && "0"}
-                                >
-                                    {renderCell(cell)}
-                                </StyledTd>
-                            ))}
-                        </Tr>
-                    ))}
+                    {tableInstance.getRowModel().rows.map((row, index) => {
+                        const isLastRow = index === tableInstance.getRowModel().rows.length - 1;
+
+                        return (
+                            <Tr key={row.id} className={isLastRow ? "last-row" : ""}>
+                                {row.getVisibleCells().map((cell) => (
+                                    <StyledTd
+                                        key={cell.id}
+                                        paddingLeft={cell.column.columnDef?.meta?.isFirst && "0"}
+                                        paddingRight={!cell.column.columnDef?.meta?.isFirst && "0"}
+                                        border={
+                                            isLastRow && !todaysAggregatedSafesWalletAssets.totalUSDValue
+                                                ? "none"
+                                                : "auto"
+                                        }
+                                    >
+                                        {renderCell(cell)}
+                                    </StyledTd>
+                                ))}
+                            </Tr>
+                        );
+                    })}
                     {todaysAggregatedSafesWalletAssets.totalUSDValue && (
                         <Tr>
-                            <StyledTd paddingLeft="0">Total</StyledTd>
-                            <StyledTd> </StyledTd>
-                            <StyledTd> </StyledTd>
-                            <StyledTd paddingRight="0">
+                            <StyledTd paddingLeft="0" border="none">
+                                Total
+                            </StyledTd>
+                            <StyledTd border="none"> </StyledTd>
+                            <StyledTd border="none"> </StyledTd>
+                            <StyledTd paddingRight="0" border="none">
                                 {usdFormatter.format(todaysAggregatedSafesWalletAssets.totalUSDValue)}
                             </StyledTd>
                         </Tr>

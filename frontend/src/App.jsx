@@ -1,4 +1,5 @@
 import React from "react";
+import { Buffer } from "buffer";
 import { ChakraProvider, ColorModeScript, Flex } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
@@ -14,6 +15,9 @@ import Home from "./routes/Home";
 import Signin from "./routes/Signin";
 import Fourofour from "./routes/Fourofour";
 import theme from "./theme";
+
+// need this for vite build and ethers with gnosis
+globalThis.Buffer = Buffer;
 
 const router = createBrowserRouter([
     {
@@ -47,6 +51,7 @@ if (import.meta.hot) {
         () => console.clear(),
     );
 }
+
 const { chains, publicClient, webSocketPublicClient } = configureChains(
     [mainnet, arbitrum, optimism, polygon],
     [
