@@ -128,7 +128,11 @@ export default function Header({ withTeam }) {
                                 <Button variant="link" size="sm" onClick={() => navigate(`/team/${slug}`)}>
                                     Home
                                 </Button>
-                                <Button variant="link" size="sm" onClick={() => setSafesModalOpen(true)}>
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    onClick={() => navigate(`/team/${slug}/admin?tab=Safes`)}
+                                >
                                     Safes
                                 </Button>
                                 <Button variant="link" size="sm">
@@ -163,7 +167,7 @@ export default function Header({ withTeam }) {
                                                 ? `${firestoreUser.displayName} (${firestoreUser?.email})`
                                                 : firestoreUser?.email}
                                         </Box>
-                                        <MenuItem onClick={() => setUpdateProfileModalOpen(true)}>
+                                        <MenuItem onClick={() => navigate(`/team/${slug}/admin?tab=Profile`)}>
                                             Update profile
                                         </MenuItem>
                                         <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>

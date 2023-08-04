@@ -15,7 +15,7 @@ import {
 import { useUser } from "../providers/User";
 
 const useAuth = () => {
-    const { setUser, firestoreUser, setFirestoreUser } = useUser();
+    const { setUser, getFirestoreUserData, getUserTeamsData } = useUser();
     const toast = useToast();
     const [isSigningIn, setSigningIn] = useState(false);
     const [isSigningOut, setSigningOut] = useState(false);
@@ -139,7 +139,8 @@ const useAuth = () => {
         try {
             const docRef = doc(db, "users", userData.uid);
             await updateDoc(docRef, data);
-            setFirestoreUser(...firestoreUser, ...data);
+            getFirestoreUserData();
+            getUserTeamsData();
         } catch (error) {
             toast({
                 description: `Failed to update user: ${error.message}`,

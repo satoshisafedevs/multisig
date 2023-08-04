@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useToast } from "@chakra-ui/react";
-import { auth, onAuthStateChanged, db, collection, doc, getDoc, getDocs } from "../firebase";
+import { auth, onAuthStateChanged, db, collection, doc, getDoc, getDocs, updateDoc } from "../firebase";
 
 const UserContext = createContext();
 const UserProvider = UserContext.Provider;
@@ -37,9 +37,9 @@ function User({ children }) {
         return unsubscribe;
     }, []);
 
-    const getUserTeamsData = async (userAuth) => {
+    const getUserTeamsData = async () => {
         try {
-            const userTeamsRef = collection(db, "users", userAuth.uid, "teams");
+            const userTeamsRef = collection(db, "users", user.uid, "teams");
             const userTeamsSnap = await getDocs(userTeamsRef);
             const userTeamsData = await Promise.all(
                 userTeamsSnap.docs.map(async (teamDoc) => {
@@ -49,7 +49,7 @@ function User({ children }) {
                     if (teamSnap.exists()) {
                         const teamData = teamSnap.data();
                         // check that user also added to the team
-                        if (teamData.users.includes(userAuth.uid)) {
+                        if (teamData.users.includes(user.uid)) {
                             return { ...teamData, id: teamSnap.id };
                         }
                     }
@@ -72,15 +72,30 @@ function User({ children }) {
         }
     };
 
-    const getFirestoreUserData = async (userAuth) => {
+    const getFirestoreUserData = async () => {
         try {
-            const userRef = doc(db, "users", userAuth.uid);
+            const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
             const userData = userSnap.data();
-            setFirestoreUser({ ...userData, uid: userAuth.uid });
+            setFirestoreUser({ ...userData, uid: user.uid });
         } catch (error) {
             toast({
                 description: `Failed to get user: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const setUserTeamWallet = async (walletAddress) => {
+        try {
+            const userTeamRef = doc(db, "users", user.uid, "teams", currentTeam.id);
+            updateDoc(userTeamRef, { userWalletAddress: walletAddress });
+        } catch (error) {
+            toast({
+                description: `Failed to update wallet address: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -106,6 +121,7 @@ function User({ children }) {
             setTeamUsersDisplayNames,
             getUserTeamsData,
             getFirestoreUserData,
+            setUserTeamWallet,
         }),
         [
             user,
@@ -123,6 +139,7 @@ function User({ children }) {
             setTeamUsersDisplayNames,
             getUserTeamsData,
             getFirestoreUserData,
+            setUserTeamWallet,
         ],
     );
 

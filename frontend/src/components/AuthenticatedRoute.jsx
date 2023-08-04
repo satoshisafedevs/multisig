@@ -68,7 +68,10 @@ function AuthenticatedRoute({ children }) {
                         const docRef = doc(db, "users", uid);
                         const docSnap = await getDoc(docRef);
                         const docData = docSnap.data();
-                        displayNames[uid] = docData.displayName || docData.email;
+                        const displayInfo = {};
+                        displayInfo.displayName = docData.displayName || docData.email;
+                        displayInfo.photoUrl = docData.photoURL || null;
+                        displayNames[uid] = displayInfo;
                     } catch (error) {
                         toast({
                             description: `Failed to get team display names: ${error.message}`,

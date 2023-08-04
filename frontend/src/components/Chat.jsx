@@ -264,13 +264,16 @@ export default function Chat() {
                                 onMouseLeave={() => setHoverID(null)}
                             >
                                 <Avatar
-                                    name={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : null}
+                                    alt={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid].displayName : null}
                                     size="sm"
+                                    src={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid].photoUrl : null}
                                 />
                                 <Box flexGrow="1" paddingLeft="6px">
                                     <Stack direction="row" spacing="5px">
                                         <Text fontSize="xs" fontWeight="bold">
-                                            {teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid] : "No name"}
+                                            {teamUsersDisplayNames
+                                                ? teamUsersDisplayNames[msg.uid].displayName
+                                                : "No name"}
                                         </Text>
                                         <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
                                     </Stack>
