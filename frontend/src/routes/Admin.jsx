@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Flex, Spinner } from "@chakra-ui/react";
 import Header from "../components/Header";
-import PreferenceTabs from "../components/PreferenceTabs"; // Import the PreferenceTabs component
+import PreferenceTabs from "../components/admin/PreferenceTabs"; // Import the PreferenceTabs component
 import { useUser } from "../providers/User";
 
 function Admin() {
