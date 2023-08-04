@@ -9,7 +9,7 @@ import {
     ModalHeader,
     ModalFooter,
 } from "@chakra-ui/react";
-import SafeCard from "../safes/SafeCard";
+import SafeCard from "./admin/SafeCard";
 
 export default function SafesModal({ isOpen, setIsOpen }) {
     const onClose = () => {

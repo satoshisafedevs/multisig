@@ -66,7 +66,7 @@ function Profile() {
     };
 
     return (
-        <Box padding="10px" backgroundColor="white" minWidth="500px" margin="10px">
+        <Box minWidth="500px" margin="10px">
             <Flex justifyContent="space-between" alignItems="center">
                 <Box>
                     <Heading as="h2">Profile</Heading>
