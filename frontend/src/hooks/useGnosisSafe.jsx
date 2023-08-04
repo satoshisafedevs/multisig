@@ -2,7 +2,7 @@ import SafeApiKit from "@safe-global/api-kit";
 import { EthersAdapter } from "@safe-global/protocol-kit";
 import { ethers } from "ethers";
 import { useToast } from "@chakra-ui/react";
-import networks from "../safes/networks.json";
+import networks from "../components/admin/networks.json";
 
 const useGnosisSafe = () => {
     const toast = useToast();

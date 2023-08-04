@@ -27,8 +27,8 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoAddCircleOutline, IoEnterOutline, IoChevronBackOutline } from "react-icons/io5";
-import { useUser } from "../providers/User";
-import { db, doc, getDoc, updateDoc, Timestamp } from "../firebase";
+import { useUser } from "../../providers/User";
+import { db, doc, getDoc, updateDoc, Timestamp } from "../../firebase";
 
 function WelcomeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");

@@ -2,6 +2,7 @@ import React from "react";
 import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Card, useColorModeValue } from "@chakra-ui/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Profile from "./Profile";
+import Safes from "./Safes";
 
 function PreferenceTabs() {
     const navigate = useNavigate();
@@ -79,7 +80,9 @@ function PreferenceTabs() {
                         <TabPanel m="0px">
                             <Profile />
                         </TabPanel>
-                        <TabPanel>{/* Safes Content */}</TabPanel>
+                        <TabPanel>
+                            <Safes />
+                        </TabPanel>
                         <TabPanel>{/* Teams Content */}</TabPanel>
                         <TabPanel>{/* Users Content */}</TabPanel>
                         <TabPanel>{/* Notifications Content */}</TabPanel>

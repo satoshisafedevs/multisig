@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Flex, Button, Box, Image, Text } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
-import { useUser } from "../providers/User";
-import { useSafeBalance } from "../providers/SafeBalance";
+import { useUser } from "../../providers/User";
+import { useSafeBalance } from "../../providers/SafeBalance";
 import networks from "./networks.json";
 import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 
