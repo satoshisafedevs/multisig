@@ -38,6 +38,7 @@ function Safes() {
                     </Thead>
                     <Tbody>
                         {currentTeam &&
+                            currentTeam.safes &&
                             currentTeam.safes.map((safe) => (
                                 <Tr key={safe.safeAddress}>
                                     <Td>{safe.safeAddress}</Td>

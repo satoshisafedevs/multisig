@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Profile from "./Profile";
 import Safes from "./Safes";
 import Users from "./Users";
+import Teams from "./Teams";
 
 function PreferenceTabs() {
     const navigate = useNavigate();
@@ -84,7 +85,9 @@ function PreferenceTabs() {
                         <TabPanel>
                             <Safes />
                         </TabPanel>
-                        <TabPanel>{/* Teams Content */}</TabPanel>
+                        <TabPanel>
+                            <Teams />
+                        </TabPanel>
                         <TabPanel>
                             <Users />
                         </TabPanel>
