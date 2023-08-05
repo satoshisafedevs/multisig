@@ -3,6 +3,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Card, useColorModeValue }
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Profile from "./Profile";
 import Safes from "./Safes";
+import Users from "./Users";
 
 function PreferenceTabs() {
     const navigate = useNavigate();
@@ -84,7 +85,9 @@ function PreferenceTabs() {
                             <Safes />
                         </TabPanel>
                         <TabPanel>{/* Teams Content */}</TabPanel>
-                        <TabPanel>{/* Users Content */}</TabPanel>
+                        <TabPanel>
+                            <Users />
+                        </TabPanel>
                         <TabPanel>{/* Notifications Content */}</TabPanel>
                     </TabPanels>
                 </Card>

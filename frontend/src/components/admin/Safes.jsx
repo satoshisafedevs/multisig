@@ -19,7 +19,9 @@ function Safes() {
         <Box padding="10px" minWidth="500px" margin="10px">
             <Flex justifyContent="space-between" alignItems="center" mb="20px">
                 <Box>
-                    <Heading as="h2">Safes</Heading>
+                    <Heading mb="10px" as="h2">
+                        Safes
+                    </Heading>
                     <Text>Manage the safes associated with your Satoshi Safe team</Text>
                 </Box>
             </Flex>

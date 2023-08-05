@@ -71,6 +71,7 @@ function AuthenticatedRoute({ children }) {
                         const displayInfo = {};
                         displayInfo.displayName = docData.displayName || docData.email;
                         displayInfo.photoUrl = docData.photoURL || null;
+                        displayInfo.email = docData.email;
                         displayNames[uid] = displayInfo;
                     } catch (error) {
                         toast({

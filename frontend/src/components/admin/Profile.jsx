@@ -69,7 +69,9 @@ function Profile() {
         <Box minWidth="500px" margin="10px">
             <Flex justifyContent="space-between" alignItems="center">
                 <Box>
-                    <Heading as="h2">Profile</Heading>
+                    <Heading mb="10px" as="h2">
+                        Profile
+                    </Heading>
                     <Text>Change your profile information such as name, profile picture, and wallet address</Text>
                 </Box>
                 <Box>
