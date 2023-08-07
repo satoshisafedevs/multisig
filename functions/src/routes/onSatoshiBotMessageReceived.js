@@ -2,6 +2,7 @@ const { onRequest } = require("../firebase");
 const { openAIResponse } = require("../openai"); // replace with actual module name
 const { db, Timestamp } = require("../firebase");
 const { corsAndOptions } = require("./cors");
+const { getAssetsByTeam } = require("../wallet/assets");
 
 exports.onSatoshiBotMessageReceived = onRequest(
     async (req, res) => {
@@ -32,20 +33,24 @@ exports.onSatoshiBotMessageReceived = onRequest(
                 snapshot.forEach((doc) => {
                     // doc.data() is never undefined for query doc snapshots
                     const data = doc.data();
-
+                    const openAiObject = {};
                     // Append "Satoshi:" if the message uid is bot_uid, else append "User"
-                    data.text = data.uid === botUid ? `Satoshi: ${data.message}` : `User: ${data.message}`;
-                    convo.push(data.text);
+                    openAiObject.role = data.uid === botUid ?
+                        "assistant" : "user";
+                    openAiObject.content = data.message;
+                    convo.push(openAiObject);
                 });
 
+                const assets = await getAssetsByTeam(teamId);
+
                 // Call your function with the message
-                let response = await openAIResponse(convo);
-                response = response.replace(/^\n+|\n+$/g, "");
+                const response = await openAIResponse(convo, assets);
                 const newMessage = {
-                    message: response,
+                    message: response.message,
                     uid: botUid,
                     type: "satoshibot",
                     createdAt: Timestamp.now(),
+                    satoshiObject: response,
                 };
                 // Add a new document with 'newMessage' object. Firestore will auto-generate an ID.
                 await db.collection(messagesPath).add(newMessage);
