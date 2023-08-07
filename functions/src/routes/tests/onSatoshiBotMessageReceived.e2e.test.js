@@ -4,18 +4,23 @@ const axios = require("axios");
 const expect = chai.expect;
 
 describe("On new message in the teams collection", function() {
-    this.timeout(20000);
+    this.timeout(18000);
     it("should write a new message to the teams collection", async () => {
         const teamId = "testTeam123";
         const botUid = "botUid123";
         const documentPath = `teams/${teamId}/messages/`;
 
         const newMessage = {
-            message: "does this work",
+            message: "Swap my 3 ETH for 100 USDT on Uniswap",
             uid: "lsjdfsdlfkjsdf",
             type: "satoshibot",
             createdAt: Timestamp.now(),
         };
+
+        // Points to the 'messages' subcollection in the team document
+        const messagesCollectionRef = db.collection("teams").doc(teamId).collection("messages");
+        // Add a new document with 'newMessage' object. Firestore will auto-generate an ID.
+        await messagesCollectionRef.add(newMessage);
 
         // Set botUid field under the team document
         await db.doc(`teams/${teamId}`).set({ botUid }, { merge: true });
