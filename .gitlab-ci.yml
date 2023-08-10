@@ -115,6 +115,7 @@ deploy-functions-playground:
         - echo PRIVATE_EVM_KEY=$PRIVATE_EVM_KEY >> .env
         - echo SMTP2GO_USERNAME=$SMTP2GO_USERNAME >> .env
         - echo SMTP2GO_PASSWORD=$SMTP2GO_PASSWORD >> .env
+        - echo BASE_URL=$BASE_URL_PLAYGROUND >> .env
         - echo "Deploying firebase functions..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
         - echo "Firebase functions successfully deployed."
