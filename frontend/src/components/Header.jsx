@@ -27,7 +27,6 @@ import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import { useWagmi } from "../providers/Wagmi";
 import ReactLogo from "../img/ReactLogo";
-import UpdateProfileModal from "./UpdateProfileModal";
 import SafesModal from "./SafesModal";
 
 export default function Header({ withTeam }) {
@@ -52,7 +51,6 @@ export default function Header({ withTeam }) {
         switchNetwork,
         switchNetworkIsLoading,
     } = useWagmi();
-    const [updateProfileModalOpen, setUpdateProfileModalOpen] = useState(false);
     const [safesModalOpen, setSafesModalOpen] = useState(false);
     const { slug } = useParams();
     const navigate = useNavigate();
@@ -115,7 +113,6 @@ export default function Header({ withTeam }) {
 
     return (
         <Flex margin="10px 10px 0 10px">
-            <UpdateProfileModal isOpen={updateProfileModalOpen} setIsOpen={setUpdateProfileModalOpen} />
             <SafesModal isOpen={safesModalOpen} setIsOpen={setSafesModalOpen} />
             <Card direction="column" width="100%">
                 <Flex direction="row" justify="space-between" padding="10px">
@@ -168,7 +165,7 @@ export default function Header({ withTeam }) {
                                                 : firestoreUser?.email}
                                         </Box>
                                         <MenuItem onClick={() => navigate(`/team/${slug}/admin?tab=Profile`)}>
-                                            Update profile
+                                            Manage Settings
                                         </MenuItem>
                                         <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>
                                             Sign out

@@ -33,7 +33,7 @@ import actions from "../actions/actions.json";
 
 export default function Chat() {
     const toast = useToast();
-    const { firestoreUser, teamsData, currentTeam, teamUsersDisplayNames } = useUser();
+    const { firestoreUser, teamsData, currentTeam, teamUsersInfo } = useUser();
     const { slug } = useParams();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
@@ -264,16 +264,14 @@ export default function Chat() {
                                 onMouseLeave={() => setHoverID(null)}
                             >
                                 <Avatar
-                                    alt={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid].displayName : null}
+                                    alt={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
                                     size="sm"
-                                    src={teamUsersDisplayNames ? teamUsersDisplayNames[msg.uid].photoUrl : null}
+                                    src={teamUsersInfo ? teamUsersInfo[msg.uid].photoUrl : null}
                                 />
                                 <Box flexGrow="1" paddingLeft="6px">
                                     <Stack direction="row" spacing="5px">
                                         <Text fontSize="xs" fontWeight="bold">
-                                            {teamUsersDisplayNames
-                                                ? teamUsersDisplayNames[msg.uid].displayName
-                                                : "No name"}
+                                            {teamUsersInfo ? teamUsersInfo[msg.uid].displayName : "No name"}
                                         </Text>
                                         <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
                                     </Stack>

@@ -22,7 +22,7 @@ import { useUser } from "../providers/User";
 
 export default function UpdateProfileModal({ isOpen, setIsOpen }) {
     const toast = useToast();
-    const { user, firestoreUser, setFirestoreUser, currentTeam, userTeamData, setTeamUsersDisplayNames } = useUser();
+    const { user, firestoreUser, setFirestoreUser, currentTeam, userTeamData, setTeamUsersInfo } = useUser();
     const [displayName, setDisplayName] = useState("");
     const [team, setTeam] = useState("");
     const [userWalletAddress, setUserWalletAddress] = useState("");
@@ -65,7 +65,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
             const userRef = doc(db, "users", user.uid);
             await updateDoc(userRef, { displayName: trimmedDisplayName });
             setFirestoreUser((prevState) => ({ ...prevState, displayName: trimmedDisplayName }));
-            setTeamUsersDisplayNames((prevState) => ({
+            setTeamUsersInfo((prevState) => ({
                 ...prevState,
                 [user.uid]: trimmedDisplayName.length > 0 ? trimmedDisplayName : user.email,
             }));
@@ -96,7 +96,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
                     <Box width="100%">
                         <Stack direction="row" align="center" paddingBottom="20px">
                             <InputGroup>
-                                <InputLeftAddon width="150px">Name</InputLeftAddon>
+                                <InputLeftAddon width="150px">Display Name</InputLeftAddon>
                                 <Input value={displayName} onChange={handleDisplayName} ref={firstInput} />
                             </InputGroup>
                         </Stack>

@@ -11,6 +11,8 @@ import {
     signInWithPhoneNumber,
     signOut,
     updateProfile,
+    connectAuthEmulator,
+    updatePassword,
 } from "firebase/auth";
 import {
     addDoc,
@@ -30,7 +32,19 @@ import {
     setDoc,
     Timestamp,
     updateDoc,
+    connectFirestoreEmulator,
 } from "firebase/firestore";
+import { getFunctions, connectFunctionsEmulator, httpsCallable } from "firebase/functions";
+
+const isServerActive = async (url) => {
+    try {
+        await fetch(url, { mode: "no-cors" });
+        return true;
+    } catch (error) {
+        console.error(`Failed to connect to ${url}`);
+        return false;
+    }
+};
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_API_KEY,
@@ -46,6 +60,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
+
+const inviteUser = httpsCallable(functions, "api-inviteUser");
+const acceptInvite = httpsCallable(functions, "api-acceptInvite");
+
+// Check if localhost:5001 is active
+isServerActive("http://localhost:4000").then((isActive) => {
+    if (isActive) {
+        connectAuthEmulator(auth, "http://localhost:9099");
+        connectFirestoreEmulator(db, "localhost", 8080);
+        connectFunctionsEmulator(functions, "localhost", 5001);
+    }
+});
 
 export {
     addDoc,
@@ -55,6 +82,9 @@ export {
     collection,
     createUserWithEmailAndPassword,
     db,
+    functions,
+    inviteUser,
+    acceptInvite,
     doc,
     getDoc,
     getDocs,
@@ -77,4 +107,5 @@ export {
     Timestamp,
     updateDoc,
     updateProfile,
+    updatePassword,
 };

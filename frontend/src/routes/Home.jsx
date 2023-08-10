@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Grid, GridItem, Spinner } from "@chakra-ui/react";
+import UpdateProfileModal from "../components/UpdateProfileModal";
 import Header from "../components/Header";
 import Portfolio from "../components/Portfolio";
 import Chat from "../components/Chat";
@@ -8,7 +9,8 @@ import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 
 function Home() {
-    const { currentTeam, teamUsersDisplayNames } = useUser();
+    const { currentTeam, teamUsersInfo, firestoreUser } = useUser();
+    const [updateProfileModalOpen, setUpdateProfileModalOpen] = useState(false);
     const { walletMismatch } = useWagmi();
     const [chartHeight, setChartHeight] = useState();
     const [expandPortfolio, setExpandPortfolio] = useState(false);
@@ -19,7 +21,13 @@ function Home() {
     }, []);
 
     useEffect(() => {
-        if (currentTeam && teamUsersDisplayNames) {
+        if (firestoreUser && !firestoreUser.displayName) {
+            setUpdateProfileModalOpen(true);
+        }
+    }, [firestoreUser]);
+
+    useEffect(() => {
+        if (currentTeam && teamUsersInfo) {
             const updateSize = () => {
                 if (gridRef.current) {
                     setTimeout(() => {
@@ -31,14 +39,15 @@ function Home() {
             window.addEventListener("resize", updateSize);
             return () => window.removeEventListener("resize", updateSize);
         }
-    }, [currentTeam, teamUsersDisplayNames, walletMismatch, expandPortfolio]);
+    }, [currentTeam, teamUsersInfo, walletMismatch, expandPortfolio]);
 
     const expandAction = () => setExpandPortfolio((prevState) => !prevState);
 
     return (
         <>
             <Header withTeam />
-            {currentTeam && teamUsersDisplayNames ? (
+            <UpdateProfileModal isOpen={updateProfileModalOpen} setIsOpen={setUpdateProfileModalOpen} />
+            {currentTeam && teamUsersInfo ? (
                 <Grid
                     height="100%"
                     minHeight="500px"

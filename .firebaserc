@@ -1,6 +1,7 @@
 {
-    "projects": {
-        "production": "prontoai-production",
-        "playground": "prontoai-playground"
-    }
+  "projects": {
+    "production": "prontoai-production",
+    "playground": "prontoai-playground",
+    "default": "prontoai-playground"
+  }
 }
