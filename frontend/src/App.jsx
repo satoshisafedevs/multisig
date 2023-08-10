@@ -15,6 +15,7 @@ import Home from "./routes/Home";
 import Admin from "./routes/Admin";
 import Signin from "./routes/Signin";
 import Fourofour from "./routes/Fourofour";
+import Invitations from "./routes/Invitations";
 import theme from "./theme";
 
 // need this for vite build and ethers with gnosis
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
                 <Admin />
             </AuthenticatedRoute>
         ),
+    },
+    {
+        path: "/invitation",
+        element: <Invitations />,
     },
 ]);
 

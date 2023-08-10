@@ -5,7 +5,7 @@ import PreferenceTabs from "../components/admin/PreferenceTabs"; // Import the P
 import { useUser } from "../providers/User";
 
 function Admin() {
-    const { currentTeam, teamUsersDisplayNames } = useUser();
+    const { currentTeam, teamUsersInfo } = useUser();
 
     useEffect(() => {
         document.title = "Satoshi Safe Admin Panel";
@@ -14,7 +14,7 @@ function Admin() {
     return (
         <>
             <Header withTeam />
-            {currentTeam && teamUsersDisplayNames ? (
+            {currentTeam && teamUsersInfo ? (
                 <Flex height="100%" padding="10px" justifyContent="center" maxWidth="100%">
                     <PreferenceTabs /> {/* Use the PreferenceTabs component */}
                 </Flex>

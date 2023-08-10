@@ -18,7 +18,7 @@ function User({ children }) {
     const [teamsData, setTeamsData] = useState(null);
     const [userTeamData, setUserTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
-    const [teamUsersDisplayNames, setTeamUsersDisplayNames] = useState(null);
+    const [teamUsersInfo, setTeamUsersInfo] = useState(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (userAuth) => {
@@ -30,7 +30,7 @@ function User({ children }) {
                 setFirestoreUser(null);
                 setCurrentTeam(null);
                 setTeamsData(null);
-                setTeamUsersDisplayNames(null);
+                setTeamUsersInfo(null);
                 setGettingUserAuthStatus(false);
             }
         });
@@ -137,8 +137,8 @@ function User({ children }) {
             setUserTeamData,
             currentTeam,
             setCurrentTeam,
-            teamUsersDisplayNames,
-            setTeamUsersDisplayNames,
+            teamUsersInfo,
+            setTeamUsersInfo,
             getUserTeamsData,
             getFirestoreUserData,
             setUserTeamWallet,
@@ -156,8 +156,8 @@ function User({ children }) {
             setUserTeamData,
             currentTeam,
             setCurrentTeam,
-            teamUsersDisplayNames,
-            setTeamUsersDisplayNames,
+            teamUsersInfo,
+            setTeamUsersInfo,
             getUserTeamsData,
             getFirestoreUserData,
             setUserTeamWallet,

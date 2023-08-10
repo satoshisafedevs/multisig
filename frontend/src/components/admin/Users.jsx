@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { Box, Table, Thead, Tbody, Tr, Th, Td, Flex, Heading, Text, Button } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
 import { useUser } from "../../providers/User";
-import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
+import InviteUserModal from "./InviteUserModal";
 
 function Users() {
-    const { teamUsersDisplayNames } = useUser();
+    const { teamUsersInfo } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
     const [sortAscending, setSortAscending] = useState(true);
 
-    const sortedUsers = teamUsersDisplayNames
-        ? Object.entries(teamUsersDisplayNames).sort(([, a], [, b]) => {
+    const sortedUsers = teamUsersInfo
+        ? Object.entries(teamUsersInfo).sort(([, a], [, b]) => {
               if (sortAscending) {
                   return a.displayName.localeCompare(b.displayName);
               }
@@ -58,7 +58,7 @@ function Users() {
                 >
                     Add User
                 </Button>
-                <AddSatoshiSafeModal isOpen={modalOpen} setIsOpen={setModalOpen} />
+                <InviteUserModal isOpen={modalOpen} setIsOpen={setModalOpen} />
             </Box>
         </Box>
     );

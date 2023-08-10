@@ -29,7 +29,7 @@ import Header from "../components/Header";
 
 function TeamPicker() {
     const toast = useToast();
-    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersDisplayNames, getUserTeamsData } = useUser();
+    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const navigate = useNavigate();
@@ -42,7 +42,7 @@ function TeamPicker() {
     useEffect(() => {
         document.title = "Select your team - Satoshi Safe";
         setCurrentTeam(null);
-        setTeamUsersDisplayNames(null);
+        setTeamUsersInfo(null);
         setWalletMismatch(false);
         resetBalanceData();
         getUserTeamsData(user);

@@ -14,7 +14,7 @@ function AuthenticatedRoute({ children }) {
         setTeamsData,
         setUserTeamData,
         setCurrentTeam,
-        setTeamUsersDisplayNames,
+        setTeamUsersInfo,
         getFirestoreUserData,
         getUserTeamsData,
     } = useUser();
@@ -84,7 +84,7 @@ function AuthenticatedRoute({ children }) {
                     }
                 };
                 Promise.all(team.users.map((uid) => getUsersDisplayNames(uid)))
-                    .then(() => setTeamUsersDisplayNames(displayNames))
+                    .then(() => setTeamUsersInfo(displayNames))
                     .catch(() => {});
             }
         }

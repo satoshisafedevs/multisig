@@ -1,6 +1,7 @@
 image: node:lts-alpine
 
 cache:
+    key: ${CI_COMMIT_REF_SLUG}  # this sets the key to the branch name
     paths:
         - frontend/node_modules
         - frontend/yarn.lock
@@ -22,7 +23,7 @@ stages:
 lint-test-frontend:
     stage: test
     before_script:
-        - apk update && apk add git
+        - apk update && apk add git python3 make g++ 
         - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Linting code... This will take about 10 seconds."
@@ -32,7 +33,7 @@ lint-test-frontend:
 lint-test-functions:
     stage: test
     before_script:
-        - apk update && apk add git
+        - apk update && apk add python3 make g++ git
         - cd $CI_PROJECT_DIR/functions && yarn install
     script:
         - echo "Linting code... This will take about 10 seconds."
@@ -42,7 +43,7 @@ lint-test-functions:
 unit-test-functions:
     stage: test
     before_script:
-        - apk update && apk add git openjdk11
+        - apk update && apk add python3 make g++ git openjdk11
         - cd $CI_PROJECT_DIR/functions && yarn install
         - cp $GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND ./serviceAccountKey.json
         - yarn global add firebase-tools
@@ -57,7 +58,7 @@ unit-test-functions:
 format-test-frontend:
     stage: test
     before_script:
-        - apk update && apk add git
+        - apk update && apk add python3 make g++ git
         - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Formatting code... This will take about 10 seconds."
@@ -67,7 +68,7 @@ format-test-frontend:
 build-frontend:
     stage: build
     before_script:
-        - apk update && apk add git
+        - apk update && apk add python3 make g++ git
         - cd $CI_PROJECT_DIR/frontend && yarn install
     script:
         - echo "Compiling the code..."
@@ -87,7 +88,7 @@ deploy-hosting-playground:
     dependencies:
         - build-frontend
     before_script:
-        - apk update && apk add git
+        - apk update && apk add python3 make g++ git
         - cd $CI_PROJECT_DIR/frontend && yarn install
         - yarn global add firebase-tools
     script:
@@ -101,7 +102,7 @@ deploy-functions-playground:
     only:
         - main
     before_script:
-        - apk update && apk add git
+        - apk update && apk add python3 make g++ git
         - cd $CI_PROJECT_DIR/functions && yarn install
         - yarn global add firebase-tools
     script:
@@ -112,6 +113,8 @@ deploy-functions-playground:
         - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
         - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
         - echo PRIVATE_EVM_KEY=$PRIVATE_EVM_KEY >> .env
+        - echo SMTP2GO_USERNAME=$SMTP2GO_USERNAME >> .env
+        - echo SMTP2GO_PASSWORD=$SMTP2GO_PASSWORD >> .env
         - echo "Deploying firebase functions..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
         - echo "Firebase functions successfully deployed."
