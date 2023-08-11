@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { IoPaperPlaneOutline } from "react-icons/io5";
 import {
     Modal,
     ModalOverlay,
@@ -79,7 +80,11 @@ function InviteUserModal({ isOpen, setIsOpen }) {
                     </FormControl>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="green300" mr={3} onClick={handleInvite}>
+                    <Button
+                        colorScheme="green300"
+                        onClick={handleInvite}
+                        rightIcon={<IoPaperPlaneOutline size="20px" />}
+                    >
                         Send Invite
                     </Button>
                 </ModalFooter>

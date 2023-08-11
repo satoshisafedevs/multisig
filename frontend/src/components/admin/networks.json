@@ -4,20 +4,23 @@
         "url": "https://arb1.arbitrum.io/rpc",
         "safeTransactionService": "https://safe-transaction-arbitrum.safe.global/",
         "currency": "ETH",
-        "title": "Arbitrum"
+        "title": "Arbitrum",
+        "scanUrl": "https://arbiscan.io"
     },
     "mainnet": {
-        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Fmainnet.svg?alt=media&token=da7326f3-c37e-4952-b071-f7cefb65cb06",
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Fmainnet.svg?alt=media&token=fd72c40a-28bf-426d-93e4-317f3e179b0c",
         "url": "https://1rpc.io/eth",
         "safeTransactionService": "https://safe-transaction-mainnet.safe.global/",
         "currency": "ETH",
-        "title": "Ethereum"
+        "title": "Ethereum",
+        "scanUrl": "https://etherscan.io"
     },
     "optimism": {
         "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Foptimism.svg?alt=media&token=b24d0e93-d289-45cb-8dae-dd3decc2987e",
         "url": "https://mainnet.optimism.io",
         "safeTransactionService": "https://safe-transaction-optimism.safe.global/",
         "currency": "ETH",
-        "title": "Optimism"
+        "title": "Optimism",
+        "scanUrl": "https://optimistic.etherscan.io"
     }
 }

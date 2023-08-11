@@ -139,6 +139,7 @@ const useAuth = () => {
         try {
             const docRef = doc(db, "users", userData.uid);
             await updateDoc(docRef, data);
+            // TODO: need to update as well - email/identifier in Authentication -> Users -> user.uid
             getFirestoreUserData();
             getUserTeamsData();
         } catch (error) {

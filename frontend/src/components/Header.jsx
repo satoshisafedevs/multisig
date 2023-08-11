@@ -18,6 +18,7 @@ import {
     MenuDivider,
     Stack,
     Flex,
+    Tooltip,
     Switch,
     useColorModeValue,
     useColorMode,
@@ -122,33 +123,49 @@ export default function Header({ withTeam }) {
                         </Box>
                         {withTeam && (
                             <>
-                                <Button variant="link" size="sm" onClick={() => navigate(`/team/${slug}`)}>
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    onClick={() => navigate(`/team/${slug}`)}
+                                    color={colorMode === "light" && "var(--chakra-colors-gray-600)"}
+                                >
                                     Home
                                 </Button>
                                 <Button
                                     variant="link"
                                     size="sm"
                                     onClick={() => navigate(`/team/${slug}/admin?tab=Safes`)}
+                                    color={colorMode === "light" && "var(--chakra-colors-gray-600)"}
                                 >
                                     Safes
                                 </Button>
-                                <Button variant="link" size="sm">
+                                <Button
+                                    variant="link"
+                                    size="sm"
+                                    color={colorMode === "light" && "var(--chakra-colors-gray-600)"}
+                                >
                                     Docs
-                                </Button>{" "}
+                                </Button>
                             </>
                         )}
                     </Stack>
                     <Stack direction="row" spacing={4} align="center">
                         {currentTeam && currentTeam.name && (
-                            <Button variant="outline" onClick={() => navigate("/")}>
-                                {currentTeam.name} Team <IoPeopleOutline style={{ marginLeft: "8px" }} />
-                            </Button>
+                            <Tooltip label="Switch team">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigate("/")}
+                                    rightIcon={<IoPeopleOutline />}
+                                >
+                                    {currentTeam.name} Team
+                                </Button>
+                            </Tooltip>
                         )}
                         {!isConnected && withTeam && (
                             <Button
                                 leftIcon={<IoWalletOutline />}
                                 size="sm"
-                                width="100%"
                                 colorScheme={setColorScheme()}
                                 isDisabled={preflightCheck || connectIsLoading}
                                 onClick={handleClick}

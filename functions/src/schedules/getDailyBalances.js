@@ -53,10 +53,15 @@ exports.getDailyBalances = onSchedule(
             });
             const ACCESS_KEY = version.payload.data.toString();
             const teamsRef = await db.collection("teams").get();
+            const processedSafes = new Set(); // This will hold the safe addresses we've processed
             for (const teamDoc of teamsRef.docs) {
                 const teamData = teamDoc.data();
                 for (const safe of teamData.safes || []) {
-                    if (safe.safeAddress) {
+                    if (safe.safeAddress && !processedSafes.has(safe.safeAddress)) {
+                        // If this safe hasn't been processed yet...
+                        // ...add it to the set of processed safes
+                        processedSafes.add(safe.safeAddress);
+
                         const options = {
                             method: "GET",
                             headers: {

@@ -24,6 +24,7 @@ import { IoAdd } from "react-icons/io5";
 import { db, addDoc, collection, setDoc, doc, Timestamp } from "../firebase";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
+import { useTransactions } from "../providers/Transactions";
 import { useSafeBalance } from "../providers/SafeBalance";
 import Header from "../components/Header";
 
@@ -32,6 +33,7 @@ function TeamPicker() {
     const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
+    const { setFirestoreTransactions } = useTransactions();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [teamName, setTeamName] = useState("");
@@ -46,6 +48,7 @@ function TeamPicker() {
         setWalletMismatch(false);
         resetBalanceData();
         getUserTeamsData(user);
+        setFirestoreTransactions();
     }, []);
 
     useEffect(() => {

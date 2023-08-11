@@ -16,10 +16,10 @@ function Safes() {
     });
 
     return (
-        <Box padding="10px" minWidth="500px" margin="10px">
+        <Box padding="10px" minWidth="500px">
             <Flex justifyContent="space-between" alignItems="center" mb="20px">
                 <Box>
-                    <Heading mb="10px" as="h2">
+                    <Heading mb="10px" size="lg">
                         Safes
                     </Heading>
                     <Text>Manage the safes associated with your Satoshi Safe team</Text>
@@ -62,7 +62,6 @@ function Safes() {
                 </Table>
                 <Button
                     leftIcon={<IoAdd size="25px" />}
-                    width="200px"
                     colorScheme="green300"
                     onClick={() => setModalOpen(true)}
                     position="absolute"

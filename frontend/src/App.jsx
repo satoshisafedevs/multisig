@@ -8,6 +8,7 @@ import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import User from "./providers/User";
 import Wagmi from "./providers/Wagmi";
+import Transactions from "./providers/Transactions";
 import SafeBalance from "./providers/SafeBalance";
 import TeamPicker from "./routes/TeamPicker";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
@@ -93,7 +94,9 @@ function App() {
                         <User>
                             <Wagmi>
                                 <SafeBalance>
-                                    <RouterProvider router={router} />
+                                    <Transactions>
+                                        <RouterProvider router={router} />
+                                    </Transactions>
                                 </SafeBalance>
                             </Wagmi>
                         </User>

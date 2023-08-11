@@ -32,6 +32,7 @@ import {
     setDoc,
     Timestamp,
     updateDoc,
+    writeBatch,
     connectFirestoreEmulator,
 } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator, httpsCallable } from "firebase/functions";
@@ -107,5 +108,6 @@ export {
     Timestamp,
     updateDoc,
     updateProfile,
+    writeBatch,
     updatePassword,
 };
