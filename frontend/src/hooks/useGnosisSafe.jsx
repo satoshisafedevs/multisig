@@ -119,14 +119,9 @@ const useGnosisSafe = () => {
                 signerOrProvider: safeOwner,
             });
             const safeSdk = await Safe.create({ ethAdapter, safeAddress });
-            console.log("safeTxHash", safeTxHash);
-            console.log("safeSdk", safeSdk);
-            // const signature = await safeSdk.signTransactionHash(safeTxHash);
-            // OR
-            // const txResponse = await safeSdk.approveTransactionHash(txHash);
-            // ???
-            // await safeService.confirmTransaction(safeTxHash, signature);
-            return safeSdk;
+            const signature = await safeSdk.signTransactionHash(safeTxHash);
+            await safeService.confirmTransaction(safeTxHash, signature.data);
+            return true;
         } catch (error) {
             if (error.message === "SafeProxy contract is not deployed on the current network") {
                 return toast({
