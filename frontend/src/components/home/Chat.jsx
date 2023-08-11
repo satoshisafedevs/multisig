@@ -25,11 +25,11 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoSend, IoTrash, IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
-import { db, collection, addDoc, onSnapshot, Timestamp } from "../firebase";
-import DeleteMessageModal from "./DeleteMessageModal";
-import { useUser } from "../providers/User";
-import theme from "../theme";
-import actions from "../actions/actions.json";
+import { db, collection, addDoc, onSnapshot, Timestamp } from "../../firebase";
+import DeleteMessageModal from "../DeleteMessageModal";
+import { useUser } from "../../providers/User";
+import theme from "../../theme";
+import actions from "../../actions/actions.json";
 
 export default function Chat() {
     const toast = useToast();

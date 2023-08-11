@@ -4,8 +4,8 @@ import styled from "@emotion/styled";
 import { Table, Thead, Tbody, Tr, Th, Td, TableContainer, TableCaption, useColorModeValue } from "@chakra-ui/react";
 import { useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
 import { IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
-import { usdFormatter, formatNumber } from "../utils";
-import theme from "../theme";
+import { usdFormatter, formatNumber } from "../../utils";
+import theme from "../../theme";
 
 function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
     const tableBorderColor = useColorModeValue(theme.colors.gray[100], theme.colors.gray[600]);

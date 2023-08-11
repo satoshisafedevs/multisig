@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useColorModeValue } from "@chakra-ui/react";
-import theme from "../theme";
+import theme from "../../theme";
 
 function LineChart({ xData, yData }) {
     const legendColor = useColorModeValue(theme.colors.blackAlpha[700], theme.colors.whiteAlpha[900]);

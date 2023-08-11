@@ -22,7 +22,7 @@ import {
     useColorModeValue,
     useColorMode,
 } from "@chakra-ui/react";
-import { IoWalletOutline } from "react-icons/io5";
+import { IoWalletOutline, IoPeopleOutline } from "react-icons/io5";
 import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import { useWagmi } from "../providers/Wagmi";
@@ -34,7 +34,7 @@ export default function Header({ withTeam }) {
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { firestoreUser } = useUser();
+    const { firestoreUser, currentTeam } = useUser();
     const { signOutUser, isSigningOut } = useAuth();
     const {
         preflightCheck,
@@ -139,6 +139,11 @@ export default function Header({ withTeam }) {
                         )}
                     </Stack>
                     <Stack direction="row" spacing={4} align="center">
+                        {currentTeam && currentTeam.name && (
+                            <Button variant="outline" onClick={() => navigate("/")}>
+                                {currentTeam.name} Team <IoPeopleOutline style={{ marginLeft: "8px" }} />
+                            </Button>
+                        )}
                         {!isConnected && withTeam && (
                             <Button
                                 leftIcon={<IoWalletOutline />}
