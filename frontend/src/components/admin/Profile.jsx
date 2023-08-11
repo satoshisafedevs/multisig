@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Box, Circle, Divider, Flex, Heading, Text, Button, Image, Input } from "@chakra-ui/react";
+import { IoImageOutline } from "react-icons/io5";
+import { Box, Circle, Divider, Flex, Heading, Text, Button, Image, Input, useColorModeValue } from "@chakra-ui/react";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { useUser } from "../../providers/User";
 import useAuth from "../../hooks/useAuth";
@@ -8,13 +9,11 @@ function Profile() {
     const [isEditing, setIsEditing] = useState({ displayName: false, email: false, walletAddress: false });
     const [displayName, setName] = useState("John Doe");
     const [email, setEmail] = useState("johndoe@example.com");
-    const [image, setImage] = useState(
-        "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o" +
-            "/profile-images%2FpcNS2Dk4WZfjC2MnN4lwRTGgGCt1?alt=media&token=a4caaa56-10ac-4e4c-a163-4ab773a8764c",
-    );
+    const [image, setImage] = useState();
     const [walletAddress, setWalletAddress] = useState(null);
     const { firestoreUser, userTeamData, setUserTeamWallet } = useUser();
     const { updateUserData } = useAuth();
+    const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
 
     // Load user profile information from Firebase
     useEffect(() => {
@@ -69,7 +68,7 @@ function Profile() {
         <Box minWidth="500px" margin="10px">
             <Flex justifyContent="space-between" alignItems="center">
                 <Box>
-                    <Heading mb="10px" as="h2">
+                    <Heading mb="10px" size="lg">
                         Profile
                     </Heading>
                     <Text>Change your profile information such as name, profile picture, and wallet address</Text>
@@ -83,8 +82,12 @@ function Profile() {
                             onChange={handleImageChange}
                             aria-label="Profile Picture Upload"
                         />
-                        <Circle size="100px" cursor="pointer">
-                            <Image src={image} alt="Profile" objectFit="cover" borderRadius="50%" />
+                        <Circle size="70px" cursor="pointer" _hover={{ backgroundColor: backgroundHover }}>
+                            {image ? (
+                                <Image src={image} alt="Profile" objectFit="cover" borderRadius="50%" />
+                            ) : (
+                                <IoImageOutline size="60%" />
+                            )}
                         </Circle>
                     </label>
                 </Box>

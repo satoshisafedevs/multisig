@@ -1,5 +1,5 @@
 import SafeApiKit from "@safe-global/api-kit";
-import { EthersAdapter } from "@safe-global/protocol-kit";
+import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { ethers } from "ethers";
 import { useToast } from "@chakra-ui/react";
 import networks from "../components/admin/networks.json";
@@ -62,9 +62,15 @@ const useGnosisSafe = () => {
         }
     };
 
-    const getAllTransactions = async (safeService, safeAddress) => {
+    const getAllTransactions = async (safeService, safeAddress, allTxsOptions) => {
         try {
-            const transactions = await safeService.getAllTransactions(safeAddress);
+            // https://safe-transaction-arbitrum.safe.global/
+            // const allTxsOptions = {
+            //   executed: bool,
+            //   queued: bool,
+            //   trusted: bool,
+            // }
+            const transactions = await safeService.getAllTransactions(safeAddress, allTxsOptions);
             return transactions;
         } catch (error) {
             toast({
@@ -104,12 +110,50 @@ const useGnosisSafe = () => {
         }
     };
 
+    const confirmTransaction = async (safeService, safeAddress, safeTxHash) => {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const safeOwner = provider.getSigner(0);
+            const ethAdapter = new EthersAdapter({
+                ethers,
+                signerOrProvider: safeOwner,
+            });
+            const safeSdk = await Safe.create({ ethAdapter, safeAddress });
+            console.log("safeTxHash", safeTxHash);
+            console.log("safeSdk", safeSdk);
+            // const signature = await safeSdk.signTransactionHash(safeTxHash);
+            // OR
+            // const txResponse = await safeSdk.approveTransactionHash(txHash);
+            // ???
+            // await safeService.confirmTransaction(safeTxHash, signature);
+            return safeSdk;
+        } catch (error) {
+            if (error.message === "SafeProxy contract is not deployed on the current network") {
+                return toast({
+                    description: "Failed to confirm transaction: wallet and transaction network mismatch.",
+                    position: "top",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+            toast({
+                description: `Failed to confirm transaction: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     return {
         getSafeService,
         getSafesByOwner,
         getSafeInfo,
         getAllTransactions,
         createAndApproveTransaction,
+        confirmTransaction,
     };
 };
 

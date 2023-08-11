@@ -2,11 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import {
-    Accordion,
-    AccordionItem,
-    AccordionButton,
-    AccordionPanel,
-    AccordionIcon,
     Avatar,
     Box,
     Button,
@@ -16,25 +11,29 @@ import {
     CardHeader,
     CardFooter,
     Input,
-    Image,
-    Flex,
     Text,
     Stack,
     useColorModeValue,
     Heading,
     useToast,
 } from "@chakra-ui/react";
-import { IoSend, IoTrash, IoCheckmarkOutline, IoCloseOutline } from "react-icons/io5";
+import { IoSend, IoTrash } from "react-icons/io5";
 import { db, collection, addDoc, onSnapshot, Timestamp } from "../../firebase";
 import DeleteMessageModal from "../DeleteMessageModal";
 import { useUser } from "../../providers/User";
+import { useWagmi } from "../../providers/Wagmi";
+import { useTransactions } from "../../providers/Transactions";
+import useGnosisSafe from "../../hooks/useGnosisSafe";
 import theme from "../../theme";
-import actions from "../../actions/actions.json";
+import Transaction from "../Transaction";
 
 export default function Chat() {
     const toast = useToast();
     const { firestoreUser, teamsData, currentTeam, teamUsersInfo } = useUser();
+    const { address, walletMismatch } = useWagmi();
+    const { firestoreTransactions } = useTransactions();
     const { slug } = useParams();
+    const { getSafeService, confirmTransaction } = useGnosisSafe();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
     // chakra ui themeing not working on html tags
@@ -59,6 +58,20 @@ export default function Chat() {
         }
     }, [messages, activeTab]);
 
+    const convertToISOString = (timestamp) => {
+        // Convert seconds to milliseconds since JavaScript Date object uses milliseconds
+        const date = new Date(timestamp.seconds * 1000);
+
+        // Adjust for nanoseconds
+        // In JavaScript, there's no direct nanosecond support. So we'll convert nanoseconds to milliseconds first
+        // and adjust the date accordingly. This might not always be super precise because of JavaScript's
+        // limitation but for the given format, it should work well.
+        const millisecondsFromNanoseconds = timestamp.nanoseconds / 1000000;
+        date.setMilliseconds(date.getMilliseconds() + millisecondsFromNanoseconds);
+
+        return date.toISOString();
+    };
+
     useEffect(() => {
         if (!currentTeam || !currentTeam.id) return;
         const messagesRef = collection(db, "teams", currentTeam.id, "messages");
@@ -68,6 +81,7 @@ export default function Chat() {
                 .map((msg) => ({
                     ...msg.data(),
                     id: msg.id,
+                    isoDate: convertToISOString(msg.data().createdAt),
                 }))
                 .sort((a, b) => a.createdAt - b.createdAt);
             setMessages(chatMessages);
@@ -121,7 +135,12 @@ export default function Chat() {
         }
     };
 
-    const handleText = (event) => setMessage(event.target.value);
+    const approveTransaction = async (network, safeAddress, safeTxHash) => {
+        const safeService = await getSafeService(network);
+        confirmTransaction(safeService, safeAddress, safeTxHash);
+        // const signature = await getSignature(network);
+        // console.log(safeService, signature);
+    };
 
     const dateOptions = {
         timeZone: "America/Los_Angeles",
@@ -200,21 +219,15 @@ export default function Chat() {
         return msg.message;
     };
 
-    const transactionsMock = [
-        {
-            id: 1,
-            type: "new",
-            action: "Swap",
-            protocol: "Uniswap",
-            status: "Awaiting approvals (2/4)",
-            send: 9999999999,
-            sendCurrency: "SNX",
-            receive: 1000000000,
-            receiveCurrency: "USDC",
-        },
-    ];
+    // Combine the two arrays, UI is just dying with 500+ transactions
+    const combinedArray = [...messages, ...(firestoreTransactions ? firestoreTransactions.slice(-25) : [])];
 
-    const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
+    // Sort the combined array by date
+    combinedArray.sort(
+        (a, b) =>
+            new Date(a.isoDate || a.executionDate || a.submissionDate) -
+            new Date(b.isoDate || b.executionDate || b.submissionDate),
+    );
 
     return (
         <Card height="100%">
@@ -250,150 +263,85 @@ export default function Chat() {
                 />
                 <Stack spacing="2">
                     {activeTab === "all" &&
-                        messages.map((msg) => (
-                            <Stack
-                                direction="row"
-                                align="center"
-                                key={msg.id}
-                                spacing="0"
-                                paddingLeft="3px"
-                                paddingTop="2px"
-                                paddingBottom="2px"
-                                _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
-                                onMouseEnter={() => setHoverID(msg.id)}
-                                onMouseLeave={() => setHoverID(null)}
-                            >
-                                <Avatar
-                                    alt={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
-                                    size="sm"
-                                    src={teamUsersInfo ? teamUsersInfo[msg.uid].photoUrl : null}
-                                />
-                                <Box flexGrow="1" paddingLeft="6px">
-                                    <Stack direction="row" spacing="5px">
-                                        <Text fontSize="xs" fontWeight="bold">
-                                            {teamUsersInfo ? teamUsersInfo[msg.uid].displayName : "No name"}
-                                        </Text>
-                                        <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
-                                    </Stack>
-                                    <Text fontSize="xs">{renderMessage(msg)}</Text>
-                                </Box>
-                                {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
-                                    <IconButton
-                                        icon={<StyledTrashIcon />}
-                                        onClick={() => handleDelete(msg.id)}
-                                        height="36px"
-                                        width="36px"
-                                        borderRadius="3px"
-                                        background="none"
-                                        _hover={{ background: "none", cursor: "default" }}
+                        combinedArray.map((msg) => {
+                            if (msg.safe) {
+                                return (
+                                    <Transaction
+                                        key={msg.id}
+                                        address={address}
+                                        transaction={msg}
+                                        walletMismatch={walletMismatch}
+                                        approveTransaction={approveTransaction}
                                     />
-                                )}
-                                <Box ref={lastMessage} />
-                            </Stack>
-                        ))}
-                    {activeTab === "transactions" &&
-                        transactionsMock.map((transaction) => (
-                            <Accordion
-                                allowMultiple
-                                key={transaction.id}
-                                padding="5px 10px"
-                                backgroundColor={backgroundHover}
-                                borderRadius="5px"
-                                boxShadow="md"
-                            >
-                                <AccordionItem border="none">
-                                    <Stack direction="row" justify="space-between">
-                                        <AccordionButton
-                                            padding="0"
-                                            width="initial"
-                                            _hover={{ background: "none" }}
-                                            flexBasis={["none", "none", "none", "none", "none", "60%"]}
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                spacing="4"
-                                                fontSize="sm"
-                                                width="100%"
-                                                justifyContent="space-between"
-                                            >
-                                                <Flex direction="column" align="center" justify="space-around">
-                                                    <Image
-                                                        boxSize="24px"
-                                                        src={actions[transaction.protocol.toLowerCase()].icon}
-                                                    />
-                                                    <Text fontSize="xs" fontWeight="bold">
-                                                        {transaction.protocol}
-                                                    </Text>
-                                                </Flex>
-                                                <Stack spacing="2" alignSelf="center">
-                                                    <Flex direction={responsiveStyles} alignItems="baseline">
-                                                        <Text fontWeight="bold" paddingRight="5px">
-                                                            Action:
-                                                        </Text>
-                                                        <Text textAlign="left">{transaction.action}</Text>
-                                                    </Flex>
-                                                    <Flex direction={responsiveStyles} alignItems="baseline">
-                                                        <Text fontWeight="bold" paddingRight="5px">
-                                                            Send:
-                                                        </Text>
-                                                        <Text textAlign="left">
-                                                            {transaction.send} {transaction.sendCurrency}
-                                                        </Text>
-                                                    </Flex>
-                                                </Stack>
-                                                <Stack spacing="2" alignSelf="center">
-                                                    <Flex direction={responsiveStyles} alignItems="baseline">
-                                                        <Text fontWeight="bold" paddingRight="5px">
-                                                            Status:
-                                                        </Text>
-                                                        <Text textAlign="left">{transaction.status}</Text>
-                                                    </Flex>
-                                                    <Flex direction={responsiveStyles} alignItems="baseline">
-                                                        <Text fontWeight="bold" paddingRight="5px">
-                                                            Receive:
-                                                        </Text>
-                                                        <Text textAlign="left">
-                                                            {transaction.receive} {transaction.receiveCurrency}
-                                                        </Text>
-                                                    </Flex>
-                                                </Stack>
+                                );
+                            }
+                            if (msg.uid) {
+                                return (
+                                    <Stack
+                                        direction="row"
+                                        align="center"
+                                        key={msg.id}
+                                        spacing="0"
+                                        paddingLeft="3px"
+                                        paddingTop="2px"
+                                        paddingBottom="2px"
+                                        _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
+                                        onMouseEnter={() => setHoverID(msg.id)}
+                                        onMouseLeave={() => setHoverID(null)}
+                                    >
+                                        <Avatar
+                                            size="sm"
+                                            alt={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
+                                            src={teamUsersInfo ? teamUsersInfo[msg.uid].photoUrl : null}
+                                            name={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
+                                        />
+                                        <Box flexGrow="1" paddingLeft="6px">
+                                            <Stack direction="row" spacing="5px">
+                                                <Text fontSize="xs" fontWeight="bold">
+                                                    {teamUsersInfo ? teamUsersInfo[msg.uid].displayName : "No name"}
+                                                </Text>
+                                                <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
                                             </Stack>
-                                        </AccordionButton>
-                                        <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
-                                            <Button
-                                                variant="outline"
-                                                colorScheme="red"
-                                                size="sm"
-                                                rightIcon={<IoCloseOutline />}
-                                            >
-                                                Reject
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                colorScheme="green300"
-                                                size="sm"
-                                                rightIcon={<IoCheckmarkOutline />}
-                                            >
-                                                Approve
-                                            </Button>
-                                        </Stack>
-                                        <AccordionButton padding="0" width="initial" _hover={{ background: "none" }}>
-                                            <AccordionIcon />
-                                        </AccordionButton>
+                                            <Text fontSize="xs">{renderMessage(msg)}</Text>
+                                        </Box>
+                                        {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
+                                            <IconButton
+                                                icon={<StyledTrashIcon />}
+                                                onClick={() => handleDelete(msg.id)}
+                                                height="36px"
+                                                width="36px"
+                                                borderRadius="3px"
+                                                background="none"
+                                                _hover={{ background: "none", cursor: "default" }}
+                                            />
+                                        )}
                                     </Stack>
-                                    <AccordionPanel padding="15px 0px">
-                                        More transaction details goes here...
-                                    </AccordionPanel>
-                                </AccordionItem>
-                            </Accordion>
-                        ))}
+                                );
+                            }
+                            return null;
+                        })}
+                    {activeTab === "transactions" &&
+                        firestoreTransactions &&
+                        firestoreTransactions
+                            .slice(-25)
+                            // UI is just dying with 500+ transactions
+                            .map((transaction) => (
+                                <Transaction
+                                    key={transaction.id}
+                                    address={address}
+                                    transaction={transaction}
+                                    walletMismatch={walletMismatch}
+                                    approveTransaction={approveTransaction}
+                                />
+                            ))}
+                    <Box ref={lastMessage} />
                 </Stack>
             </CardBody>
             <CardFooter paddingTop="5px">
                 <Input
                     placeholder="Chat or action"
                     value={message}
-                    onChange={handleText}
+                    onChange={(event) => setMessage(event.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && message.trim().length !== 0) {
                             addMessage(message.trim());

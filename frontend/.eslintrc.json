@@ -18,6 +18,7 @@
         "indent": "off",
         "react/jsx-indent": "off",
         "react/jsx-indent-props": ["error", 4],
+        "react/jsx-curly-newline": "off",
         "object-curly-newline": "off",
         "implicit-arrow-linebreak": "off",
         "consistent-return": "off",

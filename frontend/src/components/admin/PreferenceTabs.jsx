@@ -39,7 +39,7 @@ function PreferenceTabs() {
         >
             <Box display="flex" width="100%" height="100%" justifyContent="center">
                 <Card width="25%" pr="10px" pt="10px" mr="10px">
-                    <TabList flexDirection="column" mt="30px">
+                    <TabList flexDirection="column" mt="20px">
                         <Tab
                             borderRadius="0 5px 5px 0"
                             color={colorValue}

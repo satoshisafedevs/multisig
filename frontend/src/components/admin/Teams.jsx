@@ -19,10 +19,10 @@ function Teams() {
     };
 
     return (
-        <Box padding="10px" minWidth="500px" margin="10px">
+        <Box padding="10px" minWidth="500px">
             <Flex justifyContent="space-between" alignItems="center" mb="20px">
                 <Box>
-                    <Heading as="h2" mb="10px">
+                    <Heading mb="10px" size="lg">
                         Teams
                     </Heading>
                     <Text>Manage the teams associated with your account</Text>
