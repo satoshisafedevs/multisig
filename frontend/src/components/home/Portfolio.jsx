@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { Spinner, Box, Stack, Button, Card, CardHeader, CardBody, Heading, Flex, IconButton } from "@chakra-ui/react";
 import { IoExpandOutline, IoContractOutline } from "react-icons/io5";
-import { useSafeBalance } from "../providers/SafeBalance";
+import { useSafeBalance } from "../../providers/SafeBalance";
 import LineChart from "./LineChart";
 import WalletAssetsTable from "./WalletAssetsTable";
-import StakedAssetsTable from "./StakedAssetsTable";
+import StakedAssetsTable from "../StakedAssetsTable";
 
 function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
     const [activeTab, setActiveTab] = useState("chart");

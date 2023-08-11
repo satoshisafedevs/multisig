@@ -21,7 +21,7 @@ import { useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/rea
 import { IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
 import { usdFormatter } from "../utils";
 import theme from "../theme";
-import WalletAssetsTable from "./WalletAssetsTable";
+import WalletAssetsTable from "./home/WalletAssetsTable";
 
 function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
     const tableBorderColor = useColorModeValue(theme.colors.gray[100], theme.colors.gray[600]);
