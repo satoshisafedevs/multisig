@@ -10,7 +10,7 @@ describe("On inviting a user", function () {
         const teamId = "testTeam123";
         let invitationId;
 
-        // Call the route via HTTP
+        // Call the route via HTTP thing
         await axios.post("http://127.0.0.1:5001/prontoai-playground/us-central1/api-inviteUser", { email, teamId });
 
         let c = 0;
