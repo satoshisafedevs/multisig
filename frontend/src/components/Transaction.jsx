@@ -110,7 +110,11 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
                             size="sm"
                             rightIcon={<IoCheckmarkOutline />}
                             isDisabled={
-                                walletMismatch || !address || transaction.isExecuted || transaction.executionDate
+                                walletMismatch ||
+                                !address ||
+                                transaction.isExecuted ||
+                                transaction.executionDate ||
+                                transaction.confirmationsRequired === transaction.confirmations.length
                             }
                             onClick={() =>
                                 approveTransaction(transaction.network, transaction.safe, transaction.safeTxHash)

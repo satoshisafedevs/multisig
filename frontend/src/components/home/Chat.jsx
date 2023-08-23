@@ -138,8 +138,6 @@ export default function Chat() {
     const approveTransaction = async (network, safeAddress, safeTxHash) => {
         const safeService = await getSafeService(network);
         confirmTransaction(safeService, safeAddress, safeTxHash);
-        // const signature = await getSignature(network);
-        // console.log(safeService, signature);
     };
 
     const dateOptions = {
@@ -219,8 +217,11 @@ export default function Chat() {
         return msg.message;
     };
 
-    // Combine the two arrays, UI is just dying with 500+ transactions
-    const combinedArray = [...messages, ...(firestoreTransactions ? firestoreTransactions.slice(-25) : [])];
+    // UI is just dying with 500+ transactions
+    const maxTransactions = -25;
+
+    // Combine the two arrays
+    const combinedArray = [...messages, ...(firestoreTransactions ? firestoreTransactions.slice(maxTransactions) : [])];
 
     // Sort the combined array by date
     combinedArray.sort(
@@ -323,8 +324,7 @@ export default function Chat() {
                     {activeTab === "transactions" &&
                         firestoreTransactions &&
                         firestoreTransactions
-                            .slice(-25)
-                            // UI is just dying with 500+ transactions
+                            .slice(maxTransactions)
                             .map((transaction) => (
                                 <Transaction
                                     key={transaction.id}

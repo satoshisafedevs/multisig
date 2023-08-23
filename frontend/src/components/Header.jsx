@@ -186,9 +186,11 @@ export default function Header({ withTeam }) {
                                                 ? `${firestoreUser.displayName} (${firestoreUser?.email})`
                                                 : firestoreUser?.email}
                                         </Box>
-                                        <MenuItem onClick={() => navigate(`/team/${slug}/admin?tab=Profile`)}>
-                                            Manage Settings
-                                        </MenuItem>
+                                        {withTeam && (
+                                            <MenuItem onClick={() => navigate(`/team/${slug}/admin?tab=Profile`)}>
+                                                Manage Settings
+                                            </MenuItem>
+                                        )}
                                         <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>
                                             Sign out
                                         </MenuItem>

@@ -69,45 +69,45 @@ function WelcomeModal({ isOpen, setIsOpen }) {
         }));
     };
 
-    const importSafes = () => {
+    const importSafes = async () => {
         setLoading(true);
-        const entries = Object.entries(checkedSafes);
-        entries
-            .reduce(
-                (promiseChain, [key, value]) =>
-                    promiseChain.then(async () => {
-                        if (value === true) {
-                            try {
-                                const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
-                                const teamRef = doc(db, "teams", currentTeam.id);
-                                const teamSnap = await getDoc(teamRef);
-                                const teamData = teamSnap.data();
-                                await updateDoc(teamRef, {
-                                    safes: [...(teamData?.safes || []), { ...safeData, addedAt: Timestamp.now() }],
-                                });
-                                setCurrentTeam((prevState) => ({
-                                    ...prevState,
-                                    safes: [...(prevState?.safes || []), { ...safeData, addedAt: Timestamp.now() }],
-                                }));
-                            } catch (error) {
-                                toast({
-                                    description: `Failed to update team safe: ${error.message}`,
-                                    position: "top",
-                                    status: "error",
-                                    duration: 5000,
-                                    isClosable: true,
-                                });
-                            }
-                        }
-                    }),
-                Promise.resolve(),
-            )
-            .then(() => {
-                onClose();
-                setLoading(false);
-            });
-    };
 
+        const entries = Object.entries(checkedSafes);
+
+        const newSafes = entries
+            .filter(([, value]) => value === true)
+            .map(([key]) => {
+                const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
+                return { ...safeData, addedAt: Timestamp.now() };
+            });
+
+        if (newSafes.length > 0) {
+            try {
+                const teamRef = doc(db, "teams", currentTeam.id);
+                const teamSnap = await getDoc(teamRef);
+                const teamData = teamSnap.data();
+
+                await updateDoc(teamRef, {
+                    safes: [...(teamData?.safes || []), ...newSafes],
+                });
+
+                setCurrentTeam((prevState) => ({
+                    ...prevState,
+                    safes: [...(prevState?.safes || []), ...newSafes],
+                }));
+            } catch (error) {
+                toast({
+                    description: `Failed to update team safe: ${error.message}`,
+                    position: "top",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        }
+        onClose();
+        setLoading(false);
+    };
     const renderBody = () => {
         if (importFlow) {
             return (

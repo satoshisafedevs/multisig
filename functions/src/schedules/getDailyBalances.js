@@ -58,6 +58,13 @@ exports.getDailyBalances = onSchedule(
                 const teamData = teamDoc.data();
                 for (const safe of teamData.safes || []) {
                     if (safe.safeAddress && !processedSafes.has(safe.safeAddress)) {
+                        const safeDocRef = db.collection("assetsByWalletAddress").doc(safe.safeAddress);
+                        const safeDoc = await safeDocRef.get();
+                        if (!safeDoc.exists) {
+                            // let's create doc for safe if it does not exist, otherwise firestore errors in UI console:
+                            // This document does not exist, it will not appear in queries or snapshots.
+                            await safeDocRef.set({});
+                        }
                         // If this safe hasn't been processed yet...
                         // ...add it to the set of processed safes
                         processedSafes.add(safe.safeAddress);
