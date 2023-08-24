@@ -217,11 +217,46 @@ export default function Chat() {
         return msg.message;
     };
 
+    // filter out safe's same nonce transactions except executed ones
+    const filteredTransactions = [];
+
+    // Group transactions by 'safe'
+    const groupedBySafe =
+        firestoreTransactions &&
+        firestoreTransactions.reduce((acc, transaction) => {
+            if (!acc[transaction.safe]) acc[transaction.safe] = [];
+            acc[transaction.safe].push(transaction);
+            return acc;
+        }, {});
+
+    Object.keys(groupedBySafe || []).forEach((safe) => {
+        const safeTransactions = groupedBySafe[safe];
+        const executedNonces = new Set();
+
+        // Identify nonces which have isExecuted as true
+        safeTransactions.forEach((transaction) => {
+            if (transaction.isExecuted && "nonce" in transaction) {
+                executedNonces.add(transaction.nonce);
+            }
+        });
+
+        // Filter out those transactions
+        safeTransactions.forEach((transaction) => {
+            if (!("nonce" in transaction) || !executedNonces.has(transaction.nonce) || transaction.isExecuted) {
+                filteredTransactions.push(transaction);
+            }
+        });
+    });
+
     // UI is just dying with 500+ transactions
     const maxTransactions = -25;
 
+    const transactionsToRender = filteredTransactions
+        .sort((a, b) => new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate))
+        .slice(maxTransactions);
+
     // Combine the two arrays
-    const combinedArray = [...messages, ...(firestoreTransactions ? firestoreTransactions.slice(maxTransactions) : [])];
+    const combinedArray = [...messages, ...(transactionsToRender || [])];
 
     // Sort the combined array by date
     combinedArray.sort(
@@ -322,18 +357,16 @@ export default function Chat() {
                             return null;
                         })}
                     {activeTab === "transactions" &&
-                        firestoreTransactions &&
-                        firestoreTransactions
-                            .slice(maxTransactions)
-                            .map((transaction) => (
-                                <Transaction
-                                    key={transaction.id}
-                                    address={address}
-                                    transaction={transaction}
-                                    walletMismatch={walletMismatch}
-                                    approveTransaction={approveTransaction}
-                                />
-                            ))}
+                        transactionsToRender &&
+                        transactionsToRender.map((transaction) => (
+                            <Transaction
+                                key={transaction.id}
+                                address={address}
+                                transaction={transaction}
+                                walletMismatch={walletMismatch}
+                                approveTransaction={approveTransaction}
+                            />
+                        ))}
                     <Box ref={lastMessage} />
                 </Stack>
             </CardBody>

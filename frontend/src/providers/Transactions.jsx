@@ -24,16 +24,11 @@ function Transactions({ children }) {
         const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
 
         const unsubscribe = onSnapshot(transactionsRef, (querySnapshot) => {
-            const transactionDocs = querySnapshot.docs
-                .map((msg) => ({
-                    ...msg.data(),
-                    id: msg.id,
-                }))
-                .sort(
-                    (a, b) =>
-                        new Date(a.executionDate || a.submissionDate).getTime() -
-                        new Date(b.executionDate || b.submissionDate).getTime(),
-                );
+            const transactionDocs = querySnapshot.docs.map((msg) => ({
+                ...msg.data(),
+                id: msg.id,
+            }));
+
             setFirestoreTransactions(transactionDocs);
         });
 
