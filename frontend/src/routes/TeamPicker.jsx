@@ -21,7 +21,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
-import { db, addDoc, collection, setDoc, doc, Timestamp } from "../firebase";
+import { db, addDoc, collection, setDoc, doc, createNewSatoshiBot } from "../firebase";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 import { useTransactions } from "../providers/Transactions";
@@ -65,18 +65,11 @@ function TeamPicker() {
         setLoading(true);
 
         try {
-            const newSatoshiBotData = {
-                displayName: "Satoshi Bot",
-                email: "support@satoshisafe.ai",
-                creationTime: Timestamp.now(),
-            };
-            const newSatoshiBotDoc = await addDoc(collection(db, "users"), newSatoshiBotData);
             const newTeamData = {
                 name: teamName,
                 users: [firestoreUser.uid],
                 // generate a slug from the team name
                 slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
-                botUid: newSatoshiBotDoc.id,
             };
             const newDoc = await addDoc(collection(db, "teams"), newTeamData);
             const teamRef = doc(db, "users", firestoreUser.uid, "teams", newDoc.id);
@@ -87,6 +80,7 @@ function TeamPicker() {
                 },
                 { merge: true },
             );
+            await createNewSatoshiBot({ teamId: newDoc.id });
             if ((await getUserTeamsData(user)) === true) {
                 // navigate once new team is ready
                 handleTeamSelect(newTeamData.slug);

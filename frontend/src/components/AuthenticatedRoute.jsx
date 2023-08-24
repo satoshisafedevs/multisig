@@ -68,10 +68,14 @@ function AuthenticatedRoute({ children }) {
                         const docRef = doc(db, "users", uid);
                         const docSnap = await getDoc(docRef);
                         const docData = docSnap.data();
+                        const userWalletRef = doc(db, "users", uid, "teams", team.id);
+                        const userWalletSnap = await getDoc(userWalletRef);
+                        const userWalletData = userWalletSnap.data();
                         const displayInfo = {};
                         displayInfo.displayName = docData.displayName || docData.email;
                         displayInfo.photoUrl = docData.photoURL || null;
                         displayInfo.email = docData.email;
+                        displayInfo.walletAddress = userWalletData.userWalletAddress || null;
                         displayNames[uid] = displayInfo;
                     } catch (error) {
                         toast({

@@ -1,19 +1,14 @@
 import React, { useState } from "react";
 import { Box, Table, Thead, Tbody, Tr, Th, Td, Flex, Heading, Text, Button } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
-import { useSafeBalance } from "../../providers/SafeBalance";
 import { useUser } from "../../providers/User";
 import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
+import SafeOwnersList from "./SafeOwnersList";
+import SafeStatus from "./SafeStatus";
 
 function Safes() {
-    const { currentTeam } = useUser();
-    const { safesPortfolio } = useSafeBalance();
+    const { currentTeam, teamUsersInfo } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
-
-    const formatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    });
 
     return (
         <Box padding="10px" minWidth="500px">
@@ -29,11 +24,10 @@ function Safes() {
                 <Table>
                     <Thead>
                         <Tr>
+                            <Th>Status</Th>
                             <Th>Safe Address</Th>
+                            <Th>Owners</Th>
                             <Th>Network</Th>
-                            {/* <Th>Status</Th> */}
-                            <Th>Total USD</Th>
-                            {/* <Th>Actions</Th> */}
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -41,21 +35,14 @@ function Safes() {
                             currentTeam.safes &&
                             currentTeam.safes.map((safe) => (
                                 <Tr key={safe.safeAddress}>
+                                    <Td>
+                                        <SafeStatus safe={safe} teamUsersInfo={teamUsersInfo} />
+                                    </Td>
                                     <Td>{safe.safeAddress}</Td>
+                                    <Td>
+                                        <SafeOwnersList safe={safe} teamUsersInfo={teamUsersInfo} />
+                                    </Td>
                                     <Td>{safe.network}</Td>
-                                    {/* <Td>{safe.status}</Td> */}
-                                    <Td>
-                                        {safesPortfolio && safesPortfolio[safe.safeAddress]
-                                            ? `${formatter.format(safesPortfolio[safe.safeAddress].total_usd_value)}`
-                                            : null}
-                                    </Td>
-                                    {/* <Td>{safe.owners.join(", ")}</Td> */}
-                                    <Td>
-                                        {/* <Button colorScheme="blue"
-                                        onClick={() => generateJoinTransaction(safe)}>Join</Button>
-                <Button colorScheme="yellow" onClick={() => generateLeaveTransaction(safe)}>Leave</Button>
-                <Button colorScheme="green" onClick={() => addBotToSafe(safe)}>Add Bot</Button> */}
-                                    </Td>
                                 </Tr>
                             ))}
                     </Tbody>
