@@ -32,6 +32,7 @@ import SafesModal from "./SafesModal";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("green300.500", "green300.300");
+    const hoverBgValue = useColorModeValue("green300.600", "green300.400");
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
@@ -53,6 +54,7 @@ export default function Header({ withTeam }) {
         switchNetworkIsLoading,
     } = useWagmi();
     const [safesModalOpen, setSafesModalOpen] = useState(false);
+    const [hoverActive, setHoverActive] = useState(false);
     const { slug } = useParams();
     const navigate = useNavigate();
 
@@ -158,7 +160,7 @@ export default function Header({ withTeam }) {
                                     onClick={() => navigate("/")}
                                     rightIcon={<IoPeopleOutline />}
                                 >
-                                    {currentTeam.name} Team
+                                    {currentTeam.name}
                                 </Button>
                             </Tooltip>
                         )}
@@ -176,8 +178,11 @@ export default function Header({ withTeam }) {
                         {/* Box wrapper fixes warning in console */}
                         <Box>
                             <Menu>
-                                <StyledAvatarButton>
-                                    <StyledAvatar bg={bgValue} size="sm" />
+                                <StyledAvatarButton
+                                    onMouseEnter={() => setHoverActive(true)}
+                                    onMouseLeave={() => setHoverActive(false)}
+                                >
+                                    <StyledAvatar bg={hoverActive ? hoverBgValue : bgValue} size="sm" />
                                 </StyledAvatarButton>
                                 <MenuList>
                                     <MenuGroup title="Profile">
