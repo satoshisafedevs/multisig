@@ -10,6 +10,7 @@ const {
     onSchedule,
     Timestamp,
     onCall,
+    FieldValue,
 } = require("./firebase");
 const {
     createOrUpdatePrivateKey,
@@ -36,4 +37,5 @@ module.exports = {
     onSchedule,
     Timestamp,
     onCall,
+    FieldValue,
 };

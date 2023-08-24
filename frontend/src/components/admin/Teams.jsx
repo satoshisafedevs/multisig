@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Flex, Heading, Text, Button } from "@chakra-ui/react";
+import { Box, Table, Thead, Tbody, Tr, Th, Td, Flex, Heading, Text, Button, useToast } from "@chakra-ui/react";
 import { IoExitOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/User";
 import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 
 function Teams() {
-    const { teamsData, leaveTeam, currentTeam } = useUser();
+    const { teamsData, leaveTeam, currentTeam, getUserTeamsData } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
     const { navigate } = useNavigate();
+    const toast = useToast();
 
     const handleLeaveTeam = (team) => {
         // your logic to handle leaving the team goes here
@@ -16,6 +17,15 @@ function Teams() {
         if (team.id === currentTeam.id) {
             navigate("/");
         }
+        getUserTeamsData();
+        toast({
+            title: "Left Team",
+            description: `You have left the team ${team.name}`,
+            status: "success",
+            position: "top",
+            duration: 5000,
+            isClosable: true,
+        });
     };
 
     return (
