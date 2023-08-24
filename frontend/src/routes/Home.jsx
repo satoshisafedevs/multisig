@@ -3,7 +3,7 @@ import { Grid, GridItem, Spinner } from "@chakra-ui/react";
 import UpdateProfileModal from "../components/UpdateProfileModal";
 import Header from "../components/Header";
 import Portfolio from "../components/home/Portfolio";
-import Chat from "../components/home/Chat";
+import ControlPanel from "../components/home/ControlPanel";
 import ActionCard from "../actions/ActionCard";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
@@ -66,7 +66,7 @@ function Home() {
                         />
                     </GridItem>
                     <GridItem minWidth="350px" area="three" display={expandPortfolio ? "none" : "auto"}>
-                        <Chat />
+                        <ControlPanel />
                     </GridItem>
                     <GridItem minWidth="270px" minHeight="100%" area="four" display={expandPortfolio ? "none" : "auto"}>
                         <ActionCard />
