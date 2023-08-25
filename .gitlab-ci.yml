@@ -10,6 +10,7 @@ cache:
 
 stages:
     - test
+    - preview
     - build
     - deploy
 
@@ -64,6 +65,19 @@ format-test-frontend:
         - echo "Formatting code... This will take about 10 seconds."
         - yarn format:verify
         - echo "No format issues found."
+
+deploy-preview:
+    stage: preview
+    before_script:
+        - cd $CI_PROJECT_DIR/frontend && yarn install
+        - yarn global add firebase-tools
+    script:
+        - yarn build:playground
+        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase hosting:channel:deploy $CI_COMMIT_BRANCH --project playground
+    only:
+        - branches
+    except:
+        - main
 
 build-frontend:
     stage: build

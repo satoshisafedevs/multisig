@@ -52,10 +52,14 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
                                     <Text textAlign="left">{transaction.safe.slice(0, 7)}</Text>
                                 </Flex>
                                 <Flex direction={responsiveStyles} alignItems="baseline">
-                                    <Text fontWeight="bold" paddingRight="5px">
-                                        Nonce:
-                                    </Text>
-                                    <Text textAlign="left">{JSON.stringify(transaction.nonce) || "none"}</Text>
+                                    {(transaction.nonce || transaction.nonce === 0) && (
+                                        <>
+                                            <Text fontWeight="bold" paddingRight="5px">
+                                                Nonce:
+                                            </Text>
+                                            <Text textAlign="left">{JSON.stringify(transaction.nonce)}</Text>
+                                        </>
+                                    )}
                                 </Flex>
                             </Stack>
                             <Stack spacing="2" alignSelf="center" flexGrow="1">
@@ -86,7 +90,9 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
                                         Action:
                                     </Text>
                                     <Text textAlign="left">
-                                        {transaction.dataDecoded?.method || (transaction.from && "Receive") || "?"}
+                                        {transaction.dataDecoded?.method ||
+                                            (transaction.from && "Receive") ||
+                                            "On-chain rejection"}
                                     </Text>
                                 </Flex>
                             </Stack>
