@@ -27,6 +27,8 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
     //     return wei / ETH_IN_WEI;
     // }
 
+    const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+
     return (
         <Accordion allowMultiple padding="5px 10px" backgroundColor={backgroundHover} borderRadius="5px" boxShadow="md">
             <AccordionItem border="none">
@@ -90,7 +92,8 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
                                         Action:
                                     </Text>
                                     <Text textAlign="left">
-                                        {transaction.dataDecoded?.method ||
+                                        {(transaction.dataDecoded?.method &&
+                                            capitalize(transaction.dataDecoded?.method)) ||
                                             (transaction.from && "Receive") ||
                                             "On-chain rejection"}
                                     </Text>
