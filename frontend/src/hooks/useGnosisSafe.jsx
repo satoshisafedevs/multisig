@@ -142,6 +142,39 @@ const useGnosisSafe = () => {
         }
     };
 
+    const executeTransaction = async (safeService, safeAddress, safeTxHash) => {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const safeOwner = provider.getSigner(0);
+            const ethAdapter = new EthersAdapter({
+                ethers,
+                signerOrProvider: safeOwner,
+            });
+            const safeSdk = await Safe.create({ ethAdapter, safeAddress });
+            const safeTransaction = await safeService.getTransaction(safeTxHash);
+            const txResponse = await safeSdk.executeTransaction(safeTransaction);
+            const resp = await txResponse.transactionResponse?.wait();
+            return resp;
+        } catch (error) {
+            if (error.message === "SafeProxy contract is not deployed on the current network") {
+                return toast({
+                    description: "Failed to execute transaction: wallet and transaction network mismatch.",
+                    position: "top",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+            toast({
+                description: `Failed to execute transaction: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     return {
         getSafeService,
         getSafesByOwner,
@@ -149,6 +182,7 @@ const useGnosisSafe = () => {
         getAllTransactions,
         createAndApproveTransaction,
         confirmTransaction,
+        executeTransaction,
     };
 };
 

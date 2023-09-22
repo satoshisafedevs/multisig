@@ -15,10 +15,12 @@ import {
     Stack,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { IoCheckmarkOutline, IoCloseOutline, IoOpenOutline } from "react-icons/io5";
+import { IoCheckmarkOutline, IoCloseOutline, IoOpenOutline, IoPlayOutline } from "react-icons/io5";
+import useGnosisSafe from "../hooks/useGnosisSafe";
 import networks from "./admin/networks.json";
 
-function Transaction({ transaction, address, walletMismatch, approveTransaction }) {
+function Transaction({ transaction, address, walletMismatch }) {
+    const { getSafeService, confirmTransaction, executeTransaction } = useGnosisSafe();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
 
@@ -27,7 +29,66 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
     //     return wei / ETH_IN_WEI;
     // }
 
+    const approve = async (network, safeAddress, safeTxHash) => {
+        const safeService = await getSafeService(network);
+        confirmTransaction(safeService, safeAddress, safeTxHash);
+    };
+
+    const execute = async (network, safeAddress, safeTxHash) => {
+        const safeService = await getSafeService(network);
+        executeTransaction(safeService, safeAddress, safeTxHash);
+    };
+
     const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+
+    const showButtons = () => {
+        if (transaction.txHash || transaction.transactionHash) {
+            return null;
+        }
+        if (transaction.confirmationsRequired === transaction.confirmations.length) {
+            return (
+                <Button
+                    variant="outline"
+                    colorScheme="green300"
+                    size="sm"
+                    rightIcon={<IoPlayOutline />}
+                    isDisabled={walletMismatch || !address}
+                    onClick={() => execute(transaction.network, transaction.safe, transaction.safeTxHash)}
+                >
+                    Execute
+                </Button>
+            );
+        }
+        return (
+            <>
+                <Button
+                    variant="outline"
+                    colorScheme="red"
+                    size="sm"
+                    rightIcon={<IoCloseOutline />}
+                    isDisabled={walletMismatch || !address || transaction.isExecuted || transaction.executionDate}
+                >
+                    Reject
+                </Button>
+                <Button
+                    variant="outline"
+                    colorScheme="green300"
+                    size="sm"
+                    rightIcon={<IoCheckmarkOutline />}
+                    isDisabled={
+                        walletMismatch ||
+                        !address ||
+                        transaction.isExecuted ||
+                        transaction.executionDate ||
+                        transaction.confirmationsRequired === transaction.confirmations.length
+                    }
+                    onClick={() => approve(transaction.network, transaction.safe, transaction.safeTxHash)}
+                >
+                    Approve
+                </Button>
+            </>
+        );
+    };
 
     return (
         <Accordion allowMultiple padding="5px 10px" backgroundColor={backgroundHover} borderRadius="5px" boxShadow="md">
@@ -38,6 +99,7 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
                         width="initial"
                         _hover={{ background: "none" }}
                         flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
+                        flexGrow={transaction.txHash || transaction.transactionHash ? "1" : "0"}
                     >
                         <Stack direction="row" spacing="4" fontSize="sm" width="100%" justifyContent="space-between">
                             <Flex direction="column" align="center" justify="space-around">
@@ -102,35 +164,7 @@ function Transaction({ transaction, address, walletMismatch, approveTransaction 
                         </Stack>
                     </AccordionButton>
                     <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
-                        <Button
-                            variant="outline"
-                            colorScheme="red"
-                            size="sm"
-                            rightIcon={<IoCloseOutline />}
-                            isDisabled={
-                                walletMismatch || !address || transaction.isExecuted || transaction.executionDate
-                            }
-                        >
-                            Reject
-                        </Button>
-                        <Button
-                            variant="outline"
-                            colorScheme="green300"
-                            size="sm"
-                            rightIcon={<IoCheckmarkOutline />}
-                            isDisabled={
-                                walletMismatch ||
-                                !address ||
-                                transaction.isExecuted ||
-                                transaction.executionDate ||
-                                transaction.confirmationsRequired === transaction.confirmations.length
-                            }
-                            onClick={() =>
-                                approveTransaction(transaction.network, transaction.safe, transaction.safeTxHash)
-                            }
-                        >
-                            Approve
-                        </Button>
+                        {showButtons()}
                     </Stack>
                     <AccordionButton padding="0" width="initial" _hover={{ background: "none" }}>
                         <AccordionIcon />
@@ -151,7 +185,6 @@ Transaction.propTypes = {
     transaction: PropTypes.any,
     address: PropTypes.string,
     walletMismatch: PropTypes.bool,
-    approveTransaction: PropTypes.func,
 };
 
 export default Transaction;

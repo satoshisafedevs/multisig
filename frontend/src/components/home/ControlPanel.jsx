@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import {
@@ -23,7 +23,6 @@ import DeleteMessageModal from "../DeleteMessageModal";
 import { useUser } from "../../providers/User";
 import { useWagmi } from "../../providers/Wagmi";
 import { useTransactions } from "../../providers/Transactions";
-import useGnosisSafe from "../../hooks/useGnosisSafe";
 import theme from "../../theme";
 import Transaction from "../Transaction";
 
@@ -33,7 +32,6 @@ export default function Chat() {
     const { address, walletMismatch } = useWagmi();
     const { firestoreTransactions } = useTransactions();
     const { slug } = useParams();
-    const { getSafeService, confirmTransaction } = useGnosisSafe();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
     // chakra ui themeing not working on html tags
@@ -133,11 +131,6 @@ export default function Chat() {
                 isClosable: true,
             });
         }
-    };
-
-    const approveTransaction = async (network, safeAddress, safeTxHash) => {
-        const safeService = await getSafeService(network);
-        confirmTransaction(safeService, safeAddress, safeTxHash);
     };
 
     const dateOptions = {
@@ -249,21 +242,28 @@ export default function Chat() {
     });
 
     // UI is just dying with 500+ transactions
-    const maxTransactions = -25;
+    const maxTransactions = -50;
 
-    const transactionsToRender = filteredTransactions
-        .sort((a, b) => new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate))
-        .slice(maxTransactions);
+    const transactionsToRender = useMemo(
+        () =>
+            filteredTransactions
+                .sort(
+                    (a, b) =>
+                        new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
+                )
+                .slice(maxTransactions),
+        [filteredTransactions, maxTransactions],
+    );
 
     // Combine the two arrays
-    const combinedArray = [...messages, ...(transactionsToRender || [])];
-
-    // Sort the combined array by date
-    combinedArray.sort(
-        (a, b) =>
-            new Date(a.isoDate || a.executionDate || a.submissionDate) -
-            new Date(b.isoDate || b.executionDate || b.submissionDate),
-    );
+    const combinedArray = useMemo(() => {
+        const tempArray = [...messages, ...(transactionsToRender || [])];
+        return tempArray.sort(
+            (a, b) =>
+                new Date(a.isoDate || a.executionDate || a.submissionDate) -
+                new Date(b.isoDate || b.executionDate || b.submissionDate),
+        );
+    }, [messages, transactionsToRender]);
 
     return (
         <Card height="100%">
@@ -307,7 +307,6 @@ export default function Chat() {
                                         address={address}
                                         transaction={msg}
                                         walletMismatch={walletMismatch}
-                                        approveTransaction={approveTransaction}
                                     />
                                 );
                             }
@@ -364,7 +363,6 @@ export default function Chat() {
                                 address={address}
                                 transaction={transaction}
                                 walletMismatch={walletMismatch}
-                                approveTransaction={approveTransaction}
                             />
                         ))}
                     <Box ref={lastMessage} />
