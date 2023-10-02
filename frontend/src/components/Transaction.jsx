@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import PropTypes from "prop-types";
 import {
     Accordion,
@@ -18,6 +18,7 @@ import {
 import { IoCheckmarkOutline, IoCloseOutline, IoOpenOutline, IoPlayOutline } from "react-icons/io5";
 import useGnosisSafe from "../hooks/useGnosisSafe";
 import networks from "./admin/networks.json";
+import TransactionDetails from "./TransactionDetails";
 
 function Transaction({ transaction, address, walletMismatch }) {
     const { getSafeService, confirmTransaction, executeTransaction } = useGnosisSafe();
@@ -172,7 +173,7 @@ function Transaction({ transaction, address, walletMismatch }) {
                 </Stack>
                 <AccordionPanel padding="15px 0px">
                     <Code width="100%">
-                        <pre style={{ overflow: "auto" }}>{JSON.stringify(transaction, null, 2)}</pre>
+                        <TransactionDetails transaction={transaction} />
                     </Code>
                 </AccordionPanel>
             </AccordionItem>
@@ -187,4 +188,4 @@ Transaction.propTypes = {
     walletMismatch: PropTypes.bool,
 };
 
-export default Transaction;
+export default memo(Transaction);
