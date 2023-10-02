@@ -32,6 +32,7 @@ function SafeOwnersList({ safe, teamUsersInfo }) {
                                 src={ownerInfo.photoUrl}
                                 alt={ownerInfo.displayName}
                                 title={ownerInfo.displayName}
+                                maxHeight="48px"
                             />
                         </Tooltip>
                     );
