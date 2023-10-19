@@ -114,7 +114,9 @@ function Profile() {
                         {email}
                     </Text>
                 )}
-                <Button onClick={() => saveProfile("email")}>{isEditing.email ? "Save" : "Edit"}</Button>
+                <Button isDisabled onClick={() => saveProfile("email")}>
+                    {isEditing.email ? "Save" : "Edit"}
+                </Button>
             </Flex>
             <Divider my={4} />
             <Flex justifyContent="space-between" alignItems="center">

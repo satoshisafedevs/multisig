@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+import { isEmpty } from "lodash";
 import { Spinner, Box, Stack, Button, Card, CardHeader, CardBody, Heading, Flex, IconButton } from "@chakra-ui/react";
 import { IoExpandOutline, IoContractOutline } from "react-icons/io5";
 import { useSafeBalance } from "../../providers/SafeBalance";
@@ -40,7 +41,7 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
         }
         if (chartHeight && activeTab === "chart") {
             // deducting the heigh of top/bottom padding and card title for perfect chart resize
-            if (historicalTotalBalance) {
+            if (!isEmpty(historicalTotalBalance)) {
                 return (
                     <Box position="relative" display="inline-block" width="100%" height={chartHeight - 20 * 2 - 32}>
                         <LineChart

@@ -45,6 +45,7 @@ exports.onUserWalletChange = onDocumentWritten("/users/{uid}/teams/{teamId}", as
                                 network: key,
                                 safeAddress: safe,
                                 owners: safeInfo.owners,
+                                threshold: safeInfo.threshold,
                             });
                         }),
                     );
