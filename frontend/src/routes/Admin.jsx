@@ -8,14 +8,14 @@ function Admin() {
     const { currentTeam, teamUsersInfo } = useUser();
 
     useEffect(() => {
-        document.title = "Satoshi Safe Admin Panel";
+        document.title = "Admin Panel - Satoshi Safe";
     }, []);
 
     return (
         <>
             <Header withTeam />
             {currentTeam && teamUsersInfo ? (
-                <Flex height="100%" padding="10px" justifyContent="center" maxWidth="100%">
+                <Flex height="100%" padding="10px" justifyContent="center" maxWidth="100%" overflow="auto">
                     <PreferenceTabs /> {/* Use the PreferenceTabs component */}
                 </Flex>
             ) : (

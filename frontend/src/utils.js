@@ -44,3 +44,45 @@ export const formatNumber = (num, price = false) => {
         ((num < 0 ? -1 : 1) * Math.round((absNum + Number.EPSILON) * 100)) / 100,
     );
 };
+
+export const formatTimestamp = (timestamp) => {
+    // Create a new Date object using the total milliseconds
+    const totalMilliseconds = timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6;
+    const date = new Date(totalMilliseconds);
+
+    // Extract the components of the date
+    const year = date.getFullYear();
+    const day = date.getDate();
+
+    // Extract the hour and decide the meridiem (AM/PM) and adjust hour for 12-hour format
+    let hour = date.getHours();
+    const meridiem = hour < 12 ? "AM" : "PM";
+    hour %= 12;
+    hour = hour || 12; // the hour '0' should be '12'
+
+    // Minutes and seconds are extracted, and we ensure it's two-digit, e.g., '05' not '5'
+    const minutes = `0${date.getMinutes()}`.slice(-2);
+    const seconds = `0${date.getSeconds()}`.slice(-2);
+
+    // Months are 0-based in JavaScript (0 = January), so we need an array of month names
+    const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+    const month = months[date.getMonth()];
+
+    // Construct the formatted date string
+    const formattedDate = `${month} ${day}, ${year} ${hour}:${minutes}:${seconds} ${meridiem}`;
+
+    return formattedDate;
+};

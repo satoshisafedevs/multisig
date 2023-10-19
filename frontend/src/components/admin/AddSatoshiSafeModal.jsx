@@ -127,7 +127,6 @@ function WelcomeModal({ isOpen, setIsOpen }) {
                                         <Th borderColor={tableBorderColor} width="0" paddingRight="0" />
                                         <Th borderColor={tableBorderColor}>Address</Th>
                                         <Th borderColor={tableBorderColor}>Network</Th>
-                                        <Th borderColor={tableBorderColor}>Owners</Th>
                                     </Tr>
                                 </Thead>
                                 <Tbody>
@@ -156,17 +155,6 @@ function WelcomeModal({ isOpen, setIsOpen }) {
                                                 </Td>
                                                 {renderTd(safe.safeAddress, idx)}
                                                 {renderTd(safe.network, idx)}
-                                                {renderTd(
-                                                    safe.owners.map((owner) => (
-                                                        <span key={owner}>
-                                                            {owner.slice(0, 11)}
-                                                            ...
-                                                            {owner.slice(-10)}
-                                                            <br />
-                                                        </span>
-                                                    )),
-                                                    idx,
-                                                )}
                                             </Tr>
                                         );
                                     })}

@@ -22,7 +22,8 @@ import TransactionDetails from "./TransactionDetails";
 
 function Transaction({ transaction, address, walletMismatch }) {
     const { getSafeService, confirmTransaction, executeTransaction } = useGnosisSafe();
-    const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
+    const backgroundColor = useColorModeValue("gray.100", "whiteAlpha.200");
+    const codeBackground = useColorModeValue("gray.100", "none");
     const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
 
     // function weiToEth(wei) {
@@ -92,13 +93,13 @@ function Transaction({ transaction, address, walletMismatch }) {
     };
 
     return (
-        <Accordion allowMultiple padding="5px 10px" backgroundColor={backgroundHover} borderRadius="5px" boxShadow="md">
+        <Accordion allowMultiple backgroundColor={backgroundColor} borderRadius="5px" boxShadow="md">
             <AccordionItem border="none">
                 <Stack direction="row" justify="space-between">
                     <AccordionButton
-                        padding="0"
                         width="initial"
                         _hover={{ background: "none" }}
+                        padding="5px 0 5px 10px"
                         flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
                         flexGrow={transaction.txHash || transaction.transactionHash ? "1" : "0"}
                     >
@@ -158,7 +159,7 @@ function Transaction({ transaction, address, walletMismatch }) {
                                         {(transaction.dataDecoded?.method &&
                                             capitalize(transaction.dataDecoded?.method)) ||
                                             (transaction.from && "Receive") ||
-                                            "On-chain rejection"}
+                                            "Unspecified"}
                                     </Text>
                                 </Flex>
                             </Stack>
@@ -167,12 +168,12 @@ function Transaction({ transaction, address, walletMismatch }) {
                     <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
                         {showButtons()}
                     </Stack>
-                    <AccordionButton padding="0" width="initial" _hover={{ background: "none" }}>
+                    <AccordionButton padding="5px 10px 5px 0" width="initial" _hover={{ background: "none" }}>
                         <AccordionIcon />
                     </AccordionButton>
                 </Stack>
-                <AccordionPanel padding="15px 0px">
-                    <Code width="100%">
+                <AccordionPanel padding="0px">
+                    <Code background={codeBackground} width="100%" padding="10px">
                         <TransactionDetails transaction={transaction} />
                     </Code>
                 </AccordionPanel>

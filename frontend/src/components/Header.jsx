@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "@emotion/styled";
 import { PropTypes } from "prop-types";
 import { useNavigate, useParams } from "react-router-dom";
+import { isEmpty } from "lodash";
 import {
     Alert,
     AlertIcon,
@@ -45,6 +46,7 @@ export default function Header({ withTeam }) {
         connect,
         connectors,
         connectIsLoading,
+        pendingConnector,
         address,
         wallet,
         walletMismatch,
@@ -80,6 +82,9 @@ export default function Header({ withTeam }) {
         }
         if (connectIsLoading) {
             return "Approve connection with MetaMask";
+        }
+        if (!isEmpty(pendingConnector)) {
+            return "Unlock MetaMask";
         }
         return "Connect to MetaMask";
     };

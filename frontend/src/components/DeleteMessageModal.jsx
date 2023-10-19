@@ -65,7 +65,6 @@ export default function DeleteMessageModal({ messageID, isOpen, setIsOpen, setHo
                             boxShadow: "var(--chakra-shadows-outline)", // stupid Chakra focus not working for button
                         }}
                         ref={cancelRef}
-                        id="targetElementId"
                         onClick={onClose}
                     >
                         Cancel

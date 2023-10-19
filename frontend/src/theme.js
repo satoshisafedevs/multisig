@@ -49,6 +49,21 @@ const colors = {
     },
 };
 
-const theme = extendTheme({ config, styles, colors });
+const components = {
+    Accordion: {
+        baseStyle: (props) => ({
+            button: {
+                _hover: {
+                    background:
+                        props.colorMode === "light"
+                            ? "var(--chakra-colors-blackAlpha-100)"
+                            : "var(--chakra-colors-blackAlpha-300)",
+                },
+            },
+        }),
+    },
+};
+
+const theme = extendTheme({ config, styles, colors, components });
 
 export default theme;

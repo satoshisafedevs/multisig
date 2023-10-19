@@ -78,7 +78,7 @@ function PreferenceTabs() {
                     </TabList>
                 </Card>
                 <Card width="75%" minWidth="560px" marginLeft="10px">
-                    <TabPanels p="0px">
+                    <TabPanels p="0px" overflow="auto">
                         <TabPanel m="0px">
                             <Profile />
                         </TabPanel>

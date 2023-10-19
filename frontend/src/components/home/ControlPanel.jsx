@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import {
@@ -55,6 +55,17 @@ export default function Chat() {
             lastMessage.current.scrollIntoView();
         }
     }, [messages, activeTab]);
+
+    const handleMouseEnter = useCallback(
+        (id) => {
+            setHoverID(id);
+        },
+        [setHoverID],
+    );
+
+    const handleMouseLeave = useCallback(() => {
+        setHoverID(null);
+    }, [setHoverID]);
 
     const convertToISOString = (timestamp) => {
         // Convert seconds to milliseconds since JavaScript Date object uses milliseconds
@@ -210,49 +221,64 @@ export default function Chat() {
         return msg.message;
     };
 
-    // filter out safe's same nonce transactions except executed ones
-    const filteredTransactions = [];
+    const filterSameNonceTransactions = useMemo(() => {
+        const results = [];
 
-    // Group transactions by 'safe'
-    const groupedBySafe =
-        firestoreTransactions &&
-        firestoreTransactions.reduce((acc, transaction) => {
+        // If there are no transactions, we don't need to do any work
+        if (!firestoreTransactions) {
+            return results;
+        }
+
+        // Group transactions by 'safe'
+        const groupedBySafe = firestoreTransactions.reduce((acc, transaction) => {
             if (!acc[transaction.safe]) acc[transaction.safe] = [];
             acc[transaction.safe].push(transaction);
             return acc;
         }, {});
 
-    Object.keys(groupedBySafe || []).forEach((safe) => {
-        const safeTransactions = groupedBySafe[safe];
-        const executedNonces = new Set();
+        Object.keys(groupedBySafe).forEach((safe) => {
+            const safeTransactions = groupedBySafe[safe];
+            const executedNonces = new Set();
 
-        // Identify nonces which have isExecuted as true
-        safeTransactions.forEach((transaction) => {
-            if (transaction.isExecuted && "nonce" in transaction) {
-                executedNonces.add(transaction.nonce);
-            }
+            // Identify nonces which have isExecuted as true
+            safeTransactions.forEach((transaction) => {
+                if (transaction.isExecuted && "nonce" in transaction) {
+                    executedNonces.add(transaction.nonce);
+                }
+            });
+
+            // Filter out those transactions
+            safeTransactions.forEach((transaction) => {
+                if (!("nonce" in transaction) || !executedNonces.has(transaction.nonce) || transaction.isExecuted) {
+                    results.push(transaction);
+                }
+            });
         });
 
-        // Filter out those transactions
-        safeTransactions.forEach((transaction) => {
-            if (!("nonce" in transaction) || !executedNonces.has(transaction.nonce) || transaction.isExecuted) {
-                filteredTransactions.push(transaction);
-            }
-        });
-    });
+        return results;
+    }, [firestoreTransactions]);
 
-    // UI is just dying with 500+ transactions
-    const maxTransactions = -50;
+    const filterRemovedSafesTransactions = useMemo(
+        () =>
+            filterSameNonceTransactions.filter(
+                (item1) => currentTeam.safes.some((item2) => item1.safe === item2.safeAddress),
+                // eslint-disable-next-line function-paren-newline
+            ),
+        [(filterSameNonceTransactions, currentTeam)],
+    );
+
+    // display latest 100 transactions
+    const maxTransactions = -100;
 
     const transactionsToRender = useMemo(
         () =>
-            filteredTransactions
+            filterRemovedSafesTransactions
                 .sort(
                     (a, b) =>
                         new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
                 )
                 .slice(maxTransactions),
-        [filteredTransactions, maxTransactions],
+        [filterRemovedSafesTransactions, maxTransactions],
     );
 
     // Combine the two arrays
@@ -321,8 +347,8 @@ export default function Chat() {
                                         paddingTop="2px"
                                         paddingBottom="2px"
                                         _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
-                                        onMouseEnter={() => setHoverID(msg.id)}
-                                        onMouseLeave={() => setHoverID(null)}
+                                        onMouseEnter={() => handleMouseEnter(msg.id)}
+                                        onMouseLeave={handleMouseLeave}
                                     >
                                         <Avatar
                                             size="sm"
