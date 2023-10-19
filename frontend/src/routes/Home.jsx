@@ -4,7 +4,7 @@ import UpdateProfileModal from "../components/UpdateProfileModal";
 import Header from "../components/Header";
 import Portfolio from "../components/home/Portfolio";
 import ControlPanel from "../components/home/ControlPanel";
-import ActionCard from "../actions/ActionCard";
+import ActionCard from "../components/actions/ActionCard";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 

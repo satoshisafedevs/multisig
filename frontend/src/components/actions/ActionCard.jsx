@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardBody, Heading, Button, Stack } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
+import WalletConnect from "./WalletConnect";
+import HeaderTab from "../HeaderTab";
 
 export default function ActionCard() {
     const [activeTab, setActiveTab] = useState("swap");
@@ -9,34 +11,26 @@ export default function ActionCard() {
             return <div>Swap</div>;
         }
         if (activeTab === "walletconnect") {
-            return <div>WalletConnect</div>;
+            return <WalletConnect />;
         }
         return null;
     };
+
     return (
         <Card height="100%">
             <CardHeader paddingBottom="0">
                 <Stack spacing="24px" display="flex" direction="row" align="baseline">
                     <Heading size="md">Actions</Heading>
                     <>
-                        <Button
-                            variant="link"
-                            size="xs"
-                            fontWeight={activeTab === "swap" && "bold"}
-                            minWidth="34px"
-                            onClick={() => setActiveTab("swap")}
-                        >
+                        <HeaderTab isActive={activeTab === "swap"} onClick={() => setActiveTab("swap")}>
                             Swap
-                        </Button>
-                        <Button
-                            variant="link"
-                            size="xs"
-                            fontWeight={activeTab === "walletconnect" && "bold"}
-                            minWidth="82px"
+                        </HeaderTab>
+                        <HeaderTab
+                            isActive={activeTab === "walletconnect"}
                             onClick={() => setActiveTab("walletconnect")}
                         >
                             WalletConnect
-                        </Button>
+                        </HeaderTab>
                     </>
                 </Stack>
             </CardHeader>
