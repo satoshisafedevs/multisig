@@ -1,4 +1,4 @@
-image: node:lts-alpine
+image: node:lts-alpine3.16
 
 cache:
     key: ${CI_COMMIT_REF_SLUG} # this sets the key to the branch name

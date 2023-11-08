@@ -1,20 +1,11 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardBody, Heading, Stack } from "@chakra-ui/react";
 import WalletConnect from "./WalletConnect";
+import Swap from "./Swap";
 import HeaderTab from "../HeaderTab";
 
 export default function ActionCard() {
     const [activeTab, setActiveTab] = useState("swap");
-
-    const renderBody = () => {
-        if (activeTab === "swap") {
-            return <div>Swap</div>;
-        }
-        if (activeTab === "walletconnect") {
-            return <WalletConnect />;
-        }
-        return null;
-    };
 
     return (
         <Card height="100%">
@@ -35,7 +26,12 @@ export default function ActionCard() {
                 </Stack>
             </CardHeader>
             <CardBody overflow="auto" paddingTop="0" paddingBottom="0">
-                {renderBody()}
+                <div style={{ display: activeTab === "swap" ? "block" : "none" }}>
+                    <Swap />
+                </div>
+                <div style={{ display: activeTab === "walletconnect" ? "block" : "none" }}>
+                    <WalletConnect />
+                </div>
             </CardBody>
         </Card>
     );
