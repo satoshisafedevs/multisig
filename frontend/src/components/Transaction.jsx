@@ -49,30 +49,41 @@ function Transaction({ transaction, address, walletMismatch }) {
         }
         if (transaction.confirmationsRequired === transaction.confirmations.length) {
             return (
-                <Button
-                    variant="outline"
-                    colorScheme="green300"
-                    size="sm"
-                    rightIcon={<IoPlayOutline />}
-                    isDisabled={walletMismatch || !address}
-                    onClick={() => execute(transaction.network, transaction.safe, transaction.safeTxHash)}
-                >
-                    Execute
-                </Button>
+                <Stack spacing="4" direction={responsiveStyles} flex="1" justifyContent="center" alignSelf="center">
+                    <Button
+                        as={Text}
+                        variant="outline"
+                        colorScheme="green300"
+                        size="sm"
+                        rightIcon={<IoPlayOutline />}
+                        isDisabled={walletMismatch || !address}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            execute(transaction.network, transaction.safe, transaction.safeTxHash);
+                        }}
+                    >
+                        Execute
+                    </Button>
+                </Stack>
             );
         }
         return (
-            <>
+            <Stack spacing="4" direction={responsiveStyles} flex="1" justifyContent="center" alignSelf="center">
                 <Button
+                    as={Text}
                     variant="outline"
                     colorScheme="red"
                     size="sm"
                     rightIcon={<IoCloseOutline />}
                     isDisabled={walletMismatch || !address || transaction.isExecuted || transaction.executionDate}
+                    onClick={(event) => {
+                        event.preventDefault();
+                    }}
                 >
                     Reject
                 </Button>
                 <Button
+                    as={Text}
                     variant="outline"
                     colorScheme="green300"
                     size="sm"
@@ -84,24 +95,26 @@ function Transaction({ transaction, address, walletMismatch }) {
                         transaction.executionDate ||
                         transaction.confirmationsRequired === transaction.confirmations.length
                     }
-                    onClick={() => approve(transaction.network, transaction.safe, transaction.safeTxHash)}
+                    onClick={(event) => {
+                        event.preventDefault();
+                        approve(transaction.network, transaction.safe, transaction.safeTxHash);
+                    }}
                 >
                     Approve
                 </Button>
-            </>
+            </Stack>
         );
     };
 
     return (
         <Accordion allowMultiple backgroundColor={backgroundColor} borderRadius="5px" boxShadow="md">
             <AccordionItem border="none">
-                <Stack direction="row" justify="space-between">
+                <Stack direction="row" justify="space-between" gap="0">
                     <AccordionButton
                         width="initial"
-                        _hover={{ background: "none" }}
                         padding="5px 0 5px 10px"
                         flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
-                        flexGrow={transaction.txHash || transaction.transactionHash ? "1" : "0"}
+                        flexGrow="1"
                     >
                         <Stack direction="row" spacing="4" fontSize="sm" width="100%" justifyContent="space-between">
                             <Flex direction="column" align="center" justify="space-around">
@@ -110,7 +123,7 @@ function Transaction({ transaction, address, walletMismatch }) {
                                     {transaction.network}
                                 </Text>
                             </Flex>
-                            <Stack spacing="2" alignSelf="center" flexGrow="1">
+                            <Stack spacing="2" alignSelf="center" flex="1">
                                 <Flex direction={responsiveStyles} alignItems="baseline">
                                     <Text fontWeight="bold" paddingRight="5px">
                                         Safe:
@@ -128,7 +141,14 @@ function Transaction({ transaction, address, walletMismatch }) {
                                     )}
                                 </Flex>
                             </Stack>
-                            <Stack spacing="2" alignSelf="center" flexGrow="1">
+                            <Stack
+                                spacing="2"
+                                flex="1.25"
+                                alignSelf="center"
+                                textOverflow="ellipsis"
+                                whiteSpace="nowrap"
+                                overflow="hidden"
+                            >
                                 <Flex direction={responsiveStyles} alignItems="baseline">
                                     <Text fontWeight="bold" paddingRight="5px">
                                         Status:
@@ -143,6 +163,10 @@ function Transaction({ transaction, address, walletMismatch }) {
                                                 isExternal
                                                 display="flex"
                                                 alignItems="center"
+                                                onClick={(event) => {
+                                                    event.preventDefault();
+                                                    window.open(event.target.href, "_blank", "noopener,noreferrer");
+                                                }}
                                             >
                                                 Executed <IoOpenOutline style={{ paddingLeft: "3px" }} />
                                             </Link>
@@ -155,7 +179,15 @@ function Transaction({ transaction, address, walletMismatch }) {
                                     <Text fontWeight="bold" paddingRight="5px">
                                         Action:
                                     </Text>
-                                    <Text textAlign="left">
+                                    <Text
+                                        textAlign="left"
+                                        alignSelf="center"
+                                        textOverflow="ellipsis"
+                                        whiteSpace="nowrap"
+                                        overflow="hidden"
+                                        width="100%"
+                                        paddingRight="10px"
+                                    >
                                         {(transaction.dataDecoded?.method &&
                                             capitalize(transaction.dataDecoded?.method)) ||
                                             (transaction.from && "Receive") ||
@@ -163,13 +195,9 @@ function Transaction({ transaction, address, walletMismatch }) {
                                     </Text>
                                 </Flex>
                             </Stack>
+                            {showButtons()}
                         </Stack>
-                    </AccordionButton>
-                    <Stack spacing="4" direction={responsiveStyles} alignSelf="center">
-                        {showButtons()}
-                    </Stack>
-                    <AccordionButton padding="5px 10px 5px 0" width="initial" _hover={{ background: "none" }}>
-                        <AccordionIcon />
+                        <AccordionIcon margin="10px" />
                     </AccordionButton>
                 </Stack>
                 <AccordionPanel padding="0px">
