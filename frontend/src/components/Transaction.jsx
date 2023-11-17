@@ -26,11 +26,6 @@ function Transaction({ transaction, address, walletMismatch }) {
     const codeBackground = useColorModeValue("gray.100", "none");
     const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
 
-    // function weiToEth(wei) {
-    //     const ETH_IN_WEI = 1e18;
-    //     return wei / ETH_IN_WEI;
-    // }
-
     const approve = async (network, safeAddress, safeTxHash) => {
         const safeService = await getSafeService(network);
         confirmTransaction(safeService, safeAddress, safeTxHash);
@@ -117,7 +112,18 @@ function Transaction({ transaction, address, walletMismatch }) {
                         flexGrow="1"
                     >
                         <Stack direction="row" spacing="4" fontSize="sm" width="100%" justifyContent="space-between">
-                            <Flex direction="column" align="center" justify="space-around">
+                            <Flex
+                                direction="column"
+                                align="center"
+                                justify={[
+                                    "space-evenly",
+                                    "space-evenly",
+                                    "space-evenly",
+                                    "space-evenly",
+                                    "space-evenly",
+                                    "space-between",
+                                ]}
+                            >
                                 <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].icon} />
                                 <Text fontSize="xs" fontWeight="bold">
                                     {transaction.network}
@@ -128,7 +134,10 @@ function Transaction({ transaction, address, walletMismatch }) {
                                     <Text fontWeight="bold" paddingRight="5px">
                                         Safe:
                                     </Text>
-                                    <Text textAlign="left">{transaction.safe.slice(0, 7)}</Text>
+                                    <Text textAlign="left">
+                                        {transaction.safe.slice(0, 5)}...
+                                        {transaction.safe.slice(-4)}
+                                    </Text>
                                 </Flex>
                                 <Flex direction={responsiveStyles} alignItems="baseline">
                                     {(transaction.nonce || transaction.nonce === 0) && (
