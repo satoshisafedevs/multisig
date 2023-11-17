@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
+import { ethers } from "ethers";
 import {
     Alert,
     AlertIcon,
@@ -20,10 +21,78 @@ import {
 } from "@chakra-ui/react";
 import { IoSearchOutline } from "react-icons/io5";
 
-function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken }) {
+function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData }) {
     const [searchString, setSearchString] = useState("");
     const descriptionColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
     const searchTokenRef = useRef();
+
+    // eslint-disable-next-line no-unused-vars
+    const getBalances = async () => {
+        const rpcUrl = "https://arb1.arbitrum.io/rpc";
+        // this works only for arbitrum network
+
+        const tokenAddresses = tokens.map((token) => token.address).slice(0, 25);
+        // NOTE: only 25 here to reduce throttle by rpc!!!
+
+        const erc20Abi = [
+            {
+                constant: true,
+                inputs: [],
+                name: "decimals",
+                outputs: [
+                    {
+                        name: "",
+                        type: "uint8",
+                    },
+                ],
+                type: "function",
+            },
+            {
+                constant: true,
+                inputs: [{ name: "_owner", type: "address" }],
+                name: "balanceOf",
+                outputs: [
+                    {
+                        name: "balance",
+                        type: "uint256",
+                    },
+                ],
+                type: "function",
+            },
+        ];
+
+        async function batchRequest() {
+            const batchProvider = new ethers.providers.JsonRpcBatchProvider(rpcUrl);
+
+            const tokenContracts = tokenAddresses.map((address) => {
+                if (address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+                    return batchProvider.getBalance(safe);
+                }
+                // need to redo here to something like:
+                // const balance = await tokenContract.balanceOf(safe);
+                // const decimals = await tokenContract.decimals();
+                // and in balance below:
+                // ethers.utils.formatUnits(balance, decimals)
+                return new ethers.Contract(address, erc20Abi, batchProvider).balanceOf(safe);
+            });
+
+            const balances = await Promise.all(tokenContracts);
+
+            const balanceData = balances.map((balance, index) => ({
+                tokenAddress: tokenAddresses[index],
+                balance: ethers.utils.formatEther(balance),
+            }));
+
+            console.log(balanceData);
+        }
+
+        batchRequest();
+    };
+
+    // if (isOpen && tokens.length) {
+    //     getBalances();
+    // this is just not finished POC work...
+    // }
 
     useEffect(() => {
         if (isOpen) {
@@ -36,6 +105,7 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken }) {
     const onClose = () => {
         setIsOpen(false);
         setSearchString("");
+        setRouteData();
     };
 
     const handleTokenSearch = (e) => {
@@ -113,6 +183,8 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken }) {
                                                 symbol: token.symbol,
                                                 logoURI: token.logoURI,
                                                 address: token.address,
+                                                decimals: token.decimals,
+                                                usdPrice: token.usdPrice,
                                             });
                                             onClose();
                                         }}
@@ -141,5 +213,7 @@ SelectTokenModal.propTypes = {
     isOpen: PropTypes.bool,
     setIsOpen: PropTypes.func,
     setToken: PropTypes.func,
+    safe: PropTypes.string,
+    setRouteData: PropTypes.func,
 };
 export default SelectTokenModal;
