@@ -5,19 +5,34 @@ import { Web3Wallet } from "@walletconnect/web3wallet";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { buildApprovedNamespaces } from "@walletconnect/utils";
 import { useDisclosure, useToast } from "@chakra-ui/react";
-import ConnectionModal from "../components/actions/ConnectionModal";
+import WCModal from "../components/actions/WCModal";
 import { useUser } from "../providers/User";
+import useGnosisSafe from "./useGnosisSafe";
 import { NETWORK_EIP, EIP155_SIGNING_METHODS } from "../utils/networkeip";
+import checkNetwork from "../utils/checkNetwork";
 
 const useWalletConnect = () => {
     // Initialize WalletConnect
     const [web3wallet, setWeb3Wallet] = useState(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { onOpen, onClose, isOpen } = useDisclosure();
+    const [transactionRequest, setTransactionRequest] = useState(null);
     const [sessionProposal, setSessionProposal] = useState(null);
+    const [modalType, setModalType] = useState("transaction");
     const [pairings, setPairings] = useState([]);
-    const [sessions, setSessions] = useState([]);
-    const { currentTeam } = useUser();
+    const [sessions, setSessions] = useState(null);
+    const { currentTeam, userTeamData } = useUser();
+    const { createAndApproveTransaction, loadSafe } = useGnosisSafe();
     const toast = useToast();
+    let { safes } = currentTeam;
+    let uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
+    let chains = uniqueNetworks.map((network) => NETWORK_EIP[network]).filter((chainId) => chainId !== undefined);
+
+    const accounts = safes
+        .map(({ network, safeAddress }) => {
+            const chainId = NETWORK_EIP[network];
+            return chainId ? `${chainId}:${safeAddress}` : null;
+        })
+        .filter((account) => account !== null);
 
     useEffect(() => {
         if (web3wallet) {
@@ -26,38 +41,36 @@ const useWalletConnect = () => {
         }
     }, [web3wallet]);
 
-    const handleApprove = async () => {
+    useEffect(() => {
+        if (currentTeam) {
+            safes = currentTeam.safes;
+            uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
+            chains = uniqueNetworks.map((network) => NETWORK_EIP[network]).filter((chainId) => chainId !== undefined);
+        }
+    }, [currentTeam]);
+
+    const handleApproveConnection = async () => {
         if (sessionProposal) {
             // Logic to approve the session...
             // Extract unique networks from data
-            const { safes } = currentTeam;
-            const uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
-            const chains = uniqueNetworks
-                .map((network) => NETWORK_EIP[network])
-                .filter((chainId) => chainId !== undefined);
-
-            const accounts = safes
-                .map(({ network, safeAddress }) => {
-                    const chainId = NETWORK_EIP[network];
-                    return chainId ? `${chainId}:${safeAddress}` : null;
-                })
-                .filter((account) => account !== null);
-            const approvedNamespaces = buildApprovedNamespaces({
-                proposal: sessionProposal.params,
-                supportedNamespaces: {
-                    eip155: {
-                        chains,
-                        methods: Object.values(EIP155_SIGNING_METHODS),
-                        events: ["accountsChanged", "chainChanged"],
-                        accounts,
-                    },
-                },
-            });
             try {
+                const approvedNamespaces = buildApprovedNamespaces({
+                    proposal: sessionProposal.params,
+                    supportedNamespaces: {
+                        eip155: {
+                            chains,
+                            methods: Object.values(EIP155_SIGNING_METHODS),
+                            events: ["accountsChanged", "chainChanged"],
+                            accounts,
+                        },
+                    },
+                });
                 await web3wallet.approveSession({
                     id: sessionProposal.id,
                     namespaces: approvedNamespaces,
                 });
+                const newSessions = await web3wallet.getActiveSessions();
+                setSessions(newSessions);
             } catch (e) {
                 toast({
                     description: "Failed to approve session",
@@ -69,6 +82,32 @@ const useWalletConnect = () => {
                 return;
             }
             onClose(); // Close the modal once approved
+        }
+    };
+
+    const handleApproveTransaction = async () => {
+        try {
+            const fromAddress = transactionRequest.params.request.params[0].from;
+            const fromAddressLC = fromAddress.toLowerCase();
+            const safe = safes.find((s) => s.safeAddress.toLowerCase() === fromAddressLC);
+            const network = safe ? safe.network : "mainnet";
+            await checkNetwork(network);
+            const { gnosisSafe, safeService } = await loadSafe(safe.safeAddress, network);
+            await createAndApproveTransaction(
+                gnosisSafe,
+                safeService,
+                fromAddress,
+                transactionRequest,
+                userTeamData.userWalletAddress,
+            );
+        } catch (error) {
+            toast({
+                description: "Failed to approve transaction",
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         }
     };
 
@@ -89,13 +128,17 @@ const useWalletConnect = () => {
 
         newWallet.on("session_proposal", async (proposal) => {
             setSessionProposal(proposal);
-            onOpen(); // Open the modal when session proposal event occurs
+            setModalType("connection");
+            onOpen();
         });
 
-        newWallet.on("session_request", async (sessionRequest) => {
-            console.log("pca", "session_request", JSON.stringify(sessionRequest));
-            // pass request to wallet and return result
+        newWallet.on("session_request", async (request) => {
+            console.log("pca", "session_request", JSON.stringify(request));
+            setTransactionRequest(request); // Set the request details
+            setModalType("transaction");
+            onOpen();
         });
+
         setWeb3Wallet(newWallet);
     };
 
@@ -104,19 +147,29 @@ const useWalletConnect = () => {
         await web3wallet.pair({ uri });
     };
 
+    const disconnect = async (topic) => {
+        if (!web3wallet) return;
+        await web3wallet.disconnectSession({ topic });
+        setSessions(web3wallet.getActiveSessions());
+    };
+
     return {
         createWeb3Wallet,
         pair,
         ConnectionModal: (
-            <ConnectionModal
+            <WCModal
                 isOpen={isOpen}
                 onClose={onClose}
                 sessionProposal={sessionProposal}
-                onApprove={handleApprove}
+                onApproveConnection={handleApproveConnection}
+                transactionRequest={transactionRequest}
+                modalType={modalType}
+                onApproveTransaction={handleApproveTransaction}
             />
         ),
         pairings,
         sessions,
+        disconnect,
     };
 };
 

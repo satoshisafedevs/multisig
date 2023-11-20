@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from "
 import PropTypes from "prop-types";
 import { omit, isEqual } from "lodash";
 import { useUser } from "./User";
-import networks from "../components/admin/networks.json";
+import networks from "../utils/networks.json";
 import { db, doc, collection, writeBatch, onSnapshot } from "../firebase";
 
 const TransactionsContext = createContext();

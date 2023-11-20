@@ -2,7 +2,7 @@ import SafeApiKit from "@safe-global/api-kit";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { ethers } from "ethers";
 import { useToast } from "@chakra-ui/react";
-import networks from "../components/admin/networks.json";
+import networks from "../utils/networks.json";
 
 const useGnosisSafe = () => {
     const toast = useToast();
@@ -83,17 +83,21 @@ const useGnosisSafe = () => {
         }
     };
 
-    const createAndApproveTransaction = async (safe, safeService, safeAddress, tx, wallet) => {
+    const createAndApproveTransaction = async (safe, safeService, safeAddress, tx, fromAddress) => {
         try {
             const safeTx = await safe.createTransaction({
-                safeTransactionData: tx,
+                safeTransactionData: {
+                    to: ethers.utils.getAddress(tx.params.request.params[0].to),
+                    data: tx.params.request.params[0].data,
+                    value: tx.params.request.params[0].value ? tx.params.request.params[0].value : 0,
+                },
             });
             const txhash = await safe.getTransactionHash(safeTx);
             const signature = await safe.signTransactionHash(txhash);
             safeTx.addSignature(signature);
             await safeService.proposeTransaction({
-                safeAddress,
-                senderAddress: wallet.address,
+                safeAddress: ethers.utils.getAddress(safeAddress),
+                senderAddress: ethers.utils.getAddress(fromAddress),
                 safeTransactionData: safeTx.data,
                 safeTxHash: txhash,
                 senderSignature: signature.data,
@@ -175,6 +179,26 @@ const useGnosisSafe = () => {
         }
     };
 
+    async function loadSafe(safeAddress, network) {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const safeOwner = provider.getSigner(0);
+            const ethAdapter = new EthersAdapter({
+                ethers,
+                signerOrProvider: safeOwner,
+            });
+            const txServiceUrl = networks[network].safeTransactionService;
+            const safeService = new SafeApiKit({
+                txServiceUrl,
+                ethAdapter,
+            });
+            const safe = await Safe.create({ ethAdapter, safeAddress });
+            return { gnosisSafe: safe, safeService };
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     return {
         getSafeService,
         getSafesByOwner,
@@ -183,6 +207,7 @@ const useGnosisSafe = () => {
         createAndApproveTransaction,
         confirmTransaction,
         executeTransaction,
+        loadSafe,
     };
 };
 

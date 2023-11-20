@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { IoCheckmarkOutline, IoCloseOutline, IoOpenOutline, IoPlayOutline } from "react-icons/io5";
 import useGnosisSafe from "../hooks/useGnosisSafe";
-import networks from "./admin/networks.json";
+import networks from "../utils/networks.json";
 import TransactionDetails from "./TransactionDetails";
 
 function Transaction({ transaction, address, walletMismatch }) {
