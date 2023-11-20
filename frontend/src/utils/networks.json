@@ -1,0 +1,62 @@
+{
+    "arbitrum": {
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Farbitrum.svg?alt=media&token=13217f95-6fab-482f-b389-513d75100865",
+        "url": "https://arb1.arbitrum.io/rpc",
+        "safeTransactionService": "https://safe-transaction-arbitrum.safe.global/",
+        "currency": "ETH",
+        "title": "Arbitrum",
+        "scanUrl": "https://arbiscan.io",
+        "eip": "eip155:42161",
+        "metamaskSettings": {
+            "chainId": "0xa4b1",
+            "chainName": "Arbitrum One",
+            "nativeCurrency": {
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18
+            },
+            "rpcUrls": ["https://arb1.arbitrum.io/rpc"],
+            "blockExplorerUrls": ["https://arbiscan.io"]
+        }
+    },
+    "mainnet": {
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Fmainnet.svg?alt=media&token=fd72c40a-28bf-426d-93e4-317f3e179b0c",
+        "url": "https://1rpc.io/eth",
+        "safeTransactionService": "https://safe-transaction-mainnet.safe.global/",
+        "currency": "ETH",
+        "title": "Ethereum",
+        "scanUrl": "https://etherscan.io",
+        "eip": "eip155:1",
+        "metamaskSettings": {
+            "chainId": "0x1",
+            "chainName": "Ethereum Mainnet",
+            "nativeCurrency": {
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18
+            },
+            "rpcUrls": ["https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"],
+            "blockExplorerUrls": ["https://etherscan.io"]
+        }
+    },
+    "optimism": {
+        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Foptimism.svg?alt=media&token=b24d0e93-d289-45cb-8dae-dd3decc2987e",
+        "url": "https://mainnet.optimism.io",
+        "safeTransactionService": "https://safe-transaction-optimism.safe.global/",
+        "currency": "ETH",
+        "title": "Optimism",
+        "scanUrl": "https://optimistic.etherscan.io",
+        "eip": "eip155:10",
+        "metamaskSettings": {
+            "chainId": "0xa",
+            "chainName": "Optimism",
+            "rpcUrls": ["https://mainnet.optimism.io"],
+            "blockExplorerUrls": ["https://optimistic.etherscan.io"],
+            "nativeCurrency": {
+                "name": "ETH",
+                "symbol": "ETH",
+                "decimals": 18
+            }
+        }
+    }
+}
