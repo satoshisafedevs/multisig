@@ -34,6 +34,8 @@ function Swapper({
     setRouteData,
     totalUSDFrom,
     setTotalUSDFrom,
+    setFromNetwork,
+    setFromBalances,
 }) {
     const { currentTeam } = useUser();
     const [isTokenModalOpen, setTokenModalOpen] = useState(false);
@@ -58,6 +60,7 @@ function Swapper({
         const { safeAddress, network } = safeConfig;
         setSafe(safeAddress);
         setNetworkName(network);
+        setFromNetwork(network);
         const targetChainId = squid?.chains.find((c) => {
             if (network === "mainnet") {
                 // need special handling here as
@@ -99,28 +102,55 @@ function Swapper({
         }
     }, [amount, latestTokenPrice?.usdPrice, totalUSDFrom]);
 
-    const getTokenBalance = async () => {
+    // const getTokenBalance = async () => {
+    //     const rpcUrl = networks[networkName].url;
+    //     const erc20Abi = [
+    //         "function balanceOf(address owner) view returns (uint256)",
+    //         "function decimals() view returns (uint8)",
+    //     ];
+    //     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    //     if (token.address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+    //         const balance = await provider.getBalance(safe);
+    //         const convertedBalance = ethers.utils.formatEther(balance);
+    //         setTokenBalance(convertedBalance);
+    //         setFromBalance(convertedBalance);
+    //         return;
+    //     }
+    //     const tokenContract = new ethers.Contract(token.address, erc20Abi, provider);
+    //     const balance = await tokenContract.balanceOf(safe);
+    //     const decimals = await tokenContract.decimals();
+    //     const convertedBalance = ethers.utils.formatUnits(balance, decimals);
+    //     setTokenBalance(convertedBalance);
+    //     setFromBalance(convertedBalance);
+    // };
+
+    const getBalances = async () => {
         const rpcUrl = networks[networkName].url;
         const erc20Abi = [
             "function balanceOf(address owner) view returns (uint256)",
             "function decimals() view returns (uint8)",
         ];
         const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-        if (token.address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
-            const balance = await provider.getBalance(safe);
-            setTokenBalance(ethers.utils.formatEther(balance));
+        const ethBalance = await provider.getBalance(safe);
+        const convertedEthBalance = ethers.utils.formatEther(ethBalance);
+        if (token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+            const tokenContract = new ethers.Contract(token.address, erc20Abi, provider);
+            const balance = await tokenContract.balanceOf(safe);
+            const decimals = await tokenContract.decimals();
+            const convertedBalance = ethers.utils.formatUnits(balance, decimals);
+            setTokenBalance(convertedBalance);
+            setFromBalances({ ETH: convertedEthBalance, [token.symbol]: convertedBalance });
             return;
         }
-        const tokenContract = new ethers.Contract(token.address, erc20Abi, provider);
-        const balance = await tokenContract.balanceOf(safe);
-        const decimals = await tokenContract.decimals();
-        setTokenBalance(ethers.utils.formatUnits(balance, decimals));
+        setTokenBalance(convertedEthBalance);
+        setFromBalances({ ETH: convertedEthBalance });
     };
 
     useEffect(() => {
         if (safe && token.address) {
             setTokenBalance();
-            getTokenBalance();
+            setFromBalances();
+            getBalances();
         }
     }, [safe, token.address]);
 
@@ -241,7 +271,7 @@ function Swapper({
                         setAmount(validValue);
                         setRouteData();
                     }}
-                    isDisabled={inputDisabled}
+                    isDisabled={inputDisabled || !squid}
                     _disabled={{
                         opacity: "unset",
                         cursor: "not-allowed",
@@ -282,6 +312,8 @@ Swapper.propTypes = {
     totalUSDFrom: PropTypes.string,
     setTotalUSDFrom: PropTypes.func,
     setRouteData: PropTypes.func,
+    setFromNetwork: PropTypes.func,
+    setFromBalances: PropTypes.func,
 };
 
 export default memo(Swapper);

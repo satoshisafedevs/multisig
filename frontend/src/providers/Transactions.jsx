@@ -157,62 +157,60 @@ function Transactions({ children }) {
         return obj;
     };
 
+    const getLatestGnosisData = async () => {
+        setGettingData(true);
+        const allGnosisTransactions = [];
+
+        await Promise.all(
+            currentTeam.safes.map(async (teamSafe) => {
+                const { network, safeAddress } = teamSafe;
+                const { safeTransactionService } = networks[network];
+                const baseUrl = `${safeTransactionService}/api/v1/safes/${safeAddress}/all-transactions/`;
+                const options = { method: "GET" };
+                await getTransactions(baseUrl, options, allGnosisTransactions, network, safeAddress);
+            }),
+        );
+
+        if (allGnosisTransactions.length === firestoreTransactions.length) {
+            const nonMatchingTransactions = [];
+            allGnosisTransactions.forEach(async (original) => {
+                const existing = firestoreTransactions.find(
+                    (t) =>
+                        t.safeTxHash === original.safeTxHash &&
+                        (!original.txHash || !t.txHash || t.txHash === original.txHash),
+                );
+                const sanitizedOriginal = convertNestedArrays(original);
+                const transactionID = existing.id;
+                const sanitizedExisting = omit(existing, ["id"]);
+                if (!isEqual(sanitizedOriginal, sanitizedExisting)) {
+                    nonMatchingTransactions.push({ [transactionID]: sanitizedOriginal });
+                }
+            });
+            if (nonMatchingTransactions.length > 0) {
+                updateTransactionsInFirestore(nonMatchingTransactions);
+            }
+        }
+
+        if (allGnosisTransactions.length !== firestoreTransactions.length) {
+            // do stuff if transactions do not match
+            // Convert firestoreTransactions to a set of safeTxHash for faster lookup
+            const allHashes = new Set(firestoreTransactions.map((t) => t.safeTxHash || t.txHash));
+
+            // Filter objects from allGnosisTransactions that aren't in firestoreTransactions
+            const missingTransactions = allGnosisTransactions.filter((t) => !allHashes.has(t.safeTxHash || t.txHash));
+
+            if (missingTransactions.length > 0) {
+                // There are transactions in allGnosisTransactions that aren't in firestoreTransactions
+                // Do stuff with missingTransactions
+                const sanitisedData = missingTransactions.map((t) => convertNestedArrays(t));
+                addTransactionsToFirestore(sanitisedData);
+            }
+        }
+        setGettingData(false);
+    };
+
     useEffect(() => {
         if (currentTeam?.safes && firestoreTransactions && !gettingData) {
-            const getLatestGnosisData = async () => {
-                setGettingData(true);
-                const allGnosisTransactions = [];
-
-                await Promise.all(
-                    currentTeam.safes.map(async (teamSafe) => {
-                        const { network, safeAddress } = teamSafe;
-                        const baseUrl =
-                            `${networks[network].safeTransactionService}` +
-                            `/api/v1/safes/${safeAddress}/all-transactions/`;
-                        const options = { method: "GET" };
-                        await getTransactions(baseUrl, options, allGnosisTransactions, network, safeAddress);
-                    }),
-                );
-
-                if (allGnosisTransactions.length === firestoreTransactions.length) {
-                    const nonMatchingTransactions = [];
-                    allGnosisTransactions.forEach(async (original) => {
-                        const existing = firestoreTransactions.find(
-                            (t) =>
-                                t.safeTxHash === original.safeTxHash &&
-                                (!original.txHash || !t.txHash || t.txHash === original.txHash),
-                        );
-                        const sanitizedOriginal = convertNestedArrays(original);
-                        const transactionID = existing.id;
-                        const sanitizedExisting = omit(existing, ["id"]);
-                        if (!isEqual(sanitizedOriginal, sanitizedExisting)) {
-                            nonMatchingTransactions.push({ [transactionID]: sanitizedOriginal });
-                        }
-                    });
-                    if (nonMatchingTransactions.length > 0) {
-                        updateTransactionsInFirestore(nonMatchingTransactions);
-                    }
-                }
-
-                if (allGnosisTransactions.length !== firestoreTransactions.length) {
-                    // do stuff if transactions do not match
-                    // Convert firestoreTransactions to a set of safeTxHash for faster lookup
-                    const allHashes = new Set(firestoreTransactions.map((t) => t.safeTxHash || t.txHash));
-
-                    // Filter objects from allGnosisTransactions that aren't in firestoreTransactions
-                    const missingTransactions = allGnosisTransactions.filter(
-                        (t) => !allHashes.has(t.safeTxHash || t.txHash),
-                    );
-
-                    if (missingTransactions.length > 0) {
-                        // There are transactions in allGnosisTransactions that aren't in firestoreTransactions
-                        // Do stuff with missingTransactions
-                        const sanitisedData = missingTransactions.map((t) => convertNestedArrays(t));
-                        addTransactionsToFirestore(sanitisedData);
-                    }
-                }
-                setGettingData(false);
-            };
             getLatestGnosisData();
         }
     }, [currentTeam, firestoreTransactions]);
@@ -221,8 +219,9 @@ function Transactions({ children }) {
         () => ({
             firestoreTransactions,
             setFirestoreTransactions,
+            getLatestGnosisData,
         }),
-        [firestoreTransactions, setFirestoreTransactions],
+        [firestoreTransactions, setFirestoreTransactions, getLatestGnosisData],
     );
 
     return <TransactionsProvider value={values}>{children}</TransactionsProvider>;

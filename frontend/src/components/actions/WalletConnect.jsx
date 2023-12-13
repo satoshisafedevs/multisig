@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Input,
     Image,
@@ -18,6 +18,7 @@ import {
     Heading,
     Text,
 } from "@chakra-ui/react";
+import { isEmpty } from "lodash";
 import wclogo from "../../img/walletconnect_logo.png";
 import useWalletConnect from "../../hooks/useWalletConnect";
 
@@ -26,10 +27,19 @@ export default function WalletConnect() {
     const toast = useToast();
     const [inputValue, setInputValue] = useState("");
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const inputRef = useRef();
 
     useEffect(() => {
         createWeb3Wallet();
     }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
+        }
+    }, [isOpen]);
 
     const handlePair = async () => {
         try {
@@ -57,7 +67,6 @@ export default function WalletConnect() {
             <Heading size="sm" mt="20px">
                 Paired dApps
             </Heading>
-
             {sessions &&
                 Object.values(sessions).map((session) => {
                     const { name } = session.peer.metadata;
@@ -72,15 +81,17 @@ export default function WalletConnect() {
                     );
                 })}
 
+            {isEmpty(sessions) && <Text>(none)</Text>}
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Add Wallet Connect Connection</ModalHeader>
+                    <ModalHeader>Add WalletConnect Connection</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <Center flexDirection="column">
                             <Image src={wclogo} alt="WalletConnect Logo" mb={4} width="300px" />
                             <Input
+                                ref={inputRef}
                                 value={inputValue}
                                 onChange={handleChange}
                                 placeholder="Enter WalletConnect URI"
@@ -90,6 +101,9 @@ export default function WalletConnect() {
                         </Center>
                     </ModalBody>
                     <ModalFooter>
+                        <Button mr={3} onClick={onClose}>
+                            Cancel
+                        </Button>
                         <Button
                             colorScheme="blue"
                             onClick={handlePair}
@@ -100,7 +114,6 @@ export default function WalletConnect() {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-
             {ConnectionModal}
         </VStack>
     );

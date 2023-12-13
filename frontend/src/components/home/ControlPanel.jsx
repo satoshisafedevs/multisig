@@ -97,7 +97,7 @@ export default function Chat() {
         });
 
         return unsubscribe;
-    }, [slug, teamsData, db, onSnapshot, currentTeam]);
+    }, [slug, teamsData, currentTeam]);
 
     const addMessage = async (text) => {
         try {
@@ -278,7 +278,7 @@ export default function Chat() {
                         new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
                 )
                 .slice(maxTransactions),
-        [filterRemovedSafesTransactions, maxTransactions],
+        [filterRemovedSafesTransactions],
     );
 
     // Combine the two arrays

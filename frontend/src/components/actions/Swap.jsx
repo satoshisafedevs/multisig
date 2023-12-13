@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Stack, Divider, useToast } from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Button, Stack, Divider, useToast } from "@chakra-ui/react";
 import { Squid } from "@0xsquid/sdk";
 import { ethers } from "ethers";
-import { IoShuffleOutline, IoArrowDownCircleOutline } from "react-icons/io5";
+import { upperFirst } from "lodash";
+import { IoShuffleOutline, IoArrowDownCircleOutline, IoPaperPlane } from "react-icons/io5";
+import { useWagmi } from "../../providers/Wagmi";
+import useGnosisSafe from "../../hooks/useGnosisSafe";
+import erc20Abi from "./erc20Abi.json";
 import Swapper from "./Swapper";
 
 export default function Swap() {
+    const { address, isConnected, chain, metaMaskInstalled } = useWagmi();
+    const { createAndApproveSwapTransaction } = useGnosisSafe();
     const toast = useToast();
     const [squid, setSquid] = useState();
     const [fromSafe, setFromSafe] = useState("");
     const [fromChain, setFromChain] = useState("");
     const [fromToken, setFromToken] = useState({});
     const [fromAmount, setFromAmount] = useState("");
+    const [fromNetwork, setFromNetwork] = useState("");
+    const [fromBalances, setFromBalances] = useState({});
     const [toSafe, setToSafe] = useState("");
     const [toChain, setToChain] = useState("");
     const [toToken, setToToken] = useState({});
@@ -20,15 +28,23 @@ export default function Swap() {
     const [totalUSDFrom, setTotalUSDFrom] = useState();
 
     const getSquidSDK = async () => {
-        const squidSDK = new Squid({
-            baseUrl: "https://v2.api.squidrouter.com",
-            integratorId: "satoshisafe-swap-widget",
-        });
-        await squidSDK.init();
-        setSquid(squidSDK);
+        try {
+            const squidSDK = new Squid({
+                baseUrl: "https://v2.api.squidrouter.com",
+                integratorId: "satoshisafe-swap-widget",
+            });
+            await squidSDK.init();
+            setSquid(squidSDK);
+        } catch (error) {
+            toast({
+                description: `Failed to initiate swap sdk: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     };
-
-    // console.log(fromToken);
 
     useEffect(() => {
         getSquidSDK();
@@ -81,13 +97,13 @@ export default function Swap() {
             setRouteData();
             setLoadingRoute(true);
             const { route } = await squid.getRoute(params);
-            getSquidSDK();
+            await getSquidSDK(); // get latest prices
             setLoadingRoute(false);
             setRouteData(route);
         } catch (error) {
             setLoadingRoute(false);
             toast({
-                description: `Failed to get swap data: ${error.message}`,
+                description: `Failed to get swap estimate: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -95,6 +111,42 @@ export default function Swap() {
             });
         }
     };
+
+    let estimatedSwapFee = 0;
+
+    if (routeData) {
+        const { estimate } = routeData;
+
+        const sumCosts = (costs) =>
+            costs.reduce((acc, cost) => (cost.amount ? acc + parseFloat(toHumanReadable(cost.amount, 18)) : acc), 0);
+
+        if (estimate.feeCosts && estimate.feeCosts.length > 0) {
+            estimatedSwapFee += sumCosts(estimate.feeCosts);
+        }
+
+        if (estimate.gasCosts && estimate.gasCosts.length > 0) {
+            estimatedSwapFee += sumCosts(estimate.gasCosts);
+        }
+    }
+
+    const contractInterface = new ethers.utils.Interface(erc20Abi);
+
+    const approveEncodeData =
+        routeData &&
+        contractInterface.encodeFunctionData("approve", [
+            routeData.transactionRequest.target,
+            routeData.estimate.fromAmount,
+        ]);
+
+    const fromAmoutIsGreaterThanTokenBalance =
+        fromBalances && Number(fromAmount) > Number(fromBalances[fromToken.symbol]);
+
+    const insufficientEthBalance = fromBalances && parseFloat(fromBalances.ETH) < estimatedSwapFee;
+
+    const ethOnlySwapInsufficientBalance =
+        fromBalances && fromToken.symbol === "ETH" && fromBalances.ETH < parseFloat(fromAmount) + estimatedSwapFee;
+
+    const networkMismatch = chain && Number(fromChain) !== chain.id;
 
     return (
         <Stack padding="10px 0" gap="0">
@@ -110,6 +162,8 @@ export default function Swap() {
                 setAmount={setFromAmount}
                 setRouteData={setRouteData}
                 setTotalUSDFrom={setTotalUSDFrom}
+                setFromNetwork={setFromNetwork}
+                setFromBalances={setFromBalances}
             />
             <Box paddingBottom="18px" display="flex" justifyContent="center" alignItems="center">
                 <Divider />
@@ -132,6 +186,8 @@ export default function Swap() {
                         : ""
                 }
                 setAmount={() => {}}
+                setFromNetwork={() => {}}
+                setFromBalances={() => {}}
                 totalUSDFrom={totalUSDFrom}
                 setRouteData={setRouteData}
                 inputDisabled
@@ -142,30 +198,92 @@ export default function Swap() {
                 rightIcon={<IoShuffleOutline size="25px" />}
                 onClick={getSquidRoute}
                 isLoading={loadingRoute}
-                loadingText="Getting Swap Data..."
+                loadingText="Getting swap estimate..."
                 spinnerPlacement="end"
                 isDisabled={
                     !fromChain ||
                     !fromToken.address ||
                     !fromAmount ||
+                    Number(fromAmount) === 0 ||
                     !toChain ||
                     !toToken.address ||
                     !fromSafe ||
                     !toSafe
                 }
             >
-                Get Swap Data
+                Get swap estimate
             </Button>
-            {routeData?.transactionRequest && (
-                <pre
-                    style={{
-                        overflow: "auto",
-                        fontSize: "12px",
+            {routeData && (
+                <Button
+                    marginTop="12px"
+                    colorScheme={
+                        networkMismatch ||
+                        fromAmoutIsGreaterThanTokenBalance ||
+                        insufficientEthBalance ||
+                        ethOnlySwapInsufficientBalance
+                            ? "orange"
+                            : "green300"
+                    }
+                    rightIcon={<IoPaperPlane size="25px" />}
+                    onClick={() => {
+                        createAndApproveSwapTransaction(
+                            fromNetwork,
+                            fromSafe,
+                            {
+                                to: fromToken.address,
+                                data: approveEncodeData,
+                            },
+                            {
+                                to: routeData.transactionRequest.target,
+                                data: routeData.transactionRequest.data,
+                                value: routeData.transactionRequest.value,
+                            },
+                            address,
+                        );
                     }}
+                    isDisabled={
+                        !routeData ||
+                        !isConnected ||
+                        networkMismatch ||
+                        !metaMaskInstalled ||
+                        fromAmoutIsGreaterThanTokenBalance ||
+                        insufficientEthBalance ||
+                        ethOnlySwapInsufficientBalance
+                    }
+                    spinnerPlacement="end"
                 >
-                    {JSON.stringify(routeData.transactionRequest, null, 2)}
-                </pre>
+                    {(networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
+                        (fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken.symbol} balance`) ||
+                        ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
+                            "Insufficient safe ETH balance") ||
+                        "Create and sign safe transaction"}
+                </Button>
             )}
+            {routeData && (insufficientEthBalance || ethOnlySwapInsufficientBalance) && (
+                <>
+                    <Alert status="warning" variant="left-accent" marginTop="5px" borderRadius="base">
+                        <AlertIcon />
+                        To cover estimated transaction fees, ensure you have at least {estimatedSwapFee}&nbsp;ETH, in
+                        addition to the transfer amount, in your safe balance before initiating a transaction.
+                    </Alert>
+                    <Alert status="info" variant="left-accent" marginTop="5px" borderRadius="base">
+                        <AlertIcon />
+                        Gas refunds - in order to maximise success rates, smart contracts take a deposit to cover gas
+                        costs during the transaction. Once the transaction has completed, the amount left unused is
+                        refunded to the safe automatically on the source chain, in the source chain&lsquo;s native gas
+                        token.
+                    </Alert>
+                </>
+            )}
+            {/* {routeData && !(insufficientEthBalance || ethOnlySwapInsufficientBalance) && (
+                <Alert status="info" variant="left-accent" marginTop="5px" borderRadius="base">
+                    <AlertIcon />
+                    Estimated fees - {estimatedSwapFee}&nbsp;ETH. Gas refunds - in order to maximise success rates,
+                    smart contracts take a deposit to cover gas costs during the transaction. Once the transaction has
+                    completed, the amount left unused is refunded to the safe automatically on the source chain, in the
+                    source chain&lsquo;s native gas token.
+                </Alert>
+            )} */}
         </Stack>
     );
 }

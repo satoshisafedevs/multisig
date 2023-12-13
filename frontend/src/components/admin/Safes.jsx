@@ -60,7 +60,7 @@ function Safes() {
                         ...prevState,
                         safes: latestSafesData,
                     }));
-                    console.log("updated safes data");
+                    console.log("Updated safes data");
                 }
                 setLoading(false);
             }
@@ -103,7 +103,12 @@ function Safes() {
                 </Button>
             </Flex>
             {currentTeam?.safes?.map((safe) => (
-                <SafeDetails key={safe.safeAddress} data={safe} loading={loading} />
+                <SafeDetails
+                    key={safe.safeAddress}
+                    data={safe}
+                    loading={loading}
+                    fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
+                />
             ))}
         </Box>
     );
