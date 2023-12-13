@@ -19,7 +19,13 @@ function Wagmi({ children }) {
     const [metaMaskInstalled, setMetaMaskInstalled] = useState(false);
     const [walletMismatch, setWalletMismatch] = useState(false);
     const { chain } = useNetwork();
-    const { chains, error: switchNetworkError, isLoading: switchNetworkIsLoading, switchNetwork } = useSwitchNetwork();
+    const {
+        chains,
+        error: switchNetworkError,
+        isLoading: switchNetworkIsLoading,
+        switchNetwork,
+        switchNetworkAsync,
+    } = useSwitchNetwork();
     const { connect, error: connectError, isLoading: connectIsLoading, connectors, pendingConnector } = useConnect();
     const { address, connector, isConnected } = useAccount();
     const { data: wallet } = useBalance({ address });
@@ -34,16 +40,28 @@ function Wagmi({ children }) {
     }, []);
 
     useEffect(() => {
-        if (connectError || switchNetworkError) {
+        if (connectError) {
             toast({
-                description: connectError?.message || switchNetworkError?.message,
+                description: `Failed to connect: ${connectError?.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
         }
-    }, [connectError, switchNetworkError]);
+    }, [connectError]);
+
+    useEffect(() => {
+        if (switchNetworkError) {
+            toast({
+                description: `Fialed to switch network: ${switchNetworkError?.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    }, [switchNetworkError]);
 
     useEffect(() => {
         if (address && userTeamData?.userWalletAddress) {
@@ -61,7 +79,7 @@ function Wagmi({ children }) {
     useEffect(() => {
         if (pagedOpened && address) {
             toast({
-                description: "MetaMask account has been changed.",
+                description: "MetaMask account has been updated.",
                 position: "top",
                 status: "warning",
                 duration: 5000,
@@ -87,6 +105,7 @@ function Wagmi({ children }) {
             chain,
             chains,
             switchNetwork,
+            switchNetworkAsync,
             switchNetworkIsLoading,
         }),
         [
@@ -104,6 +123,7 @@ function Wagmi({ children }) {
             chain,
             chains,
             switchNetwork,
+            switchNetworkAsync,
             switchNetworkIsLoading,
         ],
     );

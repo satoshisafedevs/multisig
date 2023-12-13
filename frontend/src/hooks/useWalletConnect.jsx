@@ -24,15 +24,17 @@ const useWalletConnect = () => {
     const { createAndApproveTransaction, loadSafe } = useGnosisSafe();
     const toast = useToast();
     let { safes } = currentTeam;
-    let uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
+    let uniqueNetworks = [...new Set(safes && safes.map(({ network }) => network))];
     let chains = uniqueNetworks.map((network) => NETWORK_EIP[network]).filter((chainId) => chainId !== undefined);
 
-    const accounts = safes
-        .map(({ network, safeAddress }) => {
-            const chainId = NETWORK_EIP[network];
-            return chainId ? `${chainId}:${safeAddress}` : null;
-        })
-        .filter((account) => account !== null);
+    const accounts =
+        safes &&
+        safes
+            .map(({ network, safeAddress }) => {
+                const chainId = NETWORK_EIP[network];
+                return chainId ? `${chainId}:${safeAddress}` : null;
+            })
+            .filter((account) => account !== null);
 
     useEffect(() => {
         if (web3wallet) {
@@ -44,7 +46,7 @@ const useWalletConnect = () => {
     useEffect(() => {
         if (currentTeam) {
             safes = currentTeam.safes;
-            uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
+            uniqueNetworks = [...new Set(safes && safes.map(({ network }) => network))];
             chains = uniqueNetworks.map((network) => NETWORK_EIP[network]).filter((chainId) => chainId !== undefined);
         }
     }, [currentTeam]);

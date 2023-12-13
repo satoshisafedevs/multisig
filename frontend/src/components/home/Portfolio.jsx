@@ -111,7 +111,7 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
                     background="none"
                 />
             </CardHeader>
-            <CardBody paddingTop="0" overflow="auto">
+            <CardBody paddingTop="0" overflow={activeTab === "chart" ? "hidden" : "auto"}>
                 {renderBody()}
             </CardBody>
         </Card>

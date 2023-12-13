@@ -53,7 +53,6 @@ export default function Header({ withTeam }) {
         chain,
         chains,
         switchNetwork,
-        switchNetworkIsLoading,
     } = useWagmi();
     const [safesModalOpen, setSafesModalOpen] = useState(false);
     const [hoverActive, setHoverActive] = useState(false);
@@ -228,7 +227,6 @@ export default function Header({ withTeam }) {
                                                                     isChecked={el.name === chain.name}
                                                                     type="checkbox"
                                                                     onClick={() => switchNetwork(el.id)}
-                                                                    isDisabled={switchNetworkIsLoading}
                                                                 >
                                                                     {el.name}
                                                                 </MenuItemOption>

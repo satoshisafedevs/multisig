@@ -1,5 +1,6 @@
 import React, { useState, memo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
+import { upperFirst } from "lodash";
 import {
     Accordion,
     AccordionItem,
@@ -12,6 +13,8 @@ import {
     Flex,
     Heading,
     Button,
+    IconButton,
+    Tag,
     Tooltip,
     Modal,
     ModalOverlay,
@@ -24,19 +27,26 @@ import {
     useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
-import { IoRemoveCircleOutline, IoHelpCircleOutline } from "react-icons/io5";
+import { IoRemoveCircleOutline, IoHelpCircleOutline, IoPersonRemove, IoPersonAdd, IoCogOutline } from "react-icons/io5";
 import { BsSafe } from "react-icons/bs";
 import { db, doc, getDoc, updateDoc } from "../../firebase";
 import { useUser } from "../../providers/User";
 import { formatTimestamp } from "../../utils";
 import SafeStatus from "./SafeStatus";
+import RemoveSafeOwnerModal from "./RemoveSafeOwnerModal";
+import AddSafeOwnerModal from "./AddSafeOwnerModal";
+import EditSafeThresholdModal from "./EditSafeThresholdModal";
 
-function SafeDetails({ data, loading }) {
+function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { currentTeam, setCurrentTeam, teamUsersInfo } = useUser();
     const [isEditingName, setIsEditingName] = useState(false);
     const [safeName, setSafeName] = useState(data.name || "");
+    const [addSafeOwnerModalIsOpen, setAddSafeOwnerModalIsOpen] = useState(false);
+    const [removeSafeOwnerModalIsOpen, setRemoveSafeOwnerModalIsOpen] = useState(false);
+    const [editSafeThresholdModalIsOpen, setEditSafeThresholdModalIsOpen] = useState(false);
+    const [ownerToRemove, setOwnerToRemove] = useState();
     const bgValue = useColorModeValue("gray.50", "whiteAlpha.100");
     const cancelRef = useRef();
 
@@ -115,14 +125,48 @@ function SafeDetails({ data, loading }) {
 
     return (
         <Accordion allowToggle>
+            <RemoveSafeOwnerModal
+                isOpen={removeSafeOwnerModalIsOpen}
+                setIsOpen={setRemoveSafeOwnerModalIsOpen}
+                safeAddress={data.safeAddress}
+                safeName={data.name}
+                owner={ownerToRemove}
+                owners={data.owners}
+                threshold={data.threshold}
+                network={data.network}
+                fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
+            />
+            <AddSafeOwnerModal
+                isOpen={addSafeOwnerModalIsOpen}
+                setIsOpen={setAddSafeOwnerModalIsOpen}
+                safeAddress={data.safeAddress}
+                safeName={data.name}
+                owners={data.owners}
+                threshold={data.threshold}
+                network={data.network}
+                fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
+            />
+            <EditSafeThresholdModal
+                isOpen={editSafeThresholdModalIsOpen}
+                setIsOpen={setEditSafeThresholdModalIsOpen}
+                safeAddress={data.safeAddress}
+                safeName={data.name}
+                owners={data.owners}
+                threshold={data.threshold}
+                network={data.network}
+                fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
+            />
             <Modal isOpen={isOpen} onClose={onClose} size="lg">
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Remove safe</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        Are you sure you want to remove safe {data.safeAddress}? This cannot be undone and will reset
-                        Portfolio data for this safe.
+                        Are you sure you want to remove safe{" "}
+                        <Tag fontSize="15px" colorScheme="red">
+                            {data.name || data.safeAddress}
+                        </Tag>
+                        ?<br /> This cannot be undone and will reset Portfolio data for this safe.
                     </ModalBody>
                     <ModalFooter>
                         <Button
@@ -148,7 +192,7 @@ function SafeDetails({ data, loading }) {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-            <AccordionItem key={data.safeAddress} borderWidth={1} borderRadius="5px" marginBottom="15px">
+            <AccordionItem key={data.safeAddress} borderWidth={1} borderRadius="5px" marginTop="15px">
                 {({ isExpanded }) => (
                     <>
                         <AccordionButton padding="15px 10px">
@@ -178,6 +222,7 @@ function SafeDetails({ data, loading }) {
                                 </Flex>
                                 <Tooltip label={loading && "Syncing with latest data..."}>
                                     <Button
+                                        variant="outline"
                                         onClick={isEditingName ? handleSaveName : handleEditName}
                                         isDisabled={loading}
                                     >
@@ -200,7 +245,46 @@ function SafeDetails({ data, loading }) {
                                     Owners
                                 </Heading>
                                 <Box flex="1" textAlign="center">
-                                    {data && data.owners && data.owners.map((owner) => <Box key={owner}>{owner}</Box>)}
+                                    {data &&
+                                        data.owners &&
+                                        data.owners.map((owner) => (
+                                            <Box
+                                                key={owner}
+                                                display="flex"
+                                                flexDirection="row"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                            >
+                                                {owner}
+                                                {data.owners.length > 1 && (
+                                                    <Tooltip label="Remove owner">
+                                                        <IconButton
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            colorScheme="red"
+                                                            marginLeft="5px"
+                                                            icon={<IoPersonRemove />}
+                                                            isDisabled={loading}
+                                                            onClick={() => {
+                                                                setOwnerToRemove(owner);
+                                                                setRemoveSafeOwnerModalIsOpen(true);
+                                                            }}
+                                                        />
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
+                                        ))}
+                                    <Button
+                                        size="sm"
+                                        marginTop="5px"
+                                        colorScheme="green300"
+                                        variant="outline"
+                                        isDisabled={loading}
+                                        rightIcon={<IoPersonAdd />}
+                                        onClick={() => setAddSafeOwnerModalIsOpen(true)}
+                                    >
+                                        Add owner
+                                    </Button>
                                 </Box>
                             </Flex>
                             <Divider />
@@ -209,26 +293,7 @@ function SafeDetails({ data, loading }) {
                                     Network
                                 </Heading>
                                 <Box flex="1" textAlign="center">
-                                    {data.network}
-                                </Box>
-                            </Flex>
-                            <Divider />
-                            <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
-                                    Manage
-                                </Heading>
-                                <Box flex="1" textAlign="center">
-                                    <Tooltip label={loading && "Syncing with latest data..."}>
-                                        <Button
-                                            colorScheme="red"
-                                            variant="outline"
-                                            isDisabled={loading}
-                                            rightIcon={<IoRemoveCircleOutline />}
-                                            onClick={onOpen}
-                                        >
-                                            Remove safe
-                                        </Button>
-                                    </Tooltip>
+                                    {upperFirst(data.network)}
                                 </Box>
                             </Flex>
                             <Divider />
@@ -236,8 +301,25 @@ function SafeDetails({ data, loading }) {
                                 <Heading size="xs" flexBasis="15%">
                                     Threshold
                                 </Heading>
-                                <Box flex="1" textAlign="center">
+                                <Box
+                                    flex="1"
+                                    paddingLeft="37px"
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                >
                                     {data.threshold}
+                                    <Tooltip label="Edit threshold">
+                                        <IconButton
+                                            size="sm"
+                                            variant="ghost"
+                                            colorScheme="green300"
+                                            marginLeft="5px"
+                                            icon={<IoCogOutline />}
+                                            isDisabled={loading}
+                                            onClick={() => setEditSafeThresholdModalIsOpen(true)}
+                                        />
+                                    </Tooltip>
                                 </Box>
                             </Flex>
                             <Divider />
@@ -256,6 +338,26 @@ function SafeDetails({ data, loading }) {
                                     {formatTimestamp(data.addedAt)}
                                 </Box>
                             </Flex>
+                            <Divider />
+                            <Flex align="center" py={4}>
+                                <Heading size="xs" flexBasis="15%">
+                                    Manage
+                                </Heading>
+                                <Box flex="1" textAlign="center">
+                                    <Tooltip label={loading && "Syncing with latest data..."}>
+                                        <Button
+                                            size="sm"
+                                            colorScheme="red"
+                                            variant="outline"
+                                            isDisabled={loading}
+                                            rightIcon={<IoRemoveCircleOutline />}
+                                            onClick={onOpen}
+                                        >
+                                            Remove safe
+                                        </Button>
+                                    </Tooltip>
+                                </Box>
+                            </Flex>
                         </AccordionPanel>
                     </>
                 )}
@@ -268,6 +370,7 @@ SafeDetails.propTypes = {
     // eslint-disable-next-line react/forbid-prop-types
     data: PropTypes.any,
     loading: PropTypes.bool,
+    fetchAndUpdateLatestSafesData: PropTypes.func,
 };
 
 export default memo(SafeDetails);

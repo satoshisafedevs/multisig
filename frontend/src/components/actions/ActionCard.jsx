@@ -26,10 +26,10 @@ export default function ActionCard() {
                 </Stack>
             </CardHeader>
             <CardBody overflow="auto" paddingTop="0" paddingBottom="0">
-                <div style={{ display: activeTab === "swap" ? "block" : "none" }}>
+                <div style={{ display: activeTab === "swap" ? "unset" : "none" }}>
                     <Swap />
                 </div>
-                <div style={{ display: activeTab === "walletconnect" ? "block" : "none" }}>
+                <div style={{ display: activeTab === "walletconnect" ? "unset" : "none" }}>
                     <WalletConnect />
                 </div>
             </CardBody>
