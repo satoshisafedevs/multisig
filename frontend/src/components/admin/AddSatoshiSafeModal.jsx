@@ -19,7 +19,7 @@ import { db, doc, getDoc, updateDoc, Timestamp } from "../../firebase";
 import ImportSafeModal from "./ImportSafeModal";
 import CreateNewSafeModal from "./CreateNewSafeModal";
 
-function WelcomeModal({ isOpen, setIsOpen }) {
+function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");
     const toast = useToast();
     const { currentTeam, setCurrentTeam, userTeamData } = useUser();
@@ -152,9 +152,9 @@ function WelcomeModal({ isOpen, setIsOpen }) {
     );
 }
 
-WelcomeModal.propTypes = {
+AddSatoshiSafeModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     setIsOpen: PropTypes.func.isRequired,
 };
 
-export default WelcomeModal;
+export default AddSatoshiSafeModal;

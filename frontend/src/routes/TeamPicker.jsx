@@ -21,12 +21,14 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
-import { db, addDoc, collection, setDoc, doc, createNewSatoshiBot } from "../firebase";
+import { db, addDoc, collection, setDoc, doc } from "../firebase";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 import { useTransactions } from "../providers/Transactions";
 import { useSafeBalance } from "../providers/SafeBalance";
 import Header from "../components/Header";
+
+const MAX_TEAM_NAME_LENGTH = 50;
 
 function TeamPicker() {
     const toast = useToast();
@@ -59,12 +61,46 @@ function TeamPicker() {
         }
     }, [isOpen]);
 
+    const updateTeamName = (newName) => {
+        if (newName.length > MAX_TEAM_NAME_LENGTH) {
+            toast({
+                description: "Team name too long. Maximum 50 characters allowed.",
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        if (/[^a-zA-Z0-9\s]/.test(newName)) {
+            // Regex to check for special characters
+            toast({
+                description: "Special characters are not allowed in team name.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        setTeamName(newName);
+    };
+
     const handleTeamSelect = (slug) => navigate(`/team/${slug}`);
 
     const handleNewTeamSubmit = async () => {
-        setLoading(true);
-
         try {
+            if (teamName.length === 0 || walletAddress.length === 0) {
+                toast({
+                    description: "Please fill in all fields.",
+                    status: "warning",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            setLoading(true);
             const newTeamData = {
                 name: teamName,
                 users: [firestoreUser.uid],
@@ -80,7 +116,7 @@ function TeamPicker() {
                 },
                 { merge: true },
             );
-            await createNewSatoshiBot({ teamId: newDoc.id });
+            // await createNewSatoshiBot({ teamId: newDoc.id });
             if ((await getUserTeamsData(user)) === true) {
                 // navigate once new team is ready
                 handleTeamSelect(newTeamData.slug);
@@ -140,7 +176,11 @@ function TeamPicker() {
                         <ModalBody>
                             <FormControl>
                                 <FormLabel>Team name</FormLabel>
-                                <Input value={teamName} onChange={(e) => setTeamName(e.target.value)} ref={inputRef} />
+                                <Input
+                                    value={teamName}
+                                    onChange={(e) => updateTeamName(e.target.value)}
+                                    ref={inputRef}
+                                />
                             </FormControl>
                             <FormControl mt={4}>
                                 <FormLabel>Wallet address</FormLabel>

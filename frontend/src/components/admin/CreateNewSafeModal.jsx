@@ -19,18 +19,24 @@ import {
     Th,
     IconButton,
     useToast,
+    Spinner,
+    Link,
 } from "@chakra-ui/react";
 import { IoChevronBackOutline, IoAdd, IoRemove } from "react-icons/io5";
 import { useUser } from "../../providers/User";
+import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
 
 function CreateNewSafeModal({ onClose }) {
     const { teamUsersInfo } = useUser();
+    const { createSafe } = useGnosisSafe();
     const toast = useToast();
     const [safeName, setSafeName] = useState("");
     const [network, setNetwork] = useState("");
     const [threshold, setThreshold] = useState("");
     const [selectedOwners, setSelectedOwners] = useState([]);
+    const [transactionHash, setTransactionHash] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     // Initialize selectedOwners with all team members
     useEffect(() => {
@@ -53,7 +59,7 @@ function CreateNewSafeModal({ onClose }) {
         setSelectedOwners(newOwners);
     };
 
-    const handleCreateSafe = () => {
+    const handleCreateSafe = async () => {
         if (!safeName || !network) {
             toast({
                 title: "Required Fields Missing",
@@ -66,9 +72,62 @@ function CreateNewSafeModal({ onClose }) {
         }
 
         const ownerAddresses = selectedOwners.map((ownerId) => teamUsersInfo[ownerId].walletAddress);
+        try {
+            await createSafe({
+                network,
+                owners: ownerAddresses,
+                threshold,
+                onTransactionSent: (txHash) => {
+                    setTransactionHash(txHash);
+                    setIsLoading(false);
+                    toast({
+                        title: "Transaction Sent",
+                        description: `Transaction has been sent. 
+                        View on [block explorer](${networks[network].scanUrl}/tx/${txHash})`,
+                        status: "info",
+                        duration: 9000,
+                        isClosable: true,
+                    });
+                },
+            });
+        } catch (error) {
+            toast({
+                title: "Error creating safe",
+                description: error,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
         console.log({ safeName, network, ownerAddresses });
         onClose();
     };
+
+    if (isLoading) {
+        return (
+            <>
+                <ModalHeader>Create New Safe</ModalHeader>
+                <ModalCloseButton top="var(--chakra-space-3)" />
+                <ModalBody>
+                    <Spinner />
+                    {transactionHash ? (
+                        <Link href={`https://etherscan.io/tx/${transactionHash}`} isExternal>
+                            View Transaction
+                        </Link>
+                    ) : (
+                        <p>Creating Safe...</p>
+                    )}
+                </ModalBody>
+                <ModalFooter justifyContent="space-between">
+                    <Stack direction="row" spacing={4}>
+                        <Button variant="ghost" onClick={onClose}>
+                            Close
+                        </Button>
+                    </Stack>
+                </ModalFooter>
+            </>
+        );
+    }
 
     return (
         <>

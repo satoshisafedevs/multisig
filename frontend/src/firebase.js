@@ -65,7 +65,7 @@ const functions = getFunctions(app);
 
 const inviteUser = httpsCallable(functions, "api-inviteUser");
 const acceptInvite = httpsCallable(functions, "api-acceptInvite");
-const createNewSatoshiBot = httpsCallable(functions, "api-createNewSatoshiBot");
+// const createNewSatoshiBot = httpsCallable(functions, "api-createNewSatoshiBot");
 
 // Check if localhost:5001 is active
 isServerActive("http://localhost:4000").then((isActive) => {
@@ -87,7 +87,7 @@ export {
     functions,
     inviteUser,
     acceptInvite,
-    createNewSatoshiBot,
+    // createNewSatoshiBot,
     doc,
     getDoc,
     getDocs,
