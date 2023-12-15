@@ -30,7 +30,7 @@ function WCModal({
         const metadata = transactionRequest?.verifyContext?.verified;
         modalContent = (
             <>
-                <ModalHeader>Approve Transaction for {metadata?.origin || "Dapp"}</ModalHeader>
+                <ModalHeader>Approve Transaction for {metadata?.origin || "dApp"}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <Box mb="4">

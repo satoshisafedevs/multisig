@@ -1,13 +1,17 @@
 import SafeApiKit from "@safe-global/api-kit";
-import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
+import Safe, { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
 import { ethers } from "ethers";
 import { useToast } from "@chakra-ui/react";
-import { useTransactions } from "../providers/Transactions";
 import networks from "../utils/networks.json";
+import checkNetwork from "../utils/checkNetwork";
+import { db, doc, setDoc } from "../firebase";
+import { useUser } from "../providers/User";
+import { useTransactions } from "../providers/Transactions";
 
 const useGnosisSafe = () => {
     const { getLatestGnosisData } = useTransactions();
     const toast = useToast();
+    const { user, currentTeam, getUserTeamsData } = useUser();
 
     const getSafeSdk = async (safeAddress) => {
         try {
@@ -322,7 +326,7 @@ const useGnosisSafe = () => {
         }
     };
 
-    async function loadSafe(safeAddress, network) {
+    const loadSafe = async (safeAddress, network) => {
         try {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const safeOwner = provider.getSigner(0);
@@ -340,7 +344,92 @@ const useGnosisSafe = () => {
         } catch (error) {
             console.error(error);
         }
-    }
+    };
+    const createSafe = async ({ owners, threshold, network, onTransactionSent }) => {
+        try {
+            checkNetwork(network);
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const safeOwner = provider.getSigner(0);
+            const ethAdapter = new EthersAdapter({
+                ethers,
+                signerOrProvider: safeOwner,
+            });
+            // Generate a unique saltNonce using a timestamp
+            const saltNonce = new Date().getTime().toString();
+            const safe = await SafeFactory.create({ ethAdapter });
+            await safe.deploySafe({
+                safeAccountConfig: {
+                    owners,
+                    threshold,
+                },
+                saltNonce,
+                callback: (txHash) => {
+                    console.log(`Safe creation transaction sent: ${txHash}`);
+                    if (onTransactionSent) {
+                        onTransactionSent(txHash);
+                    }
+                },
+            });
+            return true;
+        } catch (error) {
+            console.error(error);
+            toast({
+                description: `Failed to create safe: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+    const refreshSafeList = async ({ walletAddress }) => {
+        try {
+            if (user && user.uid && currentTeam && currentTeam.id) {
+                const allSafesPromises = Object.keys(networks).map(async (key) => {
+                    if (!networks[key].safeTransactionService) {
+                        return []; // Skip if no safeTransactionService is defined
+                    }
+                    const safeService = await getSafeService(key);
+                    if (!safeService) {
+                        return []; // Skip if the Safe service couldn't be initialized
+                    }
+                    const { safes } = await getSafesByOwner(safeService, walletAddress);
+                    if (!safes || safes.length === 0) {
+                        return []; // Skip if no safes found
+                    }
+                    const safeDetails = await Promise.all(
+                        safes.map(async (safeAddress) => {
+                            const safeInfo = await getSafeInfo(safeService, safeAddress);
+                            return {
+                                network: key,
+                                safeAddress,
+                                owners: safeInfo.owners,
+                                threshold: safeInfo.threshold,
+                            };
+                        }),
+                    );
+                    return safeDetails;
+                });
+
+                const allSafesNested = await Promise.all(allSafesPromises);
+                const allSafes = allSafesNested.flat(); // Flatten the nested arrays
+                // Process the fetched safes as needed, e.g., update state, store in database, etc.
+                const safesRef = doc(db, "users", user.uid, "teams", currentTeam.id);
+                await setDoc(safesRef, { safes: allSafes }, { merge: true });
+                getUserTeamsData();
+                return allSafes;
+            }
+        } catch (error) {
+            console.error(error);
+            toast({
+                description: `Failed to refresh safes list: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     return {
         getSafeService,
@@ -355,6 +444,8 @@ const useGnosisSafe = () => {
         confirmTransaction,
         executeTransaction,
         loadSafe,
+        createSafe,
+        refreshSafeList,
     };
 };
 

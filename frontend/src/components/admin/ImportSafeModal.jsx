@@ -23,6 +23,7 @@ import {
     Checkbox,
 } from "@chakra-ui/react";
 import { IoChevronBackOutline } from "react-icons/io5";
+import useGnosisSafe from "../../hooks/useGnosisSafe";
 
 function ImportSafeModal({
     userTeamData,
@@ -41,6 +42,7 @@ function ImportSafeModal({
             margin-inline-end: 3px;
         }
     `;
+    const { refreshSafeList } = useGnosisSafe();
     return (
         <>
             <ModalHeader>Welcome to Satoshi Safe</ModalHeader>
@@ -93,10 +95,19 @@ function ImportSafeModal({
                         </Table>
                     </TableContainer>
                 ) : (
-                    <Alert status="warning" marginTop="20px" borderRadius="var(--chakra-radii-base)">
-                        <AlertIcon />
-                        It appears that you don&apos;t have a Gnosis Safe associated with your wallet.
-                    </Alert>
+                    <>
+                        <Alert status="warning" marginTop="20px" borderRadius="var(--chakra-radii-base)">
+                            <AlertIcon />
+                            It appears that you don&apos;t have a Gnosis Safe associated with your wallet.
+                        </Alert>
+                        <Button
+                            marginTop="20px"
+                            colorScheme="blue"
+                            onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}
+                        >
+                            Refresh List
+                        </Button>
+                    </>
                 )}
             </ModalBody>
 
@@ -108,6 +119,9 @@ function ImportSafeModal({
                     Back
                 </StyledButton>
                 <Stack direction="row" spacing={4}>
+                    <Button onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}>
+                        Refresh List
+                    </Button>
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
