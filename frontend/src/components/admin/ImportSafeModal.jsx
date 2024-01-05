@@ -1,5 +1,5 @@
 /* eslint-disable react/forbid-prop-types */
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import styled from "@emotion/styled";
 import {
@@ -21,6 +21,7 @@ import {
     useColorModeValue,
     Tooltip,
     Checkbox,
+    Spinner,
 } from "@chakra-ui/react";
 import { IoChevronBackOutline } from "react-icons/io5";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
@@ -43,6 +44,19 @@ function ImportSafeModal({
         }
     `;
     const { refreshSafeList } = useGnosisSafe();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Updated function to handle asynchronous refresh list
+    const handleRefreshList = async () => {
+        setIsRefreshing(true);
+        try {
+            await refreshSafeList({ walletAddress: userTeamData.userWalletAddress });
+        } catch (error) {
+            console.error("Error refreshing safe list:", error);
+            // Optionally handle errors, e.g., show a notification
+        }
+        setIsRefreshing(false);
+    };
     return (
         <>
             <ModalHeader>Welcome to Satoshi Safe</ModalHeader>
@@ -119,7 +133,7 @@ function ImportSafeModal({
                     Back
                 </StyledButton>
                 <Stack direction="row" spacing={4}>
-                    <Button onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}>
+                    <Button onClick={handleRefreshList} isLoading={isRefreshing} spinner={<Spinner size="sm" />}>
                         Refresh List
                     </Button>
                     <Button variant="ghost" onClick={onClose}>
