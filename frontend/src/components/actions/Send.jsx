@@ -169,6 +169,7 @@ export default function Send() {
                             <>
                                 <MenuButton
                                     as={Button}
+                                    isDisabled={!address}
                                     backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
                                     borderRightRadius="0"
                                     border="1px solid"

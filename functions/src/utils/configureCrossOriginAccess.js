@@ -1,9 +1,9 @@
 const configureCrossOriginAccess = (req, res) => {
     const allowedOrigins = [
         "http://localhost:5173",
-        "https://prontoai-playground.web.app/",
-        "https://prontoai-playground.firebaseapp.com/",
-        "https://playground.satoshisafe.ai/",
+        "https://prontoai-playground.web.app",
+        "https://prontoai-playground.firebaseapp.com",
+        "https://playground.satoshisafe.ai",
     ];
 
     const allowedOriginRegex = /^https:\/\/prontoai-playground.*\.web\.app$/;
