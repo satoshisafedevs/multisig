@@ -61,18 +61,11 @@ export default function Send() {
         const { safeAddress, network } = safeConfig;
         setSafe(safeAddress);
         setNetworkName(network);
-        const targetChain = chains.find((el) => {
-            // Check if the network is 'mainnet' and the el.network is 'homestead'
-            if (network === "mainnet") {
-                return el.network === "homestead";
-            }
-            // For other networks, just match the el.network with the given network
-            return el.network === network;
-        });
+        const targetChainID = networks[network].id;
         try {
             setLoadingTokens(true);
             const baseUrl = "https://api-getwallettokenbalances-mojsb2l5zq-uc.a.run.app";
-            const response = await fetch(`${baseUrl}/?chainId=${targetChain.id}&safeAddress=${safeAddress}`, {
+            const response = await fetch(`${baseUrl}/?chainId=${targetChainID}&safeAddress=${safeAddress}`, {
                 headers: {
                     Authorization: `Bearer ${user.accessToken}`,
                 },
@@ -169,7 +162,6 @@ export default function Send() {
                             <>
                                 <MenuButton
                                     as={Button}
-                                    isDisabled={!address}
                                     backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
                                     borderRightRadius="0"
                                     border="1px solid"
