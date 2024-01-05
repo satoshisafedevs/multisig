@@ -4,7 +4,7 @@ import UpdateProfileModal from "../components/UpdateProfileModal";
 import Header from "../components/Header";
 import Portfolio from "../components/home/Portfolio";
 import ControlPanel from "../components/home/ControlPanel";
-import ActionCard from "../components/actions/ActionCard";
+import ActionsCard from "../components/actions/ActionsCard";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 
@@ -85,7 +85,7 @@ function Home() {
                     </Box>
 
                     <Box minWidth="270px" minHeight="100%" gridRow="2" display={displayStyle}>
-                        <ActionCard />
+                        <ActionsCard />
                     </Box>
                     <Box minWidth="350px" gridRow="1/span 2" display={displayStyle}>
                         <ControlPanel />

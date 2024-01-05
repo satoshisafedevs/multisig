@@ -37,7 +37,7 @@ export default function Header({ withTeam }) {
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { firestoreUser, currentTeam } = useUser();
+    const { firestoreUser, currentTeam, userTeamData } = useUser();
     const { signOutUser, isSigningOut } = useAuth();
     const {
         preflightCheck,
@@ -117,6 +117,16 @@ export default function Header({ withTeam }) {
         }
         return null;
     };
+
+    const walletMismatchText =
+        "The MetaMask wallet address you have selected does not match the wallet address registered with Satoshi Safe.";
+
+    const notSafeOwner =
+        currentTeam?.safes &&
+        userTeamData?.userWalletAddress &&
+        currentTeam.safes.some((s) => !s.owners.includes(userTeamData.userWalletAddress));
+
+    const notSafeOwnerText = "The wallet address in your Profile does not belong to the owners of one or more Safes.";
 
     return (
         <Flex margin="10px 10px 0 10px">
@@ -217,18 +227,18 @@ export default function Header({ withTeam }) {
                                                 <Box paddingLeft="3" paddingBottom="1" paddingRight="3">
                                                     <Menu>
                                                         <MenuButton fontWeight="normal" as={Button}>
-                                                            Network {chain.name}
+                                                            Network{" "}
+                                                            {chain.name === "OP Mainnet" ? "Optimism" : chain.name}
                                                         </MenuButton>
                                                         <MenuList>
                                                             {chains.map((el) => (
                                                                 <MenuItemOption
                                                                     key={el.name}
-                                                                    vale={el.name}
                                                                     isChecked={el.name === chain.name}
                                                                     type="checkbox"
                                                                     onClick={() => switchNetwork(el.id)}
                                                                 >
-                                                                    {el.name}
+                                                                    {el.name === "OP Mainnet" ? "Optimism" : el.name}
                                                                 </MenuItemOption>
                                                             ))}
                                                         </MenuList>
@@ -253,7 +263,7 @@ export default function Header({ withTeam }) {
                         </Box>
                     </Stack>
                 </Flex>
-                {withTeam && walletMismatch && (
+                {withTeam && (walletMismatch || notSafeOwner) && (
                     <Flex>
                         <Alert
                             status="error"
@@ -262,8 +272,9 @@ export default function Header({ withTeam }) {
                             borderBottomRadius="var(--chakra-radii-md)"
                         >
                             <AlertIcon />
-                            The MetaMask wallet address you have selected does not match the wallet address registered
-                            with Satoshi Safe.
+                            {walletMismatch && walletMismatchText}
+                            {walletMismatch && notSafeOwner && " "}
+                            {notSafeOwner && notSafeOwnerText}
                         </Alert>
                     </Flex>
                 )}

@@ -140,7 +140,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
             );
         }
         if (modalState === "new") {
-            return <CreateNewSafeModal onClose={onClose} />;
+            return <CreateNewSafeModal onClose={onClose} setModalState={setModalState} />;
         }
     };
 

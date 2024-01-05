@@ -13,14 +13,15 @@ function Safes() {
     const [loading, setLoading] = useState(true);
 
     const getSafeData = async (safe, network, signal) => {
-        try {
-            const response = await fetch(`https://safe-transaction-${network}.safe.global/api/v1/safes/${safe}/`, {
-                signal,
-            });
-            return { [safe]: await response.json() };
-        } catch (e) {
-            return {};
+        const response = await fetch(`https://safe-transaction-${network}.safe.global/api/v1/safes/${safe}/`, {
+            signal,
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            const error = new Error(data.message || "Unprocessable Entity");
+            throw error;
         }
+        return { [safe]: await response.json() };
     };
 
     const fetchAndUpdateLatestSafesData = async (controller) => {
@@ -65,6 +66,7 @@ function Safes() {
                 setLoading(false);
             }
         } catch (error) {
+            if (error.message.includes("The operation was aborted.")) return;
             toast({
                 description: `Failed to sync safes data: ${error.message}`,
                 position: "top",

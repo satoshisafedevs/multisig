@@ -138,6 +138,49 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
+        } finally {
+            setTimeout(() => {
+                getLatestGnosisData();
+            }, 10000);
+        }
+    };
+
+    const createAndApproveSendTransaction = async (network, safeAddress, tx, senderAddress) => {
+        try {
+            const safeSdk = await getSafeSdk(safeAddress);
+            const safeTransaction = await safeSdk.createTransaction(
+                {
+                    safeTransactionData: {
+                        to: ethers.utils.getAddress(tx.to),
+                        data: tx.data,
+                        value: tx.value,
+                    },
+                },
+                // { nonce: 14 }, // add nonce value to replace an existing pending transaction if needed
+            );
+            const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+            const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+            const safeService = await getSafeService(network);
+            await safeService.proposeTransaction({
+                safeAddress: ethers.utils.getAddress(safeAddress),
+                senderAddress: ethers.utils.getAddress(senderAddress),
+                safeTransactionData: safeTransaction.data,
+                safeTxHash,
+                senderSignature: senderSignature.data,
+            });
+            return true;
+        } catch (error) {
+            toast({
+                description: `Failed to create and approve send transaction: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setTimeout(() => {
+                getLatestGnosisData();
+            }, 10000);
         }
     };
 
@@ -159,7 +202,7 @@ const useGnosisSafe = () => {
                         },
                     ],
                 },
-                // { nonce: ??? } // add nonce value to replace an existing transaction if needed
+                // { nonce: ??? } // add nonce value to replace an existing pending transaction if needed
             );
             const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
             const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
@@ -174,7 +217,7 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             toast({
-                description: `Failed to create and approve transaction: ${error.message}`,
+                description: `Failed to create and approve swap transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -300,8 +343,8 @@ const useGnosisSafe = () => {
             const safeSdk = await Safe.create({ ethAdapter, safeAddress });
             const safeTransaction = await safeService.getTransaction(safeTxHash);
             const txResponse = await safeSdk.executeTransaction(safeTransaction);
-            const resp = await txResponse.transactionResponse?.wait();
-            return resp;
+            await txResponse.transactionResponse?.wait();
+            return true;
         } catch (error) {
             if (error.message === "SafeProxy contract is not deployed on the current network") {
                 return toast({
@@ -323,6 +366,9 @@ const useGnosisSafe = () => {
             setTimeout(() => {
                 getLatestGnosisData();
             }, 10000);
+            setTimeout(() => {
+                getLatestGnosisData();
+            }, 15000);
         }
     };
 
@@ -437,6 +483,7 @@ const useGnosisSafe = () => {
         getSafeInfo,
         getAllTransactions,
         createAndApproveTransaction,
+        createAndApproveSendTransaction,
         createAndApproveSwapTransaction,
         addSafeOwner,
         removeSafeOwner,

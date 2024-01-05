@@ -33,7 +33,7 @@ function RemoveSafeOwnerModal({
     network,
     fetchAndUpdateLatestSafesData,
 }) {
-    const { chain, metaMaskInstalled } = useWagmi();
+    const { address, chain, chains, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
     const { removeSafeOwner } = useGnosisSafe();
 
     let updatedThreshold = 1;
@@ -63,7 +63,8 @@ function RemoveSafeOwnerModal({
         setNewThreshold(updatedThreshold);
     };
 
-    const networkMismatch = chain && chain.network !== network;
+    const networkMismatch =
+        chain && (network === "mainnet" ? chain.network !== "homestead" : chain.network !== network);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -115,24 +116,36 @@ function RemoveSafeOwnerModal({
                     <Button
                         colorScheme={networkMismatch ? "orange" : "red"}
                         rightIcon={<IoPersonRemove />}
-                        isDisabled={!newThreshold || networkMismatch || !metaMaskInstalled}
+                        isDisabled={!newThreshold || !metaMaskInstalled || !address || walletMismatch}
                         isLoading={loading}
                         onClick={async () => {
-                            try {
-                                setLoading(true);
-                                const resp = await removeSafeOwner(safeAddress, {
-                                    ownerAddress: owner,
-                                    threshold: newThreshold,
+                            if (networkMismatch) {
+                                const correctChain = chains.find((el) => {
+                                    // Check if the network is 'mainnet' and the el.network is 'homestead'
+                                    if (network === "mainnet") {
+                                        return el.network === "homestead";
+                                    }
+                                    // For other networks, just match the el.network with the given network
+                                    return el.network === network;
                                 });
-                                if (resp) {
-                                    setTimeout(() => {
-                                        const controller = new AbortController();
-                                        fetchAndUpdateLatestSafesData(controller);
-                                    }, 10000);
+                                switchNetwork(correctChain.id);
+                            } else {
+                                try {
+                                    setLoading(true);
+                                    const resp = await removeSafeOwner(safeAddress, {
+                                        ownerAddress: owner,
+                                        threshold: newThreshold,
+                                    });
+                                    if (resp) {
+                                        setTimeout(() => {
+                                            const controller = new AbortController();
+                                            fetchAndUpdateLatestSafesData(controller);
+                                        }, 10000);
+                                    }
+                                } finally {
+                                    onClose();
+                                    setLoading(false);
                                 }
-                            } finally {
-                                onClose();
-                                setLoading(false);
                             }
                         }}
                     >

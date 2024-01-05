@@ -32,6 +32,7 @@ import { BsSafe } from "react-icons/bs";
 import { db, doc, getDoc, updateDoc } from "../../firebase";
 import { useUser } from "../../providers/User";
 import { formatTimestamp } from "../../utils";
+import CopyToClipboard from "../CopyToClipboard";
 import SafeStatus from "./SafeStatus";
 import RemoveSafeOwnerModal from "./RemoveSafeOwnerModal";
 import AddSafeOwnerModal from "./AddSafeOwnerModal";
@@ -235,8 +236,16 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                                 <Heading size="xs" flexBasis="15%">
                                     Safe address
                                 </Heading>
-                                <Box flex="1" textAlign="center">
-                                    {data.safeAddress}
+                                <Box
+                                    flex="1"
+                                    textAlign="center"
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    gap="5px"
+                                >
+                                    {data.safeAddress}{" "}
+                                    <CopyToClipboard copy={data.safeAddress} tooltipSuffix="address" />
                                 </Box>
                             </Flex>
                             <Divider />

@@ -21,7 +21,6 @@ import { IoSend, IoTrash } from "react-icons/io5";
 import { db, collection, addDoc, onSnapshot, Timestamp } from "../../firebase";
 import DeleteMessageModal from "../DeleteMessageModal";
 import { useUser } from "../../providers/User";
-import { useWagmi } from "../../providers/Wagmi";
 import { useTransactions } from "../../providers/Transactions";
 import theme from "../../theme";
 import Transaction from "../Transaction";
@@ -29,7 +28,6 @@ import Transaction from "../Transaction";
 export default function Chat() {
     const toast = useToast();
     const { firestoreUser, teamsData, currentTeam, teamUsersInfo } = useUser();
-    const { address, walletMismatch } = useWagmi();
     const { firestoreTransactions } = useTransactions();
     const { slug } = useParams();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
@@ -54,7 +52,7 @@ export default function Chat() {
         if (messages && lastMessage.current) {
             lastMessage.current.scrollIntoView();
         }
-    }, [messages, activeTab]);
+    }, [messages, activeTab, firestoreTransactions]);
 
     const handleMouseEnter = useCallback(
         (id) => {
@@ -221,16 +219,41 @@ export default function Chat() {
         return msg.message;
     };
 
+    // once the safe is removed filter it's transactions,
+    // we need some logic that removes those transactions from backend
+    const filterRemovedSafesTransactions = useMemo(
+        () =>
+            firestoreTransactions.filter(
+                (item1) => currentTeam.safes.some((item2) => item1.safe === item2.safeAddress),
+                // eslint-disable-next-line function-paren-newline
+            ),
+        [firestoreTransactions, currentTeam],
+    );
+
+    // display latest 100 transactions
+    const maxTransactions = -100;
+
+    const sortTransactionsByDateAndSlice = useMemo(
+        () =>
+            filterRemovedSafesTransactions
+                .sort(
+                    (a, b) =>
+                        new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
+                )
+                .slice(maxTransactions),
+        [filterRemovedSafesTransactions],
+    );
+
     const filterSameNonceTransactions = useMemo(() => {
         const results = [];
 
         // If there are no transactions, we don't need to do any work
-        if (!firestoreTransactions) {
+        if (!sortTransactionsByDateAndSlice) {
             return results;
         }
 
         // Group transactions by 'safe'
-        const groupedBySafe = firestoreTransactions.reduce((acc, transaction) => {
+        const groupedBySafe = sortTransactionsByDateAndSlice.reduce((acc, transaction) => {
             if (!acc[transaction.safe]) acc[transaction.safe] = [];
             acc[transaction.safe].push(transaction);
             return acc;
@@ -254,174 +277,141 @@ export default function Chat() {
                 }
             });
         });
-
         return results;
-    }, [firestoreTransactions]);
-
-    const filterRemovedSafesTransactions = useMemo(
-        () =>
-            filterSameNonceTransactions.filter(
-                (item1) => currentTeam.safes.some((item2) => item1.safe === item2.safeAddress),
-                // eslint-disable-next-line function-paren-newline
-            ),
-        [(filterSameNonceTransactions, currentTeam)],
-    );
-
-    // display latest 100 transactions
-    const maxTransactions = -100;
-
-    const transactionsToRender = useMemo(
-        () =>
-            filterRemovedSafesTransactions
-                .sort(
-                    (a, b) =>
-                        new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
-                )
-                .slice(maxTransactions),
-        [filterRemovedSafesTransactions],
-    );
+    }, [sortTransactionsByDateAndSlice]);
 
     // Combine the two arrays
     const combinedArray = useMemo(() => {
-        const tempArray = [...messages, ...(transactionsToRender || [])];
+        const tempArray = [...messages, ...(filterSameNonceTransactions || [])];
         return tempArray.sort(
             (a, b) =>
                 new Date(a.isoDate || a.executionDate || a.submissionDate) -
                 new Date(b.isoDate || b.executionDate || b.submissionDate),
         );
-    }, [messages, transactionsToRender]);
+    }, [messages, filterSameNonceTransactions]);
 
     return (
-        <Card height="100%">
-            <CardHeader paddingBottom="3px">
-                <Stack spacing="24px" display="flex" direction="row" align="baseline">
-                    <Heading size="md">Control Panel</Heading>
-                    <Button
-                        variant="link"
-                        size="xs"
-                        fontWeight={activeTab === "all" && "bold"}
-                        minWidth="24px"
-                        onClick={() => setActiveTab("all")}
-                    >
-                        All
-                    </Button>
-                    <Button
-                        variant="link"
-                        size="xs"
-                        fontWeight={activeTab === "transactions" && "bold"}
-                        minWidth="79px"
-                        onClick={() => setActiveTab("transactions")}
-                    >
-                        Transactions
-                    </Button>
-                </Stack>
-            </CardHeader>
-            <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px">
-                <DeleteMessageModal
-                    messageID={messageID}
-                    isOpen={deleteModalOpen}
-                    setIsOpen={setDeleteModalOpen}
-                    setHoverID={setHoverID}
-                />
-                <Stack spacing="2">
-                    {activeTab === "all" &&
-                        combinedArray.map((msg) => {
-                            if (msg.safe) {
-                                return (
-                                    <Transaction
-                                        key={msg.id}
-                                        address={address}
-                                        transaction={msg}
-                                        walletMismatch={walletMismatch}
-                                    />
-                                );
-                            }
-                            if (msg.uid) {
-                                return (
-                                    <Stack
-                                        direction="row"
-                                        align="center"
-                                        key={msg.id}
-                                        spacing="0"
-                                        paddingLeft="3px"
-                                        paddingTop="2px"
-                                        paddingBottom="2px"
-                                        _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
-                                        onMouseEnter={() => handleMouseEnter(msg.id)}
-                                        onMouseLeave={handleMouseLeave}
-                                    >
-                                        <Avatar
-                                            size="sm"
-                                            alt={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
-                                            src={teamUsersInfo ? teamUsersInfo[msg.uid].photoUrl : null}
-                                            name={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
-                                        />
-                                        <Box flexGrow="1" paddingLeft="6px">
-                                            <Stack direction="row" spacing="5px">
-                                                <Text fontSize="xs" fontWeight="bold">
-                                                    {teamUsersInfo ? teamUsersInfo[msg.uid].displayName : "No name"}
-                                                </Text>
-                                                <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
-                                            </Stack>
-                                            <Text fontSize="xs">{renderMessage(msg)}</Text>
-                                        </Box>
-                                        {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
-                                            <IconButton
-                                                icon={<StyledTrashIcon />}
-                                                onClick={() => handleDelete(msg.id)}
-                                                height="36px"
-                                                width="36px"
-                                                borderRadius="3px"
-                                                background="none"
-                                                _hover={{ background: "none", cursor: "default" }}
+        <>
+            <DeleteMessageModal
+                messageID={messageID}
+                isOpen={deleteModalOpen}
+                setIsOpen={setDeleteModalOpen}
+                setHoverID={setHoverID}
+            />
+            <Card height="100%">
+                <CardHeader paddingBottom="3px">
+                    <Stack spacing="24px" display="flex" direction="row" align="baseline">
+                        <Heading size="md">Control Panel</Heading>
+                        <Button
+                            variant="link"
+                            size="xs"
+                            fontWeight={activeTab === "all" && "bold"}
+                            minWidth="24px"
+                            onClick={() => setActiveTab("all")}
+                        >
+                            All
+                        </Button>
+                        <Button
+                            variant="link"
+                            size="xs"
+                            fontWeight={activeTab === "transactions" && "bold"}
+                            minWidth="79px"
+                            onClick={() => setActiveTab("transactions")}
+                        >
+                            Transactions
+                        </Button>
+                    </Stack>
+                </CardHeader>
+                <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px">
+                    <Stack spacing="2">
+                        {activeTab === "all" &&
+                            combinedArray &&
+                            combinedArray.map((msg) => {
+                                if (msg.safe) {
+                                    return <Transaction key={msg.id} transaction={msg} />;
+                                }
+                                if (msg.uid) {
+                                    return (
+                                        <Stack
+                                            direction="row"
+                                            align="center"
+                                            key={msg.id}
+                                            spacing="0"
+                                            paddingLeft="3px"
+                                            paddingTop="2px"
+                                            paddingBottom="2px"
+                                            _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
+                                            onMouseEnter={() => handleMouseEnter(msg.id)}
+                                            onMouseLeave={handleMouseLeave}
+                                        >
+                                            <Avatar
+                                                size="sm"
+                                                alt={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
+                                                src={teamUsersInfo ? teamUsersInfo[msg.uid].photoUrl : null}
+                                                name={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
                                             />
-                                        )}
-                                    </Stack>
-                                );
-                            }
-                            return null;
-                        })}
-                    {activeTab === "transactions" &&
-                        transactionsToRender &&
-                        transactionsToRender.map((transaction) => (
-                            <Transaction
-                                key={transaction.id}
-                                address={address}
-                                transaction={transaction}
-                                walletMismatch={walletMismatch}
-                            />
-                        ))}
+                                            <Box flexGrow="1" paddingLeft="6px">
+                                                <Stack direction="row" spacing="5px">
+                                                    <Text fontSize="xs" fontWeight="bold">
+                                                        {teamUsersInfo ? teamUsersInfo[msg.uid].displayName : "No name"}
+                                                    </Text>
+                                                    <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
+                                                </Stack>
+                                                <Text fontSize="xs">{renderMessage(msg)}</Text>
+                                            </Box>
+                                            {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
+                                                <IconButton
+                                                    icon={<StyledTrashIcon />}
+                                                    onClick={() => handleDelete(msg.id)}
+                                                    height="36px"
+                                                    width="36px"
+                                                    borderRadius="3px"
+                                                    background="none"
+                                                    _hover={{ background: "none", cursor: "default" }}
+                                                />
+                                            )}
+                                        </Stack>
+                                    );
+                                }
+                                return null;
+                            })}
+                        {activeTab === "transactions" &&
+                            filterSameNonceTransactions &&
+                            filterSameNonceTransactions.map((transaction) => (
+                                <Transaction key={transaction.id} transaction={transaction} />
+                            ))}
+                    </Stack>
                     <Box ref={lastMessage} />
-                </Stack>
-            </CardBody>
-            <CardFooter paddingTop="5px">
-                <Input
-                    placeholder="Chat or action"
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && message.trim().length !== 0) {
-                            addMessage(message.trim());
-                            setMessage("");
-                        }
-                    }}
-                />
-                <Box>
-                    <Button
-                        marginLeft="20px"
-                        colorScheme="green300"
-                        rightIcon={<IoSend size="20px" />}
-                        onClick={() => {
-                            if (message.trim().length !== 0) {
+                </CardBody>
+                <CardFooter paddingTop="5px">
+                    <Input
+                        placeholder="Chat or action"
+                        value={message}
+                        onChange={(event) => setMessage(event.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && message.trim().length !== 0) {
                                 addMessage(message.trim());
                                 setMessage("");
                             }
                         }}
-                    >
-                        Send
-                    </Button>
-                </Box>
-            </CardFooter>
-        </Card>
+                    />
+                    <Box>
+                        <Button
+                            marginLeft="20px"
+                            colorScheme="green300"
+                            rightIcon={<IoSend size="20px" />}
+                            onClick={() => {
+                                if (message.trim().length !== 0) {
+                                    addMessage(message.trim());
+                                    setMessage("");
+                                }
+                            }}
+                        >
+                            Send
+                        </Button>
+                    </Box>
+                </CardFooter>
+            </Card>
+        </>
     );
 }

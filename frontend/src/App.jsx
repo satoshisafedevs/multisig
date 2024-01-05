@@ -3,7 +3,7 @@ import { Buffer } from "buffer";
 import { ChakraProvider, ColorModeScript, Flex } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { mainnet, arbitrum, optimism, polygon } from "wagmi/chains";
+import { mainnet, arbitrum, optimism } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import User from "./providers/User";
@@ -68,7 +68,7 @@ if (import.meta.hot) {
 }
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-    [mainnet, arbitrum, optimism, polygon],
+    [mainnet, arbitrum, optimism],
     [
         // alchemyProvider({ apiKey: 'yourAlchemyApiKey' }),
         // infuraProvider({ apiKey: 'yourInfuraApiKey' }),
