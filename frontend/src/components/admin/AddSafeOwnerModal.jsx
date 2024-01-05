@@ -34,7 +34,7 @@ function AddSafeOwnerModal({
     network,
     fetchAndUpdateLatestSafesData,
 }) {
-    const { chain, metaMaskInstalled } = useWagmi();
+    const { address, chain, chains, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
     const { addSafeOwner } = useGnosisSafe();
     const [newOwner, setNewOwner] = useState("");
     const [newThreshold, setNewThreshold] = useState(threshold);
@@ -52,9 +52,11 @@ function AddSafeOwnerModal({
     const onClose = () => {
         setIsOpen(false);
         setNewThreshold(threshold);
+        setNewOwner("");
     };
 
-    const networkMismatch = chain && chain.network !== network;
+    const networkMismatch =
+        chain && (network === "mainnet" ? chain.network !== "homestead" : chain.network !== network);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -102,25 +104,41 @@ function AddSafeOwnerModal({
                         colorScheme={networkMismatch ? "orange" : "green300"}
                         rightIcon={<IoPersonAdd />}
                         isDisabled={
-                            !ethers.utils.isAddress(newOwner) || !newThreshold || networkMismatch || !metaMaskInstalled
+                            !ethers.utils.isAddress(newOwner) ||
+                            !newThreshold ||
+                            !metaMaskInstalled ||
+                            !address ||
+                            walletMismatch
                         }
                         isLoading={loading}
                         onClick={async () => {
-                            try {
-                                setLoading(true);
-                                const resp = await addSafeOwner(safeAddress, {
-                                    ownerAddress: newOwner,
-                                    threshold: newThreshold,
+                            if (networkMismatch) {
+                                const correctChain = chains.find((el) => {
+                                    // Check if the network is 'mainnet' and the el.network is 'homestead'
+                                    if (network === "mainnet") {
+                                        return el.network === "homestead";
+                                    }
+                                    // For other networks, just match the el.network with the given network
+                                    return el.network === network;
                                 });
-                                if (resp) {
-                                    setTimeout(() => {
-                                        const controller = new AbortController();
-                                        fetchAndUpdateLatestSafesData(controller);
-                                    }, 10000);
+                                switchNetwork(correctChain.id);
+                            } else {
+                                try {
+                                    setLoading(true);
+                                    const resp = await addSafeOwner(safeAddress, {
+                                        ownerAddress: newOwner,
+                                        threshold: newThreshold,
+                                    });
+                                    if (resp) {
+                                        setTimeout(() => {
+                                            const controller = new AbortController();
+                                            fetchAndUpdateLatestSafesData(controller);
+                                        }, 10000);
+                                    }
+                                } finally {
+                                    onClose();
+                                    setLoading(false);
                                 }
-                            } finally {
-                                onClose();
-                                setLoading(false);
                             }
                         }}
                     >

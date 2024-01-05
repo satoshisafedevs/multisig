@@ -27,7 +27,7 @@ import { useUser } from "../../providers/User";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
 
-function CreateNewSafeModal({ onClose }) {
+function CreateNewSafeModal({ onClose, setModalState }) {
     const { teamUsersInfo } = useUser();
     const { createSafe } = useGnosisSafe();
     const toast = useToast();
@@ -82,7 +82,7 @@ function CreateNewSafeModal({ onClose }) {
                     setIsLoading(false);
                     toast({
                         title: "Transaction Sent",
-                        description: `Transaction has been sent. 
+                        description: `Transaction has been sent.
                         View on [block explorer](${networks[network].scanUrl}/tx/${txHash})`,
                         status: "info",
                         duration: 9000,
@@ -155,7 +155,7 @@ function CreateNewSafeModal({ onClose }) {
                     <Table size="sm">
                         <Thead>
                             <Tr>
-                                <Th>Address</Th>
+                                <Th>Owner</Th>
                                 <Th>Action</Th>
                             </Tr>
                         </Thead>
@@ -210,7 +210,10 @@ function CreateNewSafeModal({ onClose }) {
                 </FormControl>
             </ModalBody>
             <ModalFooter justifyContent="space-between">
-                <Button leftIcon={<IoChevronBackOutline size="18px" margin="0" />} onClick={() => onClose()}>
+                <Button
+                    leftIcon={<IoChevronBackOutline size="18px" margin="0" />}
+                    onClick={() => setModalState("welcome")}
+                >
                     Back
                 </Button>
                 <Stack direction="row" spacing={4}>
@@ -228,6 +231,7 @@ function CreateNewSafeModal({ onClose }) {
 
 CreateNewSafeModal.propTypes = {
     onClose: PropTypes.func.isRequired,
+    setModalState: PropTypes.func.isRequired,
 };
 
 export default CreateNewSafeModal;

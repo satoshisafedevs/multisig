@@ -30,7 +30,7 @@ function Swapper({
     setToken,
     amount,
     setAmount,
-    inputDisabled,
+    destinationSafe,
     setRouteData,
     totalUSDFrom,
     setTotalUSDFrom,
@@ -202,7 +202,7 @@ function Swapper({
                                         {safe.slice(0, 5)}...{safe.slice(-4)}
                                     </Box>
                                 ) : (
-                                    "Safe"
+                                    (destinationSafe && "To Safe") || "From Safe"
                                 )}
                             </MenuButton>
                             <MenuList maxHeight="50vh" overflow="auto" display={isOpen ? "block" : "none"}>
@@ -271,7 +271,7 @@ function Swapper({
                         setAmount(validValue);
                         setRouteData();
                     }}
-                    isDisabled={inputDisabled || !squid}
+                    isDisabled={destinationSafe || !squid}
                     _disabled={{
                         opacity: "unset",
                         cursor: "not-allowed",
@@ -308,7 +308,7 @@ Swapper.propTypes = {
     setToken: PropTypes.func,
     amount: PropTypes.string,
     setAmount: PropTypes.func,
-    inputDisabled: PropTypes.bool,
+    destinationSafe: PropTypes.bool,
     totalUSDFrom: PropTypes.string,
     setTotalUSDFrom: PropTypes.func,
     setRouteData: PropTypes.func,

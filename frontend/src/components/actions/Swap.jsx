@@ -6,11 +6,12 @@ import { upperFirst } from "lodash";
 import { IoShuffleOutline, IoArrowDownCircleOutline, IoPaperPlane } from "react-icons/io5";
 import { useWagmi } from "../../providers/Wagmi";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
+import { formatNumber } from "../../utils";
 import erc20Abi from "./erc20Abi.json";
 import Swapper from "./Swapper";
 
 export default function Swap() {
-    const { address, isConnected, chain, metaMaskInstalled } = useWagmi();
+    const { address, isConnected, chain, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
     const { createAndApproveSwapTransaction } = useGnosisSafe();
     const toast = useToast();
     const [squid, setSquid] = useState();
@@ -190,7 +191,7 @@ export default function Swap() {
                 setFromBalances={() => {}}
                 totalUSDFrom={totalUSDFrom}
                 setRouteData={setRouteData}
-                inputDisabled
+                destinationSafe
             />
             <Button
                 marginTop="12px"
@@ -226,36 +227,41 @@ export default function Swap() {
                     }
                     rightIcon={<IoPaperPlane size="25px" />}
                     onClick={() => {
-                        createAndApproveSwapTransaction(
-                            fromNetwork,
-                            fromSafe,
-                            {
-                                to: fromToken.address,
-                                data: approveEncodeData,
-                            },
-                            {
-                                to: routeData.transactionRequest.target,
-                                data: routeData.transactionRequest.data,
-                                value: routeData.transactionRequest.value,
-                            },
-                            address,
-                        );
+                        if (networkMismatch) {
+                            switchNetwork(Number(fromChain));
+                        } else {
+                            createAndApproveSwapTransaction(
+                                fromNetwork,
+                                fromSafe,
+                                {
+                                    to: fromToken.address,
+                                    data: approveEncodeData,
+                                },
+                                {
+                                    to: routeData.transactionRequest.target,
+                                    data: routeData.transactionRequest.data,
+                                    value: routeData.transactionRequest.value,
+                                },
+                                address,
+                            );
+                        }
                     }}
                     isDisabled={
                         !routeData ||
                         !isConnected ||
-                        networkMismatch ||
+                        !address ||
                         !metaMaskInstalled ||
+                        walletMismatch ||
                         fromAmoutIsGreaterThanTokenBalance ||
                         insufficientEthBalance ||
                         ethOnlySwapInsufficientBalance
                     }
                     spinnerPlacement="end"
                 >
-                    {(networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
-                        (fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken.symbol} balance`) ||
+                    {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken.symbol} balance`) ||
                         ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
                             "Insufficient safe ETH balance") ||
+                        (networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
                         "Create and sign safe transaction"}
                 </Button>
             )}
@@ -263,8 +269,9 @@ export default function Swap() {
                 <>
                     <Alert status="warning" variant="left-accent" marginTop="5px" borderRadius="base">
                         <AlertIcon />
-                        To cover estimated transaction fees, ensure you have at least {estimatedSwapFee}&nbsp;ETH, in
-                        addition to the transfer amount, in your safe balance before initiating a transaction.
+                        To cover estimated transaction fees, ensure you have at least {formatNumber(estimatedSwapFee)}
+                        &nbsp;ETH, in addition to the transfer amount, in your safe balance before initiating a
+                        transaction.
                     </Alert>
                     <Alert status="info" variant="left-accent" marginTop="5px" borderRadius="base">
                         <AlertIcon />
