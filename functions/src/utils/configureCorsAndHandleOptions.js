@@ -1,4 +1,4 @@
-const configureCrossOriginAccess = (req, res) => {
+const configureCorsAndHandleOptions = (req, res) => {
     const allowedOrigins = [
         "http://localhost:5173",
         "https://prontoai-playground.web.app",
@@ -26,4 +26,4 @@ const configureCrossOriginAccess = (req, res) => {
     return false;
 };
 
-module.exports = { configureCrossOriginAccess };
+module.exports = { configureCorsAndHandleOptions };

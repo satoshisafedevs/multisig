@@ -37,8 +37,8 @@ const validateFirebaseIdToken = async (req, res) => {
         const decodedIdToken = await auth.verifyIdToken(idToken);
         log(`ID Token correctly decoded, user email: ${decodedIdToken.email}, uid: ${decodedIdToken.uid}`);
         return true;
-    } catch (error) {
-        error("Error while verifying Firebase ID token:", error);
+    } catch (err) {
+        error("Error while verifying Firebase ID token:", err);
         res.status(403).send({ message: "Unauthorized" });
         return false;
     }
