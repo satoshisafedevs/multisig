@@ -221,14 +221,15 @@ export default function Chat() {
 
     // once the safe is removed filter it's transactions,
     // we need some logic that removes those transactions from backend
-    const filterRemovedSafesTransactions = useMemo(
-        () =>
-            firestoreTransactions.filter(
-                (item1) => currentTeam.safes.some((item2) => item1.safe === item2.safeAddress),
-                // eslint-disable-next-line function-paren-newline
-            ),
-        [firestoreTransactions, currentTeam],
-    );
+    const filterRemovedSafesTransactions = useMemo(() => {
+        if (!firestoreTransactions || !currentTeam?.safes) {
+            return [];
+        }
+        return firestoreTransactions.filter(
+            (item1) => currentTeam.safes.some((item2) => item1.safe === item2.safeAddress),
+            // eslint-disable-next-line function-paren-newline
+        );
+    }, [firestoreTransactions, currentTeam]);
 
     // display latest 100 transactions
     const maxTransactions = -100;
