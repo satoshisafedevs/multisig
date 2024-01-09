@@ -119,7 +119,12 @@ export default function Swap() {
         const { estimate } = routeData;
 
         const sumCosts = (costs) =>
-            costs.reduce((acc, cost) => (cost.amount ? acc + parseFloat(toHumanReadable(cost.amount, 18)) : acc), 0);
+            costs.reduce(
+                // eslint-disable-next-line no-confusing-arrow
+                (acc, cost) =>
+                    cost.amount ? acc + parseFloat(toHumanReadable(cost.amount, cost.token.decimals)) : acc,
+                0,
+            );
 
         if (estimate.feeCosts && estimate.feeCosts.length > 0) {
             estimatedSwapFee += sumCosts(estimate.feeCosts);
