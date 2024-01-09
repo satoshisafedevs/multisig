@@ -4,6 +4,8 @@ const configureCrossOriginAccess = (req, res) => {
         "https://prontoai-playground.web.app",
         "https://prontoai-playground.firebaseapp.com",
         "https://playground.satoshisafe.ai",
+        "https://playground.satoshisafe.io",
+        "https://satoshisafe.io",
     ];
 
     const allowedOriginRegex = /^https:\/\/prontoai-playground.*\.web\.app$/;
@@ -19,6 +21,7 @@ const configureCrossOriginAccess = (req, res) => {
         }
     } else {
         res.status(400).send({ message: "You have no power here!" });
+        return true;
     }
     return false;
 };
