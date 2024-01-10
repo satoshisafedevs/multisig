@@ -5,12 +5,14 @@ const expect = chai.expect;
 const { setupWallet } = require("../../wallet");
 const { createSafe, loadSafe } = require("../manageSafes");
 const { getSafesByOwner, getSafeInfo, getAllTransactions } = require("../safeService");
+const { convertNestedArrays } = require("../sanitizeTxs");
 
 describe("Gnosis Safe", async () => {
     const network = "arbitrum";
     const pKey = process.env.PRIVATE_EVM_KEY;
     let safeAddress = null;
     const { wallet, ethAdapter, safeService } = await setupWallet(network, pKey);
+    let unSanitizedTxs = null;
 
     describe("#createSafe", async () => {
         it.skip("should create a gnosis safe for a valid network", async () => {
@@ -41,6 +43,7 @@ describe("Gnosis Safe", async () => {
                 expect(transaction).to.have.property("data");
                 // add more assertions based on the properties each transaction is expected to have
             });
+            unSanitizedTxs = transactions.results;
         });
     });
 
@@ -59,6 +62,13 @@ describe("Gnosis Safe", async () => {
                 safeTransactionData,
             });
             expect(tx).to.have.property("data");
+        });
+    });
+
+    describe("#sanitizeAllTransactions", () => {
+        it("should return a list of sanitized transactions", async () => {
+            const sanitisedData = unSanitizedTxs.map((t) => convertNestedArrays(t));
+            expect(sanitisedData).to.be.an("array");
         });
     });
 });
