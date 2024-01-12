@@ -83,13 +83,15 @@ export default function Swap() {
         // that reduces transaction time across chains to 5-30 seconds.
         // It is currently available for swaps below a value of $20,000 USD.
         quoteOnly: false, // optional, defaults to false
-        slippage: 1.0, // 1.00 = 1% max slippage across the entire route
+        // slippage: 1.0, // 1.00 = 1% max slippage across the entire route, looks like needed only for v1, we use v2
         slippageConfig: {
-            autoMode: 1, // 1 is "normal" slippage. Always set to 1
+            autoMode: 1, // 1 is "normal" slippage. Always set to 1, ignored if manual slippage is set,
+            // slippage: 1, // 1% slippage,
         },
         collectFees: {
             integratorAddress: "0x15C3c3E0444bC58aad1c3b27d196016F9E28bC70",
-            fee: 50,
+            fee: 50, // The amount in "basis points" for the fee. 50 = 0.05%.
+            // There is currently soft limit of 1% fee allowed for each tx.
         },
     };
 
