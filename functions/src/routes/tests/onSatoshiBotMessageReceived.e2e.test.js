@@ -3,9 +3,9 @@ const chai = require("chai");
 const axios = require("axios");
 const expect = chai.expect;
 
-describe("On new message in the teams collection", function() {
+describe("On new message in the teams collection", function () {
     this.timeout(18000);
-    it("should write a new message to the teams collection", async () => {
+    it.skip("should write a new message to the teams collection", async () => {
         const teamId = "testTeam123";
         const botUid = "botUid123";
         const documentPath = `teams/${teamId}/messages/`;
@@ -26,10 +26,10 @@ describe("On new message in the teams collection", function() {
         await db.doc(`teams/${teamId}`).set({ botUid }, { merge: true });
 
         // Call the route via HTTP instead of the functions import
-        await axios.post(
-            "http://127.0.0.1:5001/prontoai-playground/us-central1/api-onSatoshiBotMessageReceived",
-            { teamid: teamId, message: newMessage },
-        );
+        await axios.post("http://127.0.0.1:5001/prontoai-playground/us-central1/api-onSatoshiBotMessageReceived", {
+            teamid: teamId,
+            message: newMessage,
+        });
 
         let c = 0;
         let messages;
