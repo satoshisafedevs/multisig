@@ -65,8 +65,6 @@ function Transaction({ transaction }) {
         setExecuting(false);
     };
 
-    const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1);
-
     const showButtons = () => {
         const correctChain = chains.find((el) => {
             // Check if the network is 'mainnet' and the el.network is 'homestead'
@@ -285,9 +283,9 @@ function Transaction({ transaction }) {
                                                 paddingRight="10px"
                                             >
                                                 {(transaction.dataDecoded?.method &&
-                                                    capitalize(transaction.dataDecoded?.method)) ||
+                                                    upperFirst(transaction.dataDecoded?.method)) ||
                                                     (transaction.from && "Receive") ||
-                                                    (transaction.to && transaction.value > 0 && "Send") ||
+                                                    (transaction.to && Number(transaction.value) > 0 && "Send") ||
                                                     "Unspecified"}
                                             </Text>
                                         </Flex>

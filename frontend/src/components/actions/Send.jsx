@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { upperFirst } from "lodash";
-import { IoCashOutline } from "react-icons/io5";
+import { IoCashOutline, IoRefreshOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import { useWagmi } from "../../providers/Wagmi";
 import { formatNumber } from "../../utils";
@@ -57,10 +57,7 @@ export default function Send() {
         return formattedValue.toString();
     };
 
-    const selectSafe = async (safeConfig) => {
-        const { safeAddress, network } = safeConfig;
-        setSafe(safeAddress);
-        setNetworkName(network);
+    const getTokenBalance = async (network, safeAddress) => {
         const targetChainID = networks[network].id;
         try {
             setLoadingTokens(true);
@@ -88,6 +85,13 @@ export default function Send() {
         } finally {
             setLoadingTokens(false);
         }
+    };
+
+    const selectSafe = async (safeConfig) => {
+        const { safeAddress, network } = safeConfig;
+        setSafe(safeAddress);
+        setNetworkName(network);
+        await getTokenBalance(network, safeAddress);
     };
 
     const imageSrc = (tokenData) => {
@@ -304,6 +308,24 @@ export default function Send() {
                                                 {token.contract_ticker_symbol}
                                             </MenuItem>
                                         ))}
+                                    {availableTokens && (
+                                        <MenuItem
+                                            closeOnSelect={false}
+                                            onClick={() => {
+                                                getTokenBalance(networkName, safe);
+                                                setSelectedToken("");
+                                            }}
+                                        >
+                                            <IoRefreshOutline
+                                                size="24px"
+                                                style={{
+                                                    marginRight: "12px",
+                                                    color: "var(--chakra-colors-green300-500)",
+                                                }}
+                                            />
+                                            Refresh token list
+                                        </MenuItem>
+                                    )}
                                     {!availableTokens && <MenuItem>Select safe first</MenuItem>}
                                 </MenuList>
                             </>

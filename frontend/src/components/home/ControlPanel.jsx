@@ -24,6 +24,7 @@ import { useUser } from "../../providers/User";
 import { useTransactions } from "../../providers/Transactions";
 import theme from "../../theme";
 import Transaction from "../Transaction";
+// import InFlightTransaction from "../InFlightTransaction";
 
 export default function Chat() {
     const toast = useToast();
@@ -381,6 +382,14 @@ export default function Chat() {
                             filterSameNonceTransactions.map((transaction) => (
                                 <Transaction key={transaction.id} transaction={transaction} />
                             ))}
+                        {/* <InFlightTransaction
+                            transaction={{
+                                network: "mainnet",
+                                safe: "1234567890",
+                                txHash: "aslkdjhasldkjhsalk",
+                                satoshiData: { action: "Send", receiver: "0x", amount: 555 },
+                            }}
+                        /> */}
                     </Stack>
                     <Box ref={lastMessage} />
                 </CardBody>

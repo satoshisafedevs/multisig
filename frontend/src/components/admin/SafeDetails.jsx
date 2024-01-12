@@ -312,7 +312,7 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                                 </Heading>
                                 <Box
                                     flex="1"
-                                    paddingLeft="37px"
+                                    paddingLeft="6px"
                                     display="flex"
                                     alignItems="center"
                                     justifyContent="center"
