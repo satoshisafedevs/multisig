@@ -1,5 +1,6 @@
 const { createSafe, loadSafe } = require("./manageSafes");
 const { getSafeService, getSafesByOwner, getSafeInfo, createAndApproveTransaction } = require("./safeService");
+const { convertNestedArrays } = require("./sanitizeTxs");
 
 module.exports = {
     createSafe,
@@ -8,4 +9,5 @@ module.exports = {
     getSafesByOwner,
     getSafeInfo,
     createAndApproveTransaction,
+    convertNestedArrays,
 };

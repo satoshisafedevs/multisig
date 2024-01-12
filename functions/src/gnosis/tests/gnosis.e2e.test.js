@@ -6,13 +6,16 @@ const { setupWallet } = require("../../wallet");
 const { createSafe, loadSafe } = require("../manageSafes");
 const { getSafesByOwner, getSafeInfo, getAllTransactions } = require("../safeService");
 const { convertNestedArrays } = require("../sanitizeTxs");
+const { checkDbForTxs } = require("../checkDbForTxs");
 
 describe("Gnosis Safe", async () => {
     const network = "arbitrum";
     const pKey = process.env.PRIVATE_EVM_KEY;
+    const teamId = "xwBMi9j8rgrUampwJmwN";
     let safeAddress = null;
     const { wallet, ethAdapter, safeService } = await setupWallet(network, pKey);
     let unSanitizedTxs = null;
+    let sanitisedData = null;
 
     describe("#createSafe", async () => {
         it.skip("should create a gnosis safe for a valid network", async () => {
@@ -67,8 +70,15 @@ describe("Gnosis Safe", async () => {
 
     describe("#sanitizeAllTransactions", () => {
         it("should return a list of sanitized transactions", async () => {
-            const sanitisedData = unSanitizedTxs.map((t) => convertNestedArrays(t));
+            sanitisedData = unSanitizedTxs.map((t) => convertNestedArrays(t));
             expect(sanitisedData).to.be.an("array");
+        });
+    });
+
+    describe("merge new transactions with existing transactions", () => {
+        it("should return a list of transactions", async () => {
+            const mergeResults = await checkDbForTxs(sanitisedData, teamId);
+            expect(mergeResults).to.be.a("boolean");
         });
     });
 });
