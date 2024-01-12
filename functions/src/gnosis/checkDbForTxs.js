@@ -35,7 +35,7 @@ const checkDbForTxs = async (transactions, teamid) => {
 const isTransactionUpdated = (txInDb, newTx) => {
     // Check if newTx has any field that is different from txInDb
     for (const key in newTx) {
-        if (!(key in txInDb) || isEqual(newTx[key], txInDb[key])) {
+        if (!(key in txInDb) || !isEqual(newTx[key], txInDb[key])) {
             return true; // New or updated field in newTx
         }
     }
