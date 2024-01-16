@@ -13,12 +13,12 @@ async function getLatestBlock(provider) {
     }
 }
 
-async function getProvider(network) {
+async function getProvider(key) {
     try {
-        if (networks[network] === undefined) {
+        if (networks[key] === undefined) {
             throw new Error("Invalid network");
         }
-        return new providers.AlchemyProvider(network, process.env.ALCHEMY_KEY);
+        return new providers.JsonRpcProvider(networks[key].rpcUrl);
     } catch (error) {
         console.error(error);
         throw new Error("Invalid network");

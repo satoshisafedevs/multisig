@@ -17,7 +17,7 @@ import { isEmpty } from "lodash";
 import { ethers } from "ethers";
 import { useUser } from "../../providers/User";
 import { usdFormatter } from "../../utils";
-import networks from "../admin/networks.json";
+import networks from "../../utils/networks.json";
 import SelectTokenModal from "./SelectTokenModal";
 
 function Swapper({

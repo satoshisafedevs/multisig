@@ -11,7 +11,7 @@ describe("Ethers e2e Tests", () => {
         it("should return a provider for a valid network", async () => {
             const provider = await getProvider(network);
 
-            expect(provider).to.be.instanceOf(providers.AlchemyProvider);
+            expect(provider).to.be.instanceOf(providers.JsonRpcProvider);
         });
 
         it("should throw an error for an invalid network", async () => {

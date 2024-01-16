@@ -1,6 +1,5 @@
 {
     "arbitrum": {
-        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Farbitrum.svg?alt=media&token=13217f95-6fab-482f-b389-513d75100865",
         "url": "https://arb1.arbitrum.io/rpc",
         "svg": "/networks/arbitrum.svg",
         "safeTransactionService": "https://safe-transaction-arbitrum.safe.global/",
@@ -21,9 +20,112 @@
             "blockExplorerUrls": ["https://arbiscan.io"]
         }
     },
+    "aurora": {
+        "url": "https://mainnet.aurora.dev",
+        "svg": "/networks/aurora.svg",
+        "safeTransactionService": "https://safe-transaction-aurora.safe.global/",
+        "id": 1313161554,
+        "currency": "ETH",
+        "title": "Aurora",
+        "scanUrl": "https://aurorascan.dev/",
+        "eip": "eip155:1313161554",
+        "metamaskSettings": {
+            "chainId": "0x4e454152",
+            "chainName": "Aurora Mainnet",
+            "nativeCurrency": {
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18
+            },
+            "rpcUrls": ["https://mainnet.aurora.dev"],
+            "blockExplorerUrls": ["https://aurorascan.dev/"]
+        }
+    },
+    "avalanche": {
+        "url": "https://api.avax.network/ext/bc/C/rpc",
+        "svg": "/networks/avalanche.svg",
+        "safeTransactionService": "https://safe-transaction-avalanche.safe.global/",
+        "id": 43114,
+        "currency": "AVAX",
+        "title": "Avalanche",
+        "scanUrl": "https://snowtrace.io/",
+        "eip": "eip155:43114",
+        "metamaskSettings": {
+            "chainId": "0xa86a",
+            "chainName": "Avalanche C-Chain",
+            "nativeCurrency": {
+                "name": "Avalanche",
+                "symbol": "AVAX",
+                "decimals": 18
+            },
+            "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc"],
+            "blockExplorerUrls": ["https://snowtrace.io/"]
+        }
+    },
+    "base": {
+        "url": "https://rpc.baseledger.com",
+        "svg": "/networks/base.svg",
+        "safeTransactionService": "https://safe-transaction-base.safe.global/",
+        "id": 8453,
+        "currency": "ETH",
+        "title": "Base",
+        "scanUrl": "https://base.basescan.org/",
+        "eip": "eip155:8453",
+        "metamaskSettings": {
+            "chainId": "0x2105",
+            "chainName": "Base Mainnet",
+            "rpcUrls": ["https://mainnet.base.org"],
+            "blockExplorerUrls": ["https://basescan.org"],
+            "nativeCurrency": {
+                "name": "ETH",
+                "symbol": "ETH",
+                "decimals": 18
+            }
+        }
+    },
+    "baseGoerli": {
+        "url": "https://goerli.base.org",
+        "svg": "/networks/base.svg",
+        "safeTransactionService": "https://safe-transaction-base-testnet.safe.global/",
+        "id": 84531,
+        "currency": "ETH",
+        "title": "Base Goerli",
+        "scanUrl": "https://goerli.basescan.org/",
+        "eip": "eip155:84531",
+        "metamaskSettings": {
+            "chainId": "0x14a33",
+            "chainName": "Base Goerli",
+            "rpcUrls": ["https://goerli.base.org"],
+            "blockExplorerUrls": ["https://goerli.basescan.org/"],
+            "nativeCurrency": {
+                "name": "ETH",
+                "symbol": "ETH",
+                "decimals": 18
+            }
+        }
+    },
+    "bsc": {
+        "url": "https://bsc-dataseed.binance.org/",
+        "svg": "/networks/bnb.svg",
+        "safeTransactionService": "https://safe-transaction-bsc.safe.global/",
+        "id": 56,
+        "currency": "BNB",
+        "title": "BNB Chain",
+        "scanUrl": "https://bscscan.com/",
+        "eip": "eip155:56",
+        "metamaskSettings": {
+            "chainId": "0x38",
+            "chainName": "BNB Chain Mainnet",
+            "nativeCurrency": {
+                "name": "Binance Coin",
+                "symbol": "BNB",
+                "decimals": 18
+            },
+            "rpcUrls": ["https://bsc-dataseed.binance.org/"],
+            "blockExplorerUrls": ["https://bscscan.com/"]
+        }
+    },
     "mainnet": {
-        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Fmainnet.svg?alt=media&token=fd72c40a-28bf-426d-93e4-317f3e179b0c",
-        "url": "https://1rpc.io/eth",
         "svg": "/networks/mainnet.svg",
         "safeTransactionService": "https://safe-transaction-mainnet.safe.global/",
         "id": 1,
@@ -31,6 +133,7 @@
         "title": "Ethereum",
         "scanUrl": "https://etherscan.io",
         "eip": "eip155:1",
+        "url": "https://1rpc.io/eth",
         "metamaskSettings": {
             "chainId": "0x1",
             "chainName": "Ethereum Mainnet",
@@ -39,12 +142,11 @@
                 "symbol": "ETH",
                 "decimals": 18
             },
-            "rpcUrls": ["https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"],
+            "rpcUrls": ["https://eth.llamarpc.com"],
             "blockExplorerUrls": ["https://etherscan.io"]
         }
     },
     "optimism": {
-        "icon": "https://firebasestorage.googleapis.com/v0/b/prontoai-playground.appspot.com/o/icons%2Foptimism.svg?alt=media&token=b24d0e93-d289-45cb-8dae-dd3decc2987e",
         "url": "https://mainnet.optimism.io",
         "svg": "/networks/optimism.svg",
         "safeTransactionService": "https://safe-transaction-optimism.safe.global/",
@@ -65,25 +167,25 @@
             }
         }
     },
-    "baseGoerli": {
-        "icon": "https://drive.google.com/file/d/1EfuzqGDuCigUDvA0yQ6zTqQ1Xp5nf26X/view?usp=sharing",
-        "url": "https://goerli.base.org",
-        "safeTransactionService": "https://safe-transaction-base-testnet.safe.global/",
-        "id": 84531,
-        "currency": "ETH",
-        "title": "Base Goerli",
-        "scanUrl": "https://goerli.basescan.org/",
-        "eip": "eip155:84531",
+    "polygon": {
+        "url": "https://polygon-rpc.com",
+        "svg": "/networks/polygon.svg",
+        "safeTransactionService": "https://safe-transaction-polygon.safe.global/",
+        "id": 137,
+        "currency": "MATIC",
+        "title": "Polygon",
+        "scanUrl": "https://polygonscan.com/",
+        "eip": "eip155:137",
         "metamaskSettings": {
-            "chainId": "0x14a33",
-            "chainName": "Base Goerli",
-            "rpcUrls": ["https://goerli.base.org"],
-            "blockExplorerUrls": ["https://goerli.basescan.org/"],
+            "chainId": "0x89",
+            "chainName": "Polygon Mainnet",
             "nativeCurrency": {
-                "name": "ETH",
-                "symbol": "ETH",
+                "name": "Matic",
+                "symbol": "MATIC",
                 "decimals": 18
-            }
+            },
+            "rpcUrls": ["https://polygon-rpc.com"],
+            "blockExplorerUrls": ["https://polygonscan.com/"]
         }
     }
 }

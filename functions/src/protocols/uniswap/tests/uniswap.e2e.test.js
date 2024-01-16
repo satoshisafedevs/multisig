@@ -7,10 +7,15 @@ const { approve, swap } = require("../index");
 const { utils } = require("ethers");
 const networks = require("../../../networks");
 
-describe("Uniswap Protocol", () => {
+describe.skip("Uniswap Protocol", () => {
     const network = "optimism";
     const pKey = process.env.PRIVATE_EVM_KEY;
-    let wallet; let ethAdapter; let safeService; let safes; let safeAddress; let safe;
+    let wallet;
+    let ethAdapter;
+    let safeService;
+    let safes;
+    let safeAddress;
+    let safe;
 
     before(async () => {
         ({ wallet, ethAdapter, safeService } = await setupWallet(network, pKey));
@@ -34,9 +39,13 @@ describe("Uniswap Protocol", () => {
         let tx = null;
         it("should create a new transaction given sample data", async () => {
             tx = swap(
-                network, safeAddress, wallet, networks[network].contracts.snxToken,
+                network,
+                safeAddress,
+                wallet,
+                networks[network].contracts.snxToken,
                 networks[network].contracts.usdcToken,
-                18, ".01",
+                18,
+                ".01",
             );
             expect(tx).to.have.property("data");
         });

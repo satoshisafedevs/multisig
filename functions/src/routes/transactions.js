@@ -1,6 +1,7 @@
 const { onRequest } = require("../firebase");
 const { configureCorsAndHandleOptions } = require("../utils/configureCorsAndHandleOptions");
 const { validateFirebaseIdToken } = require("../utils/validateFirebaseIdToken");
+const { checkDbForTxs } = require("../gnosis");
 
 exports.transactions = onRequest(async (req, res) => {
     const responseSent = configureCorsAndHandleOptions(req, res);
@@ -8,10 +9,16 @@ exports.transactions = onRequest(async (req, res) => {
     const authorized = await validateFirebaseIdToken(req, res);
     if (!authorized) return;
     if (req.method === "POST") {
-        if ("transactions" in req.body) {
+        if ("transactions" in req.body && "teamid" in req.body) {
             // Check if transactions is an array and has at least one element
             if (Array.isArray(req.body.transactions) && req.body.transactions.length > 0) {
-                res.status(200).send({ status: "OK" });
+                try {
+                    const dbStatus = await checkDbForTxs(req.body.transactions, req.body.teamid);
+                    res.status(200).send({ status: "OK", dbStatus: dbStatus });
+                } catch (error) {
+                    console.error(error);
+                    res.status(500).send({ message: "Internal server error." });
+                }
             } else {
                 // Send an error if transactions is not an array or is empty
                 res.status(400).send({ message: "Transactions should be a non-empty array." });

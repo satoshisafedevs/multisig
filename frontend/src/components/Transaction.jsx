@@ -194,7 +194,7 @@ function Transaction({ transaction }) {
                                     justifyContent="space-between"
                                 >
                                     <Flex direction="column" align="center" justify="space-evenly">
-                                        <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].icon} />
+                                        <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].svg} />
                                         <Text fontSize="xs" fontWeight="bold">
                                             {transaction.network}
                                         </Text>
