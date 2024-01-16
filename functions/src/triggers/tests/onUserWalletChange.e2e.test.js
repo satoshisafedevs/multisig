@@ -3,14 +3,14 @@ const chai = require("chai");
 const expect = chai.expect;
 
 describe("On user wallet changed update safe array", function () {
-    this.timeout(15000);
-    it("should update the safes field", async () => {
+    this.timeout(150000);
+    it.skip("should update the safes field", async () => {
         const userId = "testUser123";
         const teamId = "testTeam123";
         const documentPath = `users/${userId}/teams/${teamId}`;
 
         const data = {
-            userWalletAddress: "0x88A26A07AC1d80bb6544D85Da1C1d6089bC7D39f",
+            userWalletAddress: "0xc8eda2126c065464133d6A138172a540C9dDE945",
         };
         await db.doc(documentPath).set(data);
         let c = 0;

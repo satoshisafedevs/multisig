@@ -22,7 +22,7 @@ function SafeCard() {
                 {currentTeam && currentTeam.safes
                     ? currentTeam.safes.map((safe) => (
                           <Flex key={safe.safeAddress} align="center" padding="4px 0">
-                              <Image boxSize="20px" marginRight="6px" src={networks[safe?.network]?.icon || ""} />
+                              <Image boxSize="20px" marginRight="6px" src={networks[safe?.network]?.svg || ""} />
                               <Text fontSize="sm">
                                   {safe.safeAddress}
                                   {safesPortfolio && safesPortfolio[safe.safeAddress]

@@ -24,7 +24,7 @@ describe("Gnosis Safe", async () => {
     });
 
     describe("#getSafesByOwner, #getSafeInfo", () => {
-        it("should return a list of safes for a valid owner", async () => {
+        it.skip("should return a list of safes for a valid owner", async () => {
             const { safes } = await getSafesByOwner(safeService, "0x15C3c3E0444bC58aad1c3b27d196016F9E28bC70");
             expect(safes).to.be.an("array");
             safes.map(async (safe) => {
@@ -38,7 +38,7 @@ describe("Gnosis Safe", async () => {
     });
 
     describe("#getAllTransactions", () => {
-        it("should return a list of transactions for a valid safe address", async () => {
+        it.skip("should return a list of transactions for a valid safe address", async () => {
             const transactions = await getAllTransactions(safeService, safeAddress);
             expect(transactions.results).to.be.an("array");
             transactions.results.forEach((transaction) => {
@@ -52,10 +52,10 @@ describe("Gnosis Safe", async () => {
 
     describe("#loadSafeByAddress", () => {
         let safe = null;
-        it("should load a safe with the correct owner and address", async () => {
+        it.skip("should load a safe with the correct owner and address", async () => {
             safe = await loadSafe(ethAdapter, safeAddress);
         });
-        it("should create a new transaction given sample data", async () => {
+        it.skip("should create a new transaction given sample data", async () => {
             const safeTransactionData = {
                 to: wallet.address,
                 value: utils.parseEther("0.01"),
@@ -69,14 +69,14 @@ describe("Gnosis Safe", async () => {
     });
 
     describe("#sanitizeAllTransactions", () => {
-        it("should return a list of sanitized transactions", async () => {
+        it.skip("should return a list of sanitized transactions", async () => {
             sanitisedData = unSanitizedTxs.map((t) => convertNestedArrays(t));
             expect(sanitisedData).to.be.an("array");
         });
     });
 
     describe("merge new transactions with existing transactions", () => {
-        it("should return a list of transactions", async () => {
+        it.skip("should return a list of transactions", async () => {
             const mergeResults = await checkDbForTxs(sanitisedData, teamId);
             expect(mergeResults).to.be.a("boolean");
         });

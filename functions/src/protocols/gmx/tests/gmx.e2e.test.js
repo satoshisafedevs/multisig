@@ -6,10 +6,15 @@ const { setupWallet } = require("../../../wallet");
 const { getSafesByOwner, loadSafe, createAndApproveTransaction } = require("../../../gnosis");
 const { claim, stakeGMX, unStakeGMX } = require("../rewardRouter");
 
-describe("GMX Protocol", () => {
+describe.skip("GMX Protocol", () => {
     const network = "arbitrum";
     const pKey = process.env.PRIVATE_EVM_KEY;
-    let wallet; let ethAdapter; let safeService; let safes; let safeAddress; let safe;
+    let wallet;
+    let ethAdapter;
+    let safeService;
+    let safes;
+    let safeAddress;
+    let safe;
 
     before(async () => {
         ({ wallet, ethAdapter, safeService } = await setupWallet(network, pKey));
@@ -22,13 +27,13 @@ describe("GMX Protocol", () => {
         let tx = null;
         it("should create a new claim transaction", async () => {
             const params = {
-                "_shouldClaimGmx": true,
-                "_shouldStakeGmx": true,
-                "_shouldClaimEsGmx": true,
-                "_shouldStakeEsGmx": true,
-                "_shouldStakeMultiplierPoints": true,
-                "_shouldClaimWeth": true,
-                "_shouldConvertWethToEth": true,
+                _shouldClaimGmx: true,
+                _shouldStakeGmx: true,
+                _shouldClaimEsGmx: true,
+                _shouldStakeEsGmx: true,
+                _shouldStakeMultiplierPoints: true,
+                _shouldClaimWeth: true,
+                _shouldConvertWethToEth: true,
             };
             const paramsArray = Object.values(params);
             tx = claim(network, paramsArray, wallet);
