@@ -42,16 +42,14 @@ const fetchAndProcessSafeData = async (safe) => {
             [safeAddress]: doc.data(),
         }));
 
-        const allBalances = await getDocs(query(totalBalanceRef, where("createdAt", ">=", addedAt)));
+        const allBalances = await getDocs(
+            query(totalBalanceRef, where("createdAt", ">=", addedAt), orderBy("createdAt", "asc")),
+        );
         const historicalBalances = allBalances.docs.reduce((accumulator, doc) => {
             const data = doc.data();
             const dateStr = formatDate(data.createdAt);
 
-            if (!accumulator[dateStr]) {
-                accumulator[dateStr] = data.total_usd_value;
-            } else {
-                accumulator[dateStr] += data.total_usd_value;
-            }
+            accumulator[dateStr] = data.total_usd_value;
 
             return accumulator;
         }, {});
@@ -68,18 +66,6 @@ const fetchAndProcessSafeData = async (safe) => {
         });
         return null;
     }
-};
-
-const sortObjectByDate = (object) => {
-    const array = Object.entries(object);
-
-    array.sort((a, b) => {
-        const dateA = new Date(a[0]);
-        const dateB = new Date(b[0]);
-        return dateA - dateB;
-    });
-
-    return Object.fromEntries(array);
 };
 
 function SafeBalance({ children }) {
@@ -121,7 +107,7 @@ function SafeBalance({ children }) {
                 setSafesPortfolio(portfolios);
                 setSafesWalletAssets(allWalletAssets);
                 setSafesStackedAssets(allStakedAssets);
-                setHistoricalTotalBalance(sortObjectByDate(balance));
+                setHistoricalTotalBalance(balance);
                 setGettingData(false);
                 setInitialLoading(false);
             } else {
