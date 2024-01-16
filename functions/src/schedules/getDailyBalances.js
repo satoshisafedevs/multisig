@@ -77,13 +77,25 @@ exports.getDailyBalances = onSchedule(
                                 AccessKey: ACCESS_KEY,
                             },
                         };
-                        await getAndWriteTotalBalance(safe, options);
+                        try {
+                            await getAndWriteTotalBalance(safe, options);
+                        } catch (error) {
+                            log(`Error getting total balance for ${safe.safeAddress}:`, error);
+                        }
 
-                        // complex protocol list - stacked assets
-                        await getAndWriteComplexProtocolList(safe, options);
+                        try {
+                            // complex protocol list - stacked assets
+                            await getAndWriteComplexProtocolList(safe, options);
+                        } catch (error) {
+                            log(`Error getting complex protocol list for ${safe.safeAddress}:`, error);
+                        }
 
-                        // all token list - wallet assets
-                        await getAndWriteAllTokenList(safe, options);
+                        try {
+                            // all token list - wallet assets
+                            await getAndWriteAllTokenList(safe, options);
+                        } catch (error) {
+                            log(`Error getting all token list for ${safe.safeAddress}:`, error);
+                        }
                     }
                 }
             }
