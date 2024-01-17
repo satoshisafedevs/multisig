@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from "react";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Core } from "@walletconnect/core";
+import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import PropTypes from "prop-types";
 import { Web3Wallet } from "@walletconnect/web3wallet";
+import { useDisclosure, useToast } from "@chakra-ui/react";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { buildApprovedNamespaces } from "@walletconnect/utils";
-import { useDisclosure, useToast } from "@chakra-ui/react";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Core } from "@walletconnect/core";
+import { useUser } from "./User";
 import WCModal from "../components/actions/WCModal";
-import { useUser } from "../providers/User";
-import useGnosisSafe from "./useGnosisSafe";
+import useGnosisSafe from "../hooks/useGnosisSafe";
 import { NETWORK_EIP, EIP155_SIGNING_METHODS } from "../utils/networkeip";
 import checkNetwork from "../utils/checkNetwork";
 
-const useWalletConnect = () => {
-    // Initialize WalletConnect
+const WalletConnectContext = createContext();
+const WalletConnectProvider = WalletConnectContext.Provider;
+
+export function useWalletConnect() {
+    return useContext(WalletConnectContext);
+}
+
+function WalletConnect({ children }) {
     const [web3wallet, setWeb3Wallet] = useState(null);
     const { onOpen, onClose, isOpen } = useDisclosure();
     const [transactionRequest, setTransactionRequest] = useState(null);
@@ -23,7 +30,6 @@ const useWalletConnect = () => {
     const { currentTeam, userTeamData } = useUser();
     const { createAndApproveTransaction, loadSafe } = useGnosisSafe();
     const toast = useToast();
-    let { safes } = currentTeam;
 
     useEffect(() => {
         if (web3wallet) {
@@ -34,7 +40,7 @@ const useWalletConnect = () => {
 
     const getChainsAndAccounts = () => {
         if (currentTeam && currentTeam.safes) {
-            safes = currentTeam.safes;
+            const { safes } = currentTeam;
             const uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
             const chains = uniqueNetworks
                 .map((network) => NETWORK_EIP[network])
@@ -88,6 +94,7 @@ const useWalletConnect = () => {
 
     const handleApproveTransaction = async () => {
         try {
+            const { safes } = currentTeam;
             const fromAddress = transactionRequest.params.request.params[0].from;
             const fromAddressLC = fromAddress.toLowerCase();
             const safe = safes.find((s) => s.safeAddress.toLowerCase() === fromAddressLC);
@@ -153,25 +160,32 @@ const useWalletConnect = () => {
         await web3wallet.disconnectSession({ topic });
         setSessions(web3wallet.getActiveSessions());
     };
+    const values = useMemo(
+        () => ({
+            createWeb3Wallet,
+            pair,
+            ConnectionModal: (
+                <WCModal
+                    isOpen={isOpen}
+                    onClose={onClose}
+                    sessionProposal={sessionProposal}
+                    onApproveConnection={handleApproveConnection}
+                    transactionRequest={transactionRequest}
+                    modalType={modalType}
+                    onApproveTransaction={handleApproveTransaction}
+                />
+            ),
+            pairings,
+            sessions,
+            disconnect,
+        }),
+        [pairings, sessions, sessionProposal, transactionRequest, modalType, isOpen],
+    );
+    return <WalletConnectProvider value={values}>{children}</WalletConnectProvider>;
+}
 
-    return {
-        createWeb3Wallet,
-        pair,
-        ConnectionModal: (
-            <WCModal
-                isOpen={isOpen}
-                onClose={onClose}
-                sessionProposal={sessionProposal}
-                onApproveConnection={handleApproveConnection}
-                transactionRequest={transactionRequest}
-                modalType={modalType}
-                onApproveTransaction={handleApproveTransaction}
-            />
-        ),
-        pairings,
-        sessions,
-        disconnect,
-    };
+WalletConnect.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
-export default useWalletConnect;
+export default WalletConnect;

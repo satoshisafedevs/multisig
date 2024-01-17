@@ -10,6 +10,7 @@ import User from "./providers/User";
 import Wagmi from "./providers/Wagmi";
 import Transactions from "./providers/Transactions";
 import SafeBalance from "./providers/SafeBalance";
+import WalletConnect from "./providers/WalletConnect";
 import TeamPicker from "./routes/TeamPicker";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import Home from "./routes/Home";
@@ -95,7 +96,9 @@ function App() {
                             <Wagmi>
                                 <SafeBalance>
                                     <Transactions>
-                                        <RouterProvider router={router} />
+                                        <WalletConnect>
+                                            <RouterProvider router={router} />
+                                        </WalletConnect>
                                     </Transactions>
                                 </SafeBalance>
                             </Wagmi>
