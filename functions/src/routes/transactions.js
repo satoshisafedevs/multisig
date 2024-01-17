@@ -14,7 +14,10 @@ exports.transactions = onRequest(async (req, res) => {
             if (Array.isArray(req.body.transactions) && req.body.transactions.length > 0) {
                 try {
                     const dbStatus = await checkDbForTxs(req.body.transactions, req.body.teamid);
-                    res.status(200).send({ status: "OK", dbStatus: dbStatus });
+                    res.status(200).send({ status: "OK", fetchMore: dbStatus });
+                    // fetch latest 10 transactions from gnosis
+                    // if fetchMore is true
+                    // fetch latest 100 transactions from gnosis
                 } catch (error) {
                     console.error(error);
                     res.status(500).send({ message: "Internal server error." });
