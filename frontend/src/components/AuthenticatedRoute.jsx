@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { db, doc, getDoc } from "../firebase";
 import EmailVerifyModal from "./EmailVerifyModal";
 import { useUser } from "../providers/User";
+import { useWalletConnect } from "../providers/WalletConnect";
 
 function AuthenticatedRoute({ children }) {
     const {
@@ -22,6 +23,7 @@ function AuthenticatedRoute({ children }) {
     const toast = useToast();
     const { slug } = useParams();
     const navigate = useNavigate();
+    const { createWeb3Wallet } = useWalletConnect();
     const location = useLocation();
 
     useEffect(() => {
@@ -93,6 +95,10 @@ function AuthenticatedRoute({ children }) {
             }
         }
     }, [teamsData, slug]);
+
+    useEffect(() => {
+        createWeb3Wallet();
+    }, []);
 
     if (gettingUserAuthStatus) {
         return <Spinner color="blue.500" speed="1s" size="xl" thickness="4px" emptyColor="gray.200" margin="auto" />;

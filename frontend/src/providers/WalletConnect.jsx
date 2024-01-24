@@ -119,6 +119,12 @@ function WalletConnect({ children }) {
         }
     };
 
+    const disconnect = async (topic) => {
+        if (!web3wallet) return;
+        await web3wallet.disconnectSession({ topic });
+        setSessions(web3wallet.getActiveSessions());
+    };
+
     const createWeb3Wallet = async () => {
         if (web3wallet) return;
         const core = new Core({
@@ -155,11 +161,34 @@ function WalletConnect({ children }) {
         await web3wallet.pair({ uri });
     };
 
-    const disconnect = async (topic) => {
+    const disconnectAll = async () => {
         if (!web3wallet) return;
-        await web3wallet.disconnectSession({ topic });
+
+        // Assuming getActiveSessions() returns an object where keys are session identifiers
+        const activeSessions = web3wallet.getActiveSessions();
+        console.log("Active sessions before disconnect:", activeSessions);
+
+        Object.keys(sessions).forEach(async (key) => {
+            const session = sessions[key];
+            // Log the session topic you are trying to disconnect
+            console.log("Attempting to disconnect session with topic:", session.topic);
+            try {
+                // Check if the session topic exists in the active sessions object
+                if (session.topic in activeSessions) {
+                    await web3wallet.disconnectSession({ topic: session.topic });
+                } else {
+                    console.log("Session topic not found in active sessions:", session.topic);
+                }
+            } catch (error) {
+                // Handle errors such as session not found
+                console.error("Error disconnecting session:", error);
+            }
+        });
+
+        // // Update sessions state after disconnect attempts
         setSessions(web3wallet.getActiveSessions());
     };
+
     const values = useMemo(
         () => ({
             createWeb3Wallet,
@@ -178,6 +207,7 @@ function WalletConnect({ children }) {
             pairings,
             sessions,
             disconnect,
+            disconnectAll,
         }),
         [pairings, sessions, sessionProposal, transactionRequest, modalType, isOpen],
     );

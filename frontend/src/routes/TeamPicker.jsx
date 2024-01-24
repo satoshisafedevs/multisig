@@ -26,6 +26,7 @@ import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 import { useTransactions } from "../providers/Transactions";
 import { useSafeBalance } from "../providers/SafeBalance";
+import { useWalletConnect } from "../providers/WalletConnect";
 import Header from "../components/Header";
 
 const MAX_TEAM_NAME_LENGTH = 50;
@@ -36,6 +37,7 @@ function TeamPicker() {
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const { setFirestoreTransactions } = useTransactions();
+    const { disconnectAll } = useWalletConnect();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [teamName, setTeamName] = useState("");
@@ -86,7 +88,10 @@ function TeamPicker() {
         setTeamName(newName);
     };
 
-    const handleTeamSelect = (slug) => navigate(`/team/${slug}`);
+    const handleTeamSelect = (slug) => {
+        disconnectAll();
+        navigate(`/team/${slug}`);
+    };
 
     const handleNewTeamSubmit = async () => {
         try {

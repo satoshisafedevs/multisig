@@ -5,6 +5,7 @@ import {
     Center,
     Button,
     useToast,
+    Flex,
     VStack,
     HStack,
     Modal,
@@ -18,9 +19,10 @@ import {
     Heading,
     Text,
 } from "@chakra-ui/react";
+import { IoAddCircleOutline } from "react-icons/io5";
 import { isEmpty } from "lodash";
 import wclogo from "../../img/walletconnect_logo.png";
-import useWalletConnect from "../../hooks/useWalletConnect";
+import { useWalletConnect } from "../../providers/WalletConnect";
 
 export default function WalletConnect() {
     const { pair, createWeb3Wallet, ConnectionModal, disconnect, sessions } = useWalletConnect();
@@ -60,28 +62,45 @@ export default function WalletConnect() {
     };
 
     return (
-        <VStack align="start" p={4}>
-            <Button onClick={onOpen} colorScheme="green300" position="absolute" top="30px" right="30px">
-                Add Connection
-            </Button>
+        <Flex direction="column" align="start" p={4} height="100%">
             <Heading size="sm" mt="20px">
                 Paired dApps
             </Heading>
-            {sessions &&
-                Object.values(sessions).map((session) => {
-                    const { name } = session.peer.metadata;
-                    const { topic } = session;
-                    return (
-                        <HStack key={topic} width="100%" justifyContent="space-between">
-                            <Text>{name}</Text>
-                            <Button onClick={() => disconnect(topic)} size="sm">
-                                X
-                            </Button>
-                        </HStack>
-                    );
-                })}
+            <VStack flex="1" overflowY="auto" width="100%">
+                {" "}
+                {/* Scrollable and flexible container for sessions */}
+                {sessions && !isEmpty(sessions) ? (
+                    Object.values(sessions).map((session) => {
+                        const { name } = session.peer.metadata;
+                        const { topic } = session;
+                        return (
+                            <HStack key={topic} width="100%" justifyContent="space-between">
+                                <Text>{name}</Text>
+                                <Button onClick={() => disconnect(topic)} size="sm">
+                                    X
+                                </Button>
+                            </HStack>
+                        );
+                    })
+                ) : (
+                    <>
+                        <IoAddCircleOutline size="48px" color="gray.300" />
+                        <Text textAlign="center" color="gray.500">
+                            You don&apos;t have any connections yet. Pair with a dApp to get started.
+                        </Text>
+                        <Button colorScheme="blue" onClick={onOpen}>
+                            Pair a New dApp
+                        </Button>
+                    </>
+                )}
+            </VStack>
+            {/* Button at the bottom */}
+            {sessions && !isEmpty(sessions) && (
+                <Button onClick={onOpen} colorScheme="green300" w="100%">
+                    Add Connection
+                </Button>
+            )}
 
-            {isEmpty(sessions) && <Text>(none)</Text>}
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
@@ -115,6 +134,6 @@ export default function WalletConnect() {
                 </ModalContent>
             </Modal>
             {ConnectionModal}
-        </VStack>
+        </Flex>
     );
 }
