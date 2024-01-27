@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { IoAddCircleOutline, IoEnterOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
+import { useTransactions } from "../../providers/Transactions";
 import { db, doc, getDoc, updateDoc, Timestamp } from "../../firebase";
 import ImportSafeModal from "./ImportSafeModal";
 import CreateNewSafeModal from "./CreateNewSafeModal";
@@ -23,6 +24,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");
     const toast = useToast();
     const { currentTeam, setCurrentTeam, userTeamData } = useUser();
+    const { fetchAndPostTransactions, setGettingData } = useTransactions();
     const [modalState, setModalState] = useState("welcome");
     const [checkedSafes, setCheckedSafes] = useState({});
     const [loading, setLoading] = useState(false);
@@ -86,10 +88,56 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                     duration: 5000,
                     isClosable: true,
                 });
+            } finally {
+                onClose();
+                setLoading(false);
+            }
+
+            try {
+                setGettingData(true);
+                // Create an array of functions returning promises
+                const transactionPromises = newSafes.map((teamSafe) => () => fetchAndPostTransactions(teamSafe, 5));
+                // this is so werid: gnosis occasionally returns wrong results with limit more than 10
+
+                // Function to execute promises sequentially
+                const executeSequentially = (promises) =>
+                    promises.reduce((prevPromise, nextPromise) => prevPromise.then(nextPromise), Promise.resolve());
+
+                // Execute promises sequentially and wait for completion
+                const allTransactionsComplete = executeSequentially(transactionPromises);
+
+                // Use toast.promise with the promise
+                toast.promise(
+                    allTransactionsComplete, // Execute promises sequentially
+                    {
+                        loading: {
+                            title: "Fetching Transactions",
+                            description: "Task in progress... Please keep this tab open and wait for updates.",
+                            position: "top",
+                        },
+                        success: {
+                            title: "Transactions Fetched",
+                            description: "Finished getting transactions for selected safe(s).",
+                            position: "top",
+                            isClosable: true,
+                        },
+                        error: {
+                            title: "Error",
+                            description: "Error getting transactions.",
+                            position: "top",
+                            isClosable: true,
+                        },
+                    },
+                );
+
+                // Await the completion of all transactions
+                await allTransactionsComplete;
+            } catch (error) {
+                //
+            } finally {
+                setGettingData(false);
             }
         }
-        onClose();
-        setLoading(false);
     };
 
     const importSafeContent = () => {

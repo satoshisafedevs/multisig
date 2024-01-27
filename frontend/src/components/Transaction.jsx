@@ -39,6 +39,7 @@ function Transaction({ transaction }) {
 
     const networkMismatch =
         chain &&
+        transaction.network &&
         (transaction.network === "mainnet" ? chain.network !== "homestead" : chain.network !== transaction.network);
 
     const approve = async (network, safeAddress, safeTxHash) => {
@@ -52,9 +53,7 @@ function Transaction({ transaction }) {
         const success = await executeTransaction(safeService, safeAddress, safeTxHash);
         if (success) {
             toast({
-                description:
-                    "Transaction executed successfully! " +
-                    "Please await the status update or refresh the page in one minute.",
+                description: "Transaction executed successfully! Please await the status update.",
                 position: "top",
                 status: "success",
                 duration: 5000,
@@ -78,7 +77,7 @@ function Transaction({ transaction }) {
         if (transaction.txHash || transaction.transactionHash || executed) {
             return null;
         }
-        if (transaction.confirmationsRequired === transaction.confirmations.length) {
+        if (transaction.confirmations && transaction.confirmationsRequired === transaction.confirmations.length) {
             const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled;
 
             return (

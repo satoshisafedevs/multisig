@@ -12,10 +12,8 @@ function Safes() {
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const getSafeData = async (safe, network, signal) => {
-        const response = await fetch(`https://safe-transaction-${network}.safe.global/api/v1/safes/${safe}/`, {
-            signal,
-        });
+    const getSafeData = async (safe, network) => {
+        const response = await fetch(`https://safe-transaction-${network}.safe.global/api/v1/safes/${safe}/`);
         if (!response.ok) {
             const data = await response.json();
             const error = new Error(data.message || "Unprocessable Entity");
@@ -24,11 +22,11 @@ function Safes() {
         return { [safe]: await response.json() };
     };
 
-    const fetchAndUpdateLatestSafesData = async (controller) => {
+    const fetchAndUpdateLatestSafesData = async () => {
         try {
             let isUpdateNeeded = false;
             const fetchedDataList = await Promise.all(
-                currentTeam.safes.map((safe) => getSafeData(safe.safeAddress, safe.network, controller.signal)),
+                currentTeam.safes.map((safe) => getSafeData(safe.safeAddress, safe.network)),
             );
             const combinedData = fetchedDataList.reduce((acc, currData) => ({ ...acc, ...currData }), {});
             const teamRef = doc(db, "teams", currentTeam.id);
@@ -79,9 +77,7 @@ function Safes() {
 
     useEffect(() => {
         if (currentTeam?.safes?.length > 0) {
-            const controller = new AbortController();
-            fetchAndUpdateLatestSafesData(controller);
-            return () => controller.abort();
+            fetchAndUpdateLatestSafesData();
         }
     }, [currentTeam?.safes]);
 

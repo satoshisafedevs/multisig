@@ -152,7 +152,7 @@ function InFlightTransaction({ transaction }) {
                                                 width="100%"
                                                 paddingRight="10px"
                                             >
-                                                {transaction?.satoshiData?.action || "Unspecified"}
+                                                {transaction?.satoshiData?.type || "Unspecified"}
                                             </Text>
                                         </Flex>
                                     </Stack>
@@ -179,7 +179,7 @@ InFlightTransaction.propTypes = {
         txHash: PropTypes.string,
         transactionHash: PropTypes.string,
         satoshiData: PropTypes.shape({
-            action: PropTypes.string,
+            type: PropTypes.string,
         }),
     }),
 };

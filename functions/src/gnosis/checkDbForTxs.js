@@ -1,5 +1,6 @@
 const { isEqual } = require("underscore");
-const { db } = require("../firebase");
+const { db, error } = require("../firebase");
+const { convertNestedArrays } = require("../gnosis/sanitizeTxs");
 
 const checkDbForTxs = async (transactions, teamid) => {
     try {
@@ -11,24 +12,25 @@ const checkDbForTxs = async (transactions, teamid) => {
             const queryField = transaction.safeTxHash ? "safeTxHash" : "txHash";
             const queryValue = transaction.safeTxHash || transaction.txHash;
             const querySnapshot = await txsRef.where(queryField, "==", queryValue).get();
+            const sanitizedTx = convertNestedArrays(transaction);
 
             if (!querySnapshot.empty) {
                 // Transaction found in the database
                 const txInDb = querySnapshot.docs[0].data();
-                if (isTransactionUpdated(txInDb, transaction)) {
+                if (isTransactionUpdated(txInDb, sanitizedTx)) {
                     // Merge new data and update the database
-                    await txsRef.doc(querySnapshot.docs[0].id).set(transaction, { merge: true });
+                    await txsRef.doc(querySnapshot.docs[0].id).set(sanitizedTx, { merge: true });
                     txModified = true;
                 }
             } else {
                 // If the transaction does not exist in the database, add it
-                await txsRef.add(transaction);
+                await txsRef.add(sanitizedTx);
                 txModified = true;
             }
         }
         return txModified;
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        error(err);
     }
 };
 
@@ -42,6 +44,8 @@ const isTransactionUpdated = (txInDb, newTx) => {
 
     // Check if newTx lacks any field that exists in txInDb
     for (const key in txInDb) {
+        if (key === "satoshiData") continue; // Skip the satoshiData field
+        // this is a custom field we add to easy understand all transaction data
         if (!(key in newTx)) {
             return true; // Missing field in newTx
         }

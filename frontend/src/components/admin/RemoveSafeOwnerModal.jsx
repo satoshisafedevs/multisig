@@ -66,6 +66,13 @@ function RemoveSafeOwnerModal({
     const networkMismatch =
         chain && (network === "mainnet" ? chain.network !== "homestead" : chain.network !== network);
 
+    const satoshiData = {
+        type: "removeSafeOwner",
+        owner,
+        newThreshold,
+        oldThreshold: threshold,
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <ModalOverlay />
@@ -132,14 +139,19 @@ function RemoveSafeOwnerModal({
                             } else {
                                 try {
                                     setLoading(true);
-                                    const resp = await removeSafeOwner(safeAddress, {
-                                        ownerAddress: owner,
-                                        threshold: newThreshold,
-                                    });
+                                    const resp = await removeSafeOwner(
+                                        network,
+                                        safeAddress,
+                                        {
+                                            ownerAddress: owner,
+                                            threshold: newThreshold,
+                                        },
+                                        address,
+                                        satoshiData,
+                                    );
                                     if (resp) {
                                         setTimeout(() => {
-                                            const controller = new AbortController();
-                                            fetchAndUpdateLatestSafesData(controller);
+                                            fetchAndUpdateLatestSafesData();
                                         }, 10000);
                                     }
                                 } finally {
@@ -151,7 +163,7 @@ function RemoveSafeOwnerModal({
                     >
                         {networkMismatch
                             ? `Switch to ${upperFirst(network)} network`
-                            : "Execute transaction to remove owner"}
+                            : "Create and sign transaction to remove owner"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

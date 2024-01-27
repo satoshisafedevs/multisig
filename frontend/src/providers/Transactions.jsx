@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
-import { omit, isEqual } from "lodash";
 import { useUser } from "./User";
 import networks from "../utils/networks.json";
-import { db, doc, collection, writeBatch, onSnapshot } from "../firebase";
+import { db, collection, onSnapshot } from "../firebase";
 
 const TransactionsContext = createContext();
 const TransactionsProvider = TransactionsContext.Provider;
@@ -13,13 +12,17 @@ export function useTransactions() {
 }
 
 function Transactions({ children }) {
-    const { currentTeam } = useUser();
+    const { currentTeam, user } = useUser();
     const [firestoreTransactions, setFirestoreTransactions] = useState();
     const [gettingData, setGettingData] = useState(false);
-    const [writingInProgress, setWritingInProgress] = useState(false);
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+    const [isBrowserTabActive, setIsBrowserTabActive] = useState(true);
+    const [lastActiveTime, setLastActiveTime] = useState(Date.now());
+    const [isUserActive, setIsUserActive] = useState(true);
+    const activityTimeout = 3 * 60 * 1000; // 3 minutes in milliseconds
 
     useEffect(() => {
-        if (!currentTeam || !currentTeam.id || writingInProgress) return;
+        if (!currentTeam || !currentTeam.id) return;
 
         const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
 
@@ -33,195 +36,174 @@ function Transactions({ children }) {
         });
 
         return unsubscribe;
-    }, [currentTeam, writingInProgress]);
+    }, [currentTeam]);
 
-    const getTransactions = async (baseUrl, options, allGnosisTransactions, network, safeAddress) => {
-        const limit = 100;
-
-        const fetchData = async (offset) => {
-            const response = await fetch(`${baseUrl}?limit=${limit}&offset=${offset}`, options);
+    const postNewTransactions = async (tData) => {
+        try {
+            const response = await fetch("https://api-transactions-mojsb2l5zq-uc.a.run.app", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${user.accessToken}`,
+                },
+                body: JSON.stringify({
+                    teamid: currentTeam.id,
+                    transactions: tData,
+                }),
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message);
+            }
             const data = await response.json();
+            return data;
+        } catch (error) {
+            // error
+        }
+    };
 
-            data.results.forEach((result) => {
-                allGnosisTransactions.push({
-                    ...result,
-                    network,
-                    safe: safeAddress,
-                    interface: "GnosisSafe",
-                });
-            });
+    const getTransactionsFromGnosis = async (baseUrl, limitValue, offset) => {
+        const response = await fetch(`${baseUrl}?limit=${limitValue}&offset=${offset}`);
+        const data = await response.json();
+        return data.results;
+    };
 
-            // If the total count is still greater than the current offset plus the limit, fetch the next set
-            if (data.count > offset + limit) {
-                await fetchData(offset + limit);
+    // this is so werid: gnosis occasionally returns wrong results with limit more than 10
+    async function fetchAndPostTransactions(teamSafe, limitValue = 5, offset = 0) {
+        const { network, safeAddress } = teamSafe;
+        const { safeTransactionService } = networks[network];
+        const baseUrl = `${safeTransactionService}/api/v1/safes/${safeAddress}/all-transactions/`;
+
+        let response = await getTransactionsFromGnosis(baseUrl, limitValue, offset);
+        response = response.map((resp) => ({
+            ...resp,
+            network,
+            safe: safeAddress,
+            interface: "GnosisSafe",
+        }));
+
+        if (response && response.length === 0) {
+            return true;
+        }
+        // console.log("gotTransactionsFromGnosis for ", safeAddress, response);
+        // console.log("getting safe data at", new Date().toLocaleString("en-US", { timeZone: "America/Chicago" }));
+        if (response && response.length > 0) {
+            const postResponse = await postNewTransactions(response);
+            // console.log("postResponse", postResponse);
+            if (postResponse && postResponse.fetchMore) {
+                // Recursively call the function with updated limit and offset
+                await fetchAndPostTransactions(teamSafe, limitValue, offset + limitValue);
             }
-        };
-
-        await fetchData(0); // Start fetching from the first set of transactions
-    };
-
-    const addTransactionsToFirestore = async (transactionsToWrite) => {
-        setWritingInProgress(true);
-        const chunkSize = 500;
-        const transactionsChunks = [];
-        for (let i = 0; i < transactionsToWrite.length; i += chunkSize) {
-            transactionsChunks.push(transactionsToWrite.slice(i, i + chunkSize));
         }
-        // Process each chunk
-        await Promise.all(
-            transactionsChunks.map(async (transactionsChunk, index) => {
-                const batch = writeBatch(db);
-                transactionsChunk.forEach((transaction) => {
-                    const ref = doc(collection(db, "teams", currentTeam.id, "transactions"));
-                    batch.set(ref, transaction);
-                });
-                // Commit the batch
-                await batch
-                    .commit()
-                    .then(() => {
-                        // eslint-disable-next-line no-console
-                        console.log(
-                            `Batch ${index} add transactions completed,` +
-                                ` added ${transactionsChunks[index].length} transaction(s)`,
-                        );
-                    })
-                    .catch((error) => {
-                        // eslint-disable-next-line no-console
-                        console.error(`Batch ${index} add transactions failed`, error);
-                    });
-            }),
-        );
-        setWritingInProgress(false);
-    };
+    }
 
-    const updateTransactionsInFirestore = async (transactionsToUpdate) => {
-        setWritingInProgress(true);
-        const chunkSize = 500;
-        const transactionsChunks = [];
-        for (let i = 0; i < transactionsToUpdate.length; i += chunkSize) {
-            transactionsChunks.push(transactionsToUpdate.slice(i, i + chunkSize));
-        }
-        // Process each chunk
-        await Promise.all(
-            transactionsChunks.map(async (transactionsChunk, index) => {
-                const batch = writeBatch(db);
-                transactionsChunk.forEach((transaction) => {
-                    const ref = doc(db, "teams", currentTeam.id, "transactions", Object.keys(transaction)[0]);
-                    batch.set(ref, Object.values(transaction)[0]);
-                });
-                // Commit the batch
-                await batch
-                    .commit()
-                    .then(() => {
-                        // eslint-disable-next-line no-console
-                        console.log(
-                            `Batch ${index} update transactions completed,` +
-                                ` updated ${transactionsChunks[index].length} transaction(s)`,
-                        );
-                    })
-                    .catch((error) => {
-                        // eslint-disable-next-line no-console
-                        console.error(`Batch ${index} update transactions failed`, error);
-                    });
-            }),
-        );
-        setWritingInProgress(false);
-    };
-
-    const convertNestedArrays = (obj) => {
-        if (Array.isArray(obj)) {
-            // Check if it's an array of arrays
-            if (obj.every((item) => Array.isArray(item))) {
-                return obj.map((subArray, index) => ({
-                    [index]: convertNestedArrays(subArray),
-                }));
-            }
-            return obj.map((item) => {
-                if (typeof item === "object" && item !== null) {
-                    // If the item is an object or array, recursively check its properties or elements
-                    return convertNestedArrays(item);
-                }
-                return item;
-            });
-        }
-        if (typeof obj === "object" && obj !== null) {
-            // Create a copy of obj to avoid modification of function parameters
-            const newObj = { ...obj };
-            Object.keys(newObj).forEach((key) => {
-                if (typeof newObj[key] === "object" && newObj[key] !== null) {
-                    newObj[key] = convertNestedArrays(newObj[key]);
-                }
-            });
-            return newObj; // Return the new object
-        }
-        return obj;
-    };
-
-    const getLatestGnosisData = async () => {
+    const fetchAndUpdateData = async () => {
         setGettingData(true);
-        const allGnosisTransactions = [];
-
-        await Promise.all(
-            currentTeam.safes.map(async (teamSafe) => {
-                const { network, safeAddress } = teamSafe;
-                const { safeTransactionService } = networks[network];
-                const baseUrl = `${safeTransactionService}/api/v1/safes/${safeAddress}/all-transactions/`;
-                const options = { method: "GET" };
-                await getTransactions(baseUrl, options, allGnosisTransactions, network, safeAddress);
-            }),
-        );
-
-        if (allGnosisTransactions.length === firestoreTransactions.length) {
-            const nonMatchingTransactions = [];
-            allGnosisTransactions.forEach(async (original) => {
-                const existing = firestoreTransactions.find(
-                    (t) =>
-                        t.safeTxHash === original.safeTxHash &&
-                        (!original.txHash || !t.txHash || t.txHash === original.txHash),
-                );
-                const sanitizedOriginal = convertNestedArrays(original);
-                const transactionID = existing.id;
-                const sanitizedExisting = omit(existing, ["id"]);
-                if (!isEqual(sanitizedOriginal, sanitizedExisting)) {
-                    nonMatchingTransactions.push({ [transactionID]: sanitizedOriginal });
-                }
-            });
-            if (nonMatchingTransactions.length > 0) {
-                updateTransactionsInFirestore(nonMatchingTransactions);
-            }
+        try {
+            await currentTeam.safes.reduce(async (prevPromise, teamSafe) => {
+                await prevPromise;
+                return fetchAndPostTransactions(teamSafe);
+            }, Promise.resolve());
+        } catch (error) {
+            console.error("Error in fetchAndUpdateData function:", error);
+        } finally {
+            setGettingData(false);
         }
-
-        if (allGnosisTransactions.length !== firestoreTransactions.length) {
-            // do stuff if transactions do not match
-            // Convert firestoreTransactions to a set of safeTxHash for faster lookup
-            const allHashes = new Set(firestoreTransactions.map((t) => t.safeTxHash || t.txHash));
-
-            // Filter objects from allGnosisTransactions that aren't in firestoreTransactions
-            const missingTransactions = allGnosisTransactions.filter((t) => !allHashes.has(t.safeTxHash || t.txHash));
-
-            if (missingTransactions.length > 0) {
-                // There are transactions in allGnosisTransactions that aren't in firestoreTransactions
-                // Do stuff with missingTransactions
-                const sanitisedData = missingTransactions.map((t) => convertNestedArrays(t));
-                addTransactionsToFirestore(sanitisedData);
-            }
-        }
-        setGettingData(false);
     };
 
     useEffect(() => {
-        if (currentTeam?.safes && firestoreTransactions && !gettingData) {
-            getLatestGnosisData();
+        // handle first page open
+        if (!isDataLoaded && currentTeam) {
+            if (currentTeam.safes?.length > 0) {
+                // console.log("1");
+                fetchAndUpdateData();
+                setIsDataLoaded(true);
+            } else {
+                // console.log("2");
+                setIsDataLoaded(true);
+            }
         }
-    }, [currentTeam, firestoreTransactions]);
+    }, [isDataLoaded, currentTeam]);
+
+    useEffect(() => {
+        let intervalId;
+        // Set up the interval only if gettingData is false and currentTeam has safes
+        if (!gettingData && isBrowserTabActive && isUserActive && currentTeam?.safes?.length > 0) {
+            intervalId = setInterval(fetchAndUpdateData, 15000);
+        }
+        // Clean up the interval on component unmount or when gettingData changes
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [gettingData, currentTeam?.safes, isBrowserTabActive, isUserActive]);
+
+    useEffect(() => {
+        // sets the tab inactive and checks for how long, if more than 15 seconds and active again - calls get data
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                setLastActiveTime(Date.now());
+                setIsBrowserTabActive(false);
+            } else {
+                const timeAway = Date.now() - lastActiveTime;
+                if (timeAway > 15000) {
+                    fetchAndUpdateData();
+                }
+                setIsBrowserTabActive(true);
+            }
+        }
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        // Cleanup event listeners on component unmount
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, [lastActiveTime]);
+
+    useEffect(() => {
+        // sets user to inactive after activityTimeout minutes
+        let timeoutId;
+
+        const resetActivityTimeout = () => {
+            clearTimeout(timeoutId);
+            setIsUserActive(true);
+            timeoutId = setTimeout(() => setIsUserActive(false), activityTimeout);
+        };
+
+        // Set initial timeout
+        timeoutId = setTimeout(() => setIsUserActive(false), activityTimeout);
+
+        // Set up event listeners
+        window.addEventListener("mousemove", resetActivityTimeout);
+        window.addEventListener("keydown", resetActivityTimeout);
+
+        // Cleanup function
+        return () => {
+            clearTimeout(timeoutId);
+            window.removeEventListener("mousemove", resetActivityTimeout);
+            window.removeEventListener("keydown", resetActivityTimeout);
+        };
+    }, []);
 
     const values = useMemo(
         () => ({
             firestoreTransactions,
             setFirestoreTransactions,
-            getLatestGnosisData,
+            fetchAndPostTransactions,
+            gettingData,
+            setGettingData,
+            setIsDataLoaded,
         }),
-        [firestoreTransactions, setFirestoreTransactions, getLatestGnosisData],
+        [
+            firestoreTransactions,
+            setFirestoreTransactions,
+            fetchAndPostTransactions,
+            gettingData,
+            setGettingData,
+            setIsDataLoaded,
+        ],
     );
 
     return <TransactionsProvider value={values}>{children}</TransactionsProvider>;
