@@ -154,6 +154,14 @@ export default function Send() {
             fromHumanReadable(amount, selectedToken.contract_decimals),
         ]);
 
+    const satoshiData = {
+        type: "send",
+        from: safe && ethers.utils.getAddress(safe),
+        to: recipient && ethers.utils.getAddress(recipient),
+        token: selectedToken.native_token ? "ETH" : selectedToken.contract_ticker_symbol,
+        amount,
+    };
+
     return (
         <Stack padding="10px 0" gap="20px">
             <Box display="flex" flexDirection="row">
@@ -402,6 +410,7 @@ export default function Send() {
                                     : "0",
                             },
                             address,
+                            satoshiData,
                         );
                         if (success) {
                             setSafe("");

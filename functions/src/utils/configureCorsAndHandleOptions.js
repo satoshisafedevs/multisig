@@ -14,8 +14,9 @@ const configureCorsAndHandleOptions = (req, res) => {
 
     if (allowedOrigins.includes(origin) || allowedOriginRegex.test(origin)) {
         res.set("Access-Control-Allow-Origin", origin);
+        res.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        res.set("Access-Control-Allow-Methods", "GET, POST, DELETE");
         if (req.method === "OPTIONS") {
-            res.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
             res.status(204).send("");
             return true;
         }

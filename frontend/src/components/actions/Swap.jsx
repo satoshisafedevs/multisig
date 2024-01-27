@@ -24,6 +24,7 @@ export default function Swap() {
     const [toSafe, setToSafe] = useState("");
     const [toChain, setToChain] = useState("");
     const [toToken, setToToken] = useState({});
+    const [toNetwork, setToNetwork] = useState("");
     const [loadingRoute, setLoadingRoute] = useState(false);
     const [routeData, setRouteData] = useState();
     const [totalUSDFrom, setTotalUSDFrom] = useState();
@@ -90,7 +91,7 @@ export default function Swap() {
         },
         collectFees: {
             integratorAddress: "0x15C3c3E0444bC58aad1c3b27d196016F9E28bC70",
-            fee: 50, // The amount in "basis points" for the fee. 50 = 0.05%.
+            fee: 50, // The amount in "basis points" for the fee. 50 = 0.05%. (OR 0.5% ???)
             // There is currently soft limit of 1% fee allowed for each tx.
         },
     };
@@ -156,6 +157,21 @@ export default function Swap() {
 
     const networkMismatch = chain && Number(fromChain) !== chain.id;
 
+    const satoshiData = {
+        type: "swap",
+        from: fromSafe && ethers.utils.getAddress(fromSafe),
+        fromNetwork,
+        fromAmount: `${fromAmount} ${fromToken?.symbol}`,
+        to: toSafe && ethers.utils.getAddress(toSafe),
+        toNetwork,
+        toAmount: `${
+            routeData?.estimate?.toAmount &&
+            toToken?.decimals &&
+            toHumanReadable(routeData.estimate.toAmount, toToken.decimals)
+        } ${toToken?.symbol}`,
+        estimatedSwapFees: `${estimatedSwapFee} ETH`,
+    };
+
     return (
         <Stack padding="10px 0" gap="0">
             <Swapper
@@ -194,7 +210,7 @@ export default function Swap() {
                         : ""
                 }
                 setAmount={() => {}}
-                setFromNetwork={() => {}}
+                setFromNetwork={setToNetwork}
                 setFromBalances={() => {}}
                 totalUSDFrom={totalUSDFrom}
                 setRouteData={setRouteData}
@@ -250,6 +266,7 @@ export default function Swap() {
                                     value: routeData.transactionRequest.value,
                                 },
                                 address,
+                                satoshiData,
                             );
                         }
                     }}

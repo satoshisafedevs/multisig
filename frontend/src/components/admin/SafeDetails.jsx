@@ -31,6 +31,7 @@ import { IoRemoveCircleOutline, IoHelpCircleOutline, IoPersonRemove, IoPersonAdd
 import { BsSafe } from "react-icons/bs";
 import { db, doc, getDoc, updateDoc } from "../../firebase";
 import { useUser } from "../../providers/User";
+import { useTransactions } from "../../providers/Transactions";
 import { formatTimestamp } from "../../utils";
 import CopyToClipboard from "../CopyToClipboard";
 import SafeStatus from "./SafeStatus";
@@ -41,7 +42,8 @@ import EditSafeThresholdModal from "./EditSafeThresholdModal";
 function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { currentTeam, setCurrentTeam, teamUsersInfo } = useUser();
+    const { currentTeam, setCurrentTeam, teamUsersInfo, user } = useUser();
+    const { setGettingData, gettingData } = useTransactions();
     const [isEditingName, setIsEditingName] = useState(false);
     const [safeName, setSafeName] = useState(data.name || "");
     const [addSafeOwnerModalIsOpen, setAddSafeOwnerModalIsOpen] = useState(false);
@@ -122,6 +124,29 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                 isClosable: true,
             });
         }
+
+        try {
+            setGettingData(true);
+            await fetch(
+                `https://api-transactions-mojsb2l5zq-uc.a.run.app/?teamid=${currentTeam.id}&safe=${safeAddress}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${user.accessToken}`,
+                    },
+                },
+            );
+        } catch (error) {
+            toast({
+                description: `Failed to clean up transactions for safe: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setGettingData(false);
+        }
     };
 
     return (
@@ -181,15 +206,18 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                         >
                             Cancel
                         </Button>
-                        <Button
-                            colorScheme="red"
-                            onClick={() => {
-                                removeSafe(data.safeAddress);
-                                onClose();
-                            }}
-                        >
-                            Remove
-                        </Button>
+                        <Tooltip label={gettingData && "Syncing with latest data..."}>
+                            <Button
+                                isDisabled={gettingData}
+                                colorScheme="red"
+                                onClick={() => {
+                                    removeSafe(data.safeAddress);
+                                    onClose();
+                                }}
+                            >
+                                Remove
+                            </Button>
+                        </Tooltip>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

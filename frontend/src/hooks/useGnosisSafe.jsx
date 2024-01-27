@@ -4,14 +4,52 @@ import { ethers } from "ethers";
 import { useToast } from "@chakra-ui/react";
 import networks from "../utils/networks.json";
 import checkNetwork from "../utils/checkNetwork";
-import { db, doc, setDoc } from "../firebase";
+import { convertToISOString } from "../utils";
+import { db, doc, setDoc, Timestamp } from "../firebase";
 import { useUser } from "../providers/User";
-import { useTransactions } from "../providers/Transactions";
 
 const useGnosisSafe = () => {
-    const { getLatestGnosisData } = useTransactions();
     const toast = useToast();
     const { user, currentTeam, getUserTeamsData } = useUser();
+
+    const postNewTransactionToDb = async (network, safe, safeTxHash, satoshiData) => {
+        try {
+            const response = await fetch("https://api-transactions-mojsb2l5zq-uc.a.run.app", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${user.accessToken}`,
+                },
+                body: JSON.stringify({
+                    teamid: currentTeam.id,
+                    transactions: [
+                        {
+                            network,
+                            safe,
+                            safeTxHash,
+                            submissionDate: convertToISOString(Timestamp.now()),
+                            satoshiData,
+                        },
+                    ],
+                }),
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message);
+            }
+            const data = await response.json();
+            // eslint-disable-next-line no-console
+            console.log("postNewTransaction response:", data);
+        } catch (error) {
+            toast({
+                description: `Failed to post new transaction: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     const getSafeSdk = async (safeAddress) => {
         try {
@@ -138,14 +176,10 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
         }
     };
 
-    const createAndApproveSendTransaction = async (network, safeAddress, tx, senderAddress) => {
+    const createAndApproveSendTransaction = async (network, safeAddress, tx, senderAddress, satoshiData) => {
         try {
             const safeSdk = await getSafeSdk(safeAddress);
             const safeTransaction = await safeSdk.createTransaction(
@@ -160,6 +194,7 @@ const useGnosisSafe = () => {
             );
             const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
             const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+            await postNewTransactionToDb(network, safeAddress, safeTxHash, satoshiData);
             const safeService = await getSafeService(network);
             await safeService.proposeTransaction({
                 safeAddress: ethers.utils.getAddress(safeAddress),
@@ -177,14 +212,11 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
+            return false;
         }
     };
 
-    const createAndApproveSwapTransaction = async (network, safeAddress, contractTx, tx, fromAddress) => {
+    const createAndApproveSwapTransaction = async (network, safeAddress, contractTx, tx, fromAddress, satoshiData) => {
         try {
             const safeSdk = await getSafeSdk(safeAddress);
             const safeTransaction = await safeSdk.createTransaction(
@@ -206,6 +238,7 @@ const useGnosisSafe = () => {
             );
             const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
             const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+            await postNewTransactionToDb(network, safeAddress, safeTxHash, satoshiData);
             const safeService = await getSafeService(network);
             await safeService.proposeTransaction({
                 safeAddress: ethers.utils.getAddress(safeAddress),
@@ -223,76 +256,91 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
+            return false;
         }
     };
 
-    const addSafeOwner = async (safeAddress, params) => {
+    const addSafeOwner = async (network, safeAddress, params, fromAddress, satoshiData) => {
         try {
             const safeSdk = await getSafeSdk(safeAddress);
             const safeTransaction = await safeSdk.createAddOwnerTx(params);
-            const txResponse = await safeSdk.executeTransaction(safeTransaction);
-            const resp = await txResponse.transactionResponse?.wait();
-            return resp;
+            const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+            const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+            await postNewTransactionToDb(network, safeAddress, safeTxHash, satoshiData);
+            const safeService = await getSafeService(network);
+            await safeService.proposeTransaction({
+                safeAddress: ethers.utils.getAddress(safeAddress),
+                senderAddress: ethers.utils.getAddress(fromAddress),
+                safeTransactionData: safeTransaction.data,
+                safeTxHash,
+                senderSignature: senderSignature.data,
+            });
+            return true;
         } catch (error) {
-            return toast({
-                description: `Failed to add safe owner: ${error.message}`,
+            toast({
+                description: `Failed to create and approve add safe owner transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
+            return false;
         }
     };
 
-    const removeSafeOwner = async (safeAddress, params) => {
+    const removeSafeOwner = async (network, safeAddress, params, fromAddress, satoshiData) => {
         try {
             const safeSdk = await getSafeSdk(safeAddress);
             const safeTransaction = await safeSdk.createRemoveOwnerTx(params);
-            const txResponse = await safeSdk.executeTransaction(safeTransaction);
-            const resp = await txResponse.transactionResponse?.wait();
-            return resp;
+            const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+            const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+            await postNewTransactionToDb(network, safeAddress, safeTxHash, satoshiData);
+            const safeService = await getSafeService(network);
+            await safeService.proposeTransaction({
+                safeAddress: ethers.utils.getAddress(safeAddress),
+                senderAddress: ethers.utils.getAddress(fromAddress),
+                safeTransactionData: safeTransaction.data,
+                safeTxHash,
+                senderSignature: senderSignature.data,
+            });
+            return true;
         } catch (error) {
-            return toast({
-                description: `Failed to remove safe owner: ${error.message}`,
+            toast({
+                description: `Failed to to create and approve remove safe owner transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
+            return false;
         }
     };
 
-    const editSafeThreshold = async (safeAddress, newThreshold) => {
+    const editSafeThreshold = async (network, safeAddress, newThreshold, fromAddress, satoshiData) => {
         try {
             const safeSdk = await getSafeSdk(safeAddress);
             const safeTransaction = await safeSdk.createChangeThresholdTx(newThreshold);
-            const txResponse = await safeSdk.executeTransaction(safeTransaction);
-            const resp = await txResponse.transactionResponse?.wait();
-            return resp;
+            const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
+            const senderSignature = await safeSdk.signTransactionHash(safeTxHash);
+            await postNewTransactionToDb(network, safeAddress, safeTxHash, satoshiData);
+            const safeService = await getSafeService(network);
+            await safeService.proposeTransaction({
+                safeAddress: ethers.utils.getAddress(safeAddress),
+                senderAddress: ethers.utils.getAddress(fromAddress),
+                safeTransactionData: safeTransaction.data,
+                safeTxHash,
+                senderSignature: senderSignature.data,
+            });
+            return true;
         } catch (error) {
-            return toast({
-                description: `Failed to remove safe owner: ${error.message}`,
+            toast({
+                description: `Failed to create and approve remove safe owner transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
+            return false;
         }
     };
 
@@ -310,13 +358,14 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             if (error.message === "SafeProxy contract is not deployed on the current network") {
-                return toast({
+                toast({
                     description: "Failed to confirm transaction: wallet and transaction network mismatch.",
                     position: "top",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
                 });
+                return false;
             }
             toast({
                 description: `Failed to confirm transaction: ${error.message}`,
@@ -325,10 +374,7 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
+            return false;
         }
     };
 
@@ -347,13 +393,14 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             if (error.message === "SafeProxy contract is not deployed on the current network") {
-                return toast({
+                toast({
                     description: "Failed to execute transaction: wallet and transaction network mismatch.",
                     position: "top",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
                 });
+                return false;
             }
             toast({
                 description: `Failed to execute transaction: ${error.message}`,
@@ -362,13 +409,7 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 10000);
-            setTimeout(() => {
-                getLatestGnosisData();
-            }, 15000);
+            return false;
         }
     };
 

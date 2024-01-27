@@ -54,6 +54,12 @@ function EditSafeThresholdModal({
     const networkMismatch =
         chain && (network === "mainnet" ? chain.network !== "homestead" : chain.network !== network);
 
+    const satoshiData = {
+        type: "editSafeThreshold",
+        newThreshold,
+        oldThreshold: threshold,
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <ModalOverlay />
@@ -106,11 +112,16 @@ function EditSafeThresholdModal({
                             } else {
                                 try {
                                     setLoading(true);
-                                    const resp = await editSafeThreshold(safeAddress, newThreshold);
+                                    const resp = await editSafeThreshold(
+                                        network,
+                                        safeAddress,
+                                        newThreshold,
+                                        address,
+                                        satoshiData,
+                                    );
                                     if (resp) {
                                         setTimeout(() => {
-                                            const controller = new AbortController();
-                                            fetchAndUpdateLatestSafesData(controller);
+                                            fetchAndUpdateLatestSafesData();
                                         }, 10000);
                                     }
                                 } finally {
@@ -122,7 +133,7 @@ function EditSafeThresholdModal({
                     >
                         {networkMismatch
                             ? `Switch to ${upperFirst(network)} network`
-                            : "Execute transaction to edit threshold"}
+                            : "Create and sign transaction to edit threshold"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

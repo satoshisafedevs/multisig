@@ -86,3 +86,17 @@ export const formatTimestamp = (timestamp) => {
 
     return formattedDate;
 };
+
+export const convertToISOString = (timestamp) => {
+    // Convert seconds to milliseconds since JavaScript Date object uses milliseconds
+    const date = new Date(timestamp.seconds * 1000);
+
+    // Adjust for nanoseconds
+    // In JavaScript, there's no direct nanosecond support. So we'll convert nanoseconds to milliseconds first
+    // and adjust the date accordingly. This might not always be super precise because of JavaScript's
+    // limitation but for the given format, it should work well.
+    const millisecondsFromNanoseconds = timestamp.nanoseconds / 1000000;
+    date.setMilliseconds(date.getMilliseconds() + millisecondsFromNanoseconds);
+
+    return date.toISOString();
+};

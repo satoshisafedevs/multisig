@@ -58,6 +58,13 @@ function AddSafeOwnerModal({
     const networkMismatch =
         chain && (network === "mainnet" ? chain.network !== "homestead" : chain.network !== network);
 
+    const satoshiData = {
+        type: "addSafeOwner",
+        owner: newOwner,
+        oldThreshold: threshold,
+        newThreshold,
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
             <ModalOverlay />
@@ -125,14 +132,19 @@ function AddSafeOwnerModal({
                             } else {
                                 try {
                                     setLoading(true);
-                                    const resp = await addSafeOwner(safeAddress, {
-                                        ownerAddress: newOwner,
-                                        threshold: newThreshold,
-                                    });
+                                    const resp = await addSafeOwner(
+                                        network,
+                                        safeAddress,
+                                        {
+                                            ownerAddress: newOwner,
+                                            threshold: newThreshold,
+                                        },
+                                        address,
+                                        satoshiData,
+                                    );
                                     if (resp) {
                                         setTimeout(() => {
-                                            const controller = new AbortController();
-                                            fetchAndUpdateLatestSafesData(controller);
+                                            fetchAndUpdateLatestSafesData();
                                         }, 10000);
                                     }
                                 } finally {
@@ -144,7 +156,7 @@ function AddSafeOwnerModal({
                     >
                         {networkMismatch
                             ? `Switch to ${upperFirst(network)} network`
-                            : "Execute transaction to add owner"}
+                            : "Create and sign transaction to add owner"}
                     </Button>
                 </ModalFooter>
             </ModalContent>

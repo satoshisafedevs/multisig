@@ -22,9 +22,10 @@ import { db, collection, addDoc, onSnapshot, Timestamp } from "../../firebase";
 import DeleteMessageModal from "../DeleteMessageModal";
 import { useUser } from "../../providers/User";
 import { useTransactions } from "../../providers/Transactions";
+import { convertToISOString } from "../../utils";
 import theme from "../../theme";
 import Transaction from "../Transaction";
-// import InFlightTransaction from "../InFlightTransaction";
+import InFlightTransaction from "../InFlightTransaction";
 
 export default function Chat() {
     const toast = useToast();
@@ -65,20 +66,6 @@ export default function Chat() {
     const handleMouseLeave = useCallback(() => {
         setHoverID(null);
     }, [setHoverID]);
-
-    const convertToISOString = (timestamp) => {
-        // Convert seconds to milliseconds since JavaScript Date object uses milliseconds
-        const date = new Date(timestamp.seconds * 1000);
-
-        // Adjust for nanoseconds
-        // In JavaScript, there's no direct nanosecond support. So we'll convert nanoseconds to milliseconds first
-        // and adjust the date accordingly. This might not always be super precise because of JavaScript's
-        // limitation but for the given format, it should work well.
-        const millisecondsFromNanoseconds = timestamp.nanoseconds / 1000000;
-        date.setMilliseconds(date.getMilliseconds() + millisecondsFromNanoseconds);
-
-        return date.toISOString();
-    };
 
     useEffect(() => {
         if (!currentTeam || !currentTeam.id) return;
@@ -220,30 +207,19 @@ export default function Chat() {
         return msg.message;
     };
 
-    // once the safe is removed filter it's transactions,
-    // we need some logic that removes those transactions from backend
-    const filterRemovedSafesTransactions = useMemo(() => {
-        if (!firestoreTransactions || !currentTeam?.safes) {
-            return [];
-        }
-        return firestoreTransactions.filter(
-            (item1) => currentTeam.safes.some((item2) => item1.safe === item2.safeAddress),
-            // eslint-disable-next-line function-paren-newline
-        );
-    }, [firestoreTransactions, currentTeam]);
-
     // display latest 100 transactions
     const maxTransactions = -100;
 
     const sortTransactionsByDateAndSlice = useMemo(
         () =>
-            filterRemovedSafesTransactions
+            firestoreTransactions &&
+            firestoreTransactions
                 .sort(
                     (a, b) =>
                         new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
                 )
                 .slice(maxTransactions),
-        [filterRemovedSafesTransactions],
+        [firestoreTransactions],
     );
 
     const filterSameNonceTransactions = useMemo(() => {
@@ -292,6 +268,8 @@ export default function Chat() {
         );
     }, [messages, filterSameNonceTransactions]);
 
+    const filterMessages = useMemo(() => combinedArray.filter((el) => !el.isoDate), [combinedArray]);
+
     return (
         <>
             <DeleteMessageModal
@@ -329,7 +307,7 @@ export default function Chat() {
                         {activeTab === "all" &&
                             combinedArray &&
                             combinedArray.map((msg) => {
-                                if (msg.safe) {
+                                if (msg.txHash || msg.transactionHash || msg.nonce || msg.data) {
                                     return <Transaction key={msg.id} transaction={msg} />;
                                 }
                                 if (msg.uid) {
@@ -375,21 +353,21 @@ export default function Chat() {
                                         </Stack>
                                     );
                                 }
-                                return null;
+                                return <InFlightTransaction key={msg.id} transaction={msg} />;
                             })}
                         {activeTab === "transactions" &&
-                            filterSameNonceTransactions &&
-                            filterSameNonceTransactions.map((transaction) => (
-                                <Transaction key={transaction.id} transaction={transaction} />
-                            ))}
-                        {/* <InFlightTransaction
-                            transaction={{
-                                network: "mainnet",
-                                safe: "1234567890",
-                                txHash: "aslkdjhasldkjhsalk",
-                                satoshiData: { action: "Send", receiver: "0x", amount: 555 },
-                            }}
-                        /> */}
+                            filterMessages &&
+                            filterMessages.map((transaction) => {
+                                if (
+                                    transaction.txHash ||
+                                    transaction.transactionHash ||
+                                    transaction.nonce ||
+                                    transaction.data
+                                ) {
+                                    return <Transaction key={transaction.id} transaction={transaction} />;
+                                }
+                                return <InFlightTransaction key={transaction.id} transaction={transaction} />;
+                            })}
                     </Stack>
                     <Box ref={lastMessage} />
                 </CardBody>

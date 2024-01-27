@@ -2,7 +2,7 @@
     "arbitrum": {
         "url": "https://arb1.arbitrum.io/rpc",
         "svg": "/networks/arbitrum.svg",
-        "safeTransactionService": "https://safe-transaction-arbitrum.safe.global/",
+        "safeTransactionService": "https://safe-transaction-arbitrum.safe.global",
         "id": 42161,
         "currency": "ETH",
         "title": "Arbitrum",
@@ -23,7 +23,7 @@
     "aurora": {
         "url": "https://mainnet.aurora.dev",
         "svg": "/networks/aurora.svg",
-        "safeTransactionService": "https://safe-transaction-aurora.safe.global/",
+        "safeTransactionService": "https://safe-transaction-aurora.safe.global",
         "id": 1313161554,
         "currency": "ETH",
         "title": "Aurora",
@@ -44,7 +44,7 @@
     "avalanche": {
         "url": "https://api.avax.network/ext/bc/C/rpc",
         "svg": "/networks/avalanche.svg",
-        "safeTransactionService": "https://safe-transaction-avalanche.safe.global/",
+        "safeTransactionService": "https://safe-transaction-avalanche.safe.global",
         "id": 43114,
         "currency": "AVAX",
         "title": "Avalanche",
@@ -65,7 +65,7 @@
     "base": {
         "url": "https://rpc.baseledger.com",
         "svg": "/networks/base.svg",
-        "safeTransactionService": "https://safe-transaction-base.safe.global/",
+        "safeTransactionService": "https://safe-transaction-base.safe.global",
         "id": 8453,
         "currency": "ETH",
         "title": "Base",
@@ -86,7 +86,7 @@
     "baseGoerli": {
         "url": "https://goerli.base.org",
         "svg": "/networks/base.svg",
-        "safeTransactionService": "https://safe-transaction-base-testnet.safe.global/",
+        "safeTransactionService": "https://safe-transaction-base-testnet.safe.global",
         "id": 84531,
         "currency": "ETH",
         "title": "Base Goerli",
@@ -107,7 +107,7 @@
     "bsc": {
         "url": "https://bsc-dataseed.binance.org/",
         "svg": "/networks/bnb.svg",
-        "safeTransactionService": "https://safe-transaction-bsc.safe.global/",
+        "safeTransactionService": "https://safe-transaction-bsc.safe.global",
         "id": 56,
         "currency": "BNB",
         "title": "BNB Chain",
@@ -127,7 +127,7 @@
     },
     "mainnet": {
         "svg": "/networks/mainnet.svg",
-        "safeTransactionService": "https://safe-transaction-mainnet.safe.global/",
+        "safeTransactionService": "https://safe-transaction-mainnet.safe.global",
         "id": 1,
         "currency": "ETH",
         "title": "Ethereum",
@@ -149,7 +149,7 @@
     "optimism": {
         "url": "https://mainnet.optimism.io",
         "svg": "/networks/optimism.svg",
-        "safeTransactionService": "https://safe-transaction-optimism.safe.global/",
+        "safeTransactionService": "https://safe-transaction-optimism.safe.global",
         "id": 10,
         "currency": "ETH",
         "title": "Optimism",
@@ -170,7 +170,7 @@
     "polygon": {
         "url": "https://polygon-rpc.com",
         "svg": "/networks/polygon.svg",
-        "safeTransactionService": "https://safe-transaction-polygon.safe.global/",
+        "safeTransactionService": "https://safe-transaction-polygon.safe.global",
         "id": 137,
         "currency": "MATIC",
         "title": "Polygon",
