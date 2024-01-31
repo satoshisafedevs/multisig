@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from "
 import PropTypes from "prop-types";
 import { useToast } from "@chakra-ui/react";
 import { auth, onAuthStateChanged, db, collection, doc, getDoc, getDocs, updateDoc, deleteDoc } from "../firebase";
+import networks from "../utils/networks.json";
 
 const UserContext = createContext();
 const UserProvider = UserContext.Provider;
@@ -124,6 +125,69 @@ function User({ children }) {
         }
     };
 
+    const getSafeData = async (safe, network) => {
+        const response = await fetch(`${networks[network].safeTransactionService}api/v1/safes/${safe}/`);
+        if (!response.ok) {
+            let errorMessage = "Unprocessable Entity";
+            const data = await response.json();
+            if (data.message) {
+                errorMessage = data.message;
+            } else if (response.status === 404) {
+                errorMessage = "Resource not found";
+            } // Add more status code checks if needed
+            throw new Error(errorMessage);
+        }
+        const responseData = await response.json();
+        return { [safe]: responseData };
+    };
+
+    const fetchSafesData = async (safes) =>
+        Promise.all(safes.map((safe) => getSafeData(safe.safeAddress, safe.network)));
+
+    const getUpdatedSafesData = (currentSafes, fetchedData) => {
+        let isUpdateNeeded = false;
+        const updatedSafesData = currentSafes.map((safe) => {
+            const key = fetchedData[safe.safeAddress] ? safe.safeAddress : null;
+            if (
+                key &&
+                (JSON.stringify(safe.owners) !== JSON.stringify(fetchedData[key].owners) ||
+                    safe.threshold !== fetchedData[key].threshold)
+            ) {
+                isUpdateNeeded = true;
+                return { ...safe, ...fetchedData[key] };
+            }
+            return safe;
+        });
+        return { updatedSafesData, isUpdateNeeded };
+    };
+
+    const fetchAndUpdateLatestSafesData = async () => {
+        try {
+            const fetchedDataList = await fetchSafesData(currentTeam.safes);
+            const combinedData = fetchedDataList.reduce((acc, currData) => ({ ...acc, ...currData }), {});
+
+            if (Object.keys(combinedData).length) {
+                const { updatedSafesData, isUpdateNeeded } = getUpdatedSafesData(currentTeam.safes, combinedData);
+
+                if (isUpdateNeeded) {
+                    const teamRef = doc(db, "teams", currentTeam.id);
+                    await updateDoc(teamRef, { safes: updatedSafesData });
+                    setCurrentTeam((prevState) => ({ ...prevState, safes: updatedSafesData }));
+                    console.log("Updated safes data");
+                }
+            }
+        } catch (error) {
+            if (error.message.includes("The operation was aborted.")) return;
+            toast({
+                description: `Failed to sync safes data: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     const values = useMemo(
         () => ({
             user,
@@ -143,6 +207,7 @@ function User({ children }) {
             getFirestoreUserData,
             setUserTeamWallet,
             leaveTeam,
+            fetchAndUpdateLatestSafesData,
         }),
         [
             user,

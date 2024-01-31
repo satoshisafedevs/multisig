@@ -1,85 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text, Button, useToast } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Button } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
 import { useUser } from "../../providers/User";
-import { db, doc, getDoc, updateDoc } from "../../firebase";
 import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 import SafeDetails from "./SafeDetails";
 
 function Safes() {
-    const toast = useToast();
-    const { currentTeam, setCurrentTeam } = useUser();
+    const { fetchAndUpdateLatestSafesData, currentTeam } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const getSafeData = async (safe, network) => {
-        const response = await fetch(`https://safe-transaction-${network}.safe.global/api/v1/safes/${safe}/`);
-        if (!response.ok) {
-            const data = await response.json();
-            const error = new Error(data.message || "Unprocessable Entity");
-            throw error;
-        }
-        return { [safe]: await response.json() };
-    };
-
-    const fetchAndUpdateLatestSafesData = async () => {
-        try {
-            let isUpdateNeeded = false;
-            const fetchedDataList = await Promise.all(
-                currentTeam.safes.map((safe) => getSafeData(safe.safeAddress, safe.network)),
-            );
-            const combinedData = fetchedDataList.reduce((acc, currData) => ({ ...acc, ...currData }), {});
-            const teamRef = doc(db, "teams", currentTeam.id);
-            const teamSnap = await getDoc(teamRef);
-            const teamData = teamSnap.data();
-
-            const latestSafesData = teamData.safes.map((safe) => {
-                const key = Object.keys(combinedData).find((el) => el === safe.safeAddress);
-                if (key) {
-                    if (
-                        JSON.stringify(safe.owners) !== JSON.stringify(combinedData[key].owners) ||
-                        safe.threshold !== combinedData[key].threshold
-                    ) {
-                        isUpdateNeeded = true;
-                    }
-                    return {
-                        ...safe,
-                        owners: combinedData[key].owners,
-                        threshold: combinedData[key].threshold,
-                    };
-                }
-                return safe;
-            });
-            if (Object.keys(combinedData).length) {
-                if (isUpdateNeeded) {
-                    await updateDoc(teamRef, {
-                        safes: latestSafesData,
-                    });
-                    setCurrentTeam((prevState) => ({
-                        ...prevState,
-                        safes: latestSafesData,
-                    }));
-                    console.log("Updated safes data");
-                }
-                setLoading(false);
-            }
-        } catch (error) {
-            if (error.message.includes("The operation was aborted.")) return;
-            toast({
-                description: `Failed to sync safes data: ${error.message}`,
-                position: "top",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-        }
-    };
-
     useEffect(() => {
-        if (currentTeam?.safes?.length > 0) {
-            fetchAndUpdateLatestSafesData();
+        async function getSafes() {
+            await fetchAndUpdateLatestSafesData();
+            setLoading(false);
         }
-    }, [currentTeam?.safes]);
+        getSafes();
+    }, []);
 
     return (
         <Box padding="10px" minWidth="500px">
