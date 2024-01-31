@@ -1,7 +1,8 @@
 function generateEmailContent(username, email, teamName, userMessage, inviteLink) {
-    const logoUrl = "https://firebasestorage.googleapis.com/v0/b/" +
-    "prontoai-playground.appspot.com/o/logo%2FScreen%20Shot%202023-08-08%20at%2011.09.03%20AM.png" +
-    "?alt=media&token=cf69a5c3-3f33-4637-a0fc-73b34c7353d9";
+    const logoUrl =
+        "https://firebasestorage.googleapis.com/v0/b/" +
+        "prontoai-playground.appspot.com/o/logo%2FScreen%20Shot%202023-08-08%20at%2011.09.03%20AM.png" +
+        "?alt=media&token=cf69a5c3-3f33-4637-a0fc-73b34c7353d9";
 
     return `
     <!DOCTYPE html>
@@ -9,7 +10,7 @@ function generateEmailContent(username, email, teamName, userMessage, inviteLink
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Invitation to Join Safe</title>
+        <title>Invitation to Join Satoshi Safe</title>
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

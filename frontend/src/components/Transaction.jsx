@@ -77,7 +77,11 @@ function Transaction({ transaction }) {
         if (transaction.txHash || transaction.transactionHash || executed) {
             return null;
         }
-        if (transaction.confirmations && transaction.confirmationsRequired === transaction.confirmations.length) {
+        if (
+            transaction &&
+            transaction.confirmations &&
+            transaction.confirmationsRequired === transaction.confirmations.length
+        ) {
             const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled;
 
             return (
