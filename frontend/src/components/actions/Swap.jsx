@@ -165,9 +165,7 @@ export default function Swap() {
         to: toSafe && ethers.utils.getAddress(toSafe),
         toNetwork,
         toAmount: `${
-            routeData?.estimate?.toAmount &&
-            toToken?.decimals &&
-            toHumanReadable(routeData.estimate.toAmount, toToken.decimals)
+            routeData?.estimate && toHumanReadable(routeData.estimate.toAmount, routeData.estimate.deciamls)
         } ${toToken?.symbol}`,
         estimatedSwapFees: `${estimatedSwapFee} ETH`,
     };

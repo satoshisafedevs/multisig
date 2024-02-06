@@ -1,4 +1,4 @@
-const { onRequest } = require("../firebase");
+const { onRequest, error } = require("../firebase");
 const { configureCorsAndHandleOptions } = require("../utils/configureCorsAndHandleOptions");
 const { validateFirebaseIdToken } = require("../utils/validateFirebaseIdToken");
 
@@ -25,6 +25,9 @@ exports.getWalletTokenBalances = onRequest(async (req, res) => {
                 return;
             } catch (e) {
                 res.status(400).send({ message: e.message });
+                error("chainId:", chainId);
+                error("safeAddress:", safeAddress);
+                error("error:", e);
                 return;
             }
         } else res.status(400).send({ message: "Missing required query params." });

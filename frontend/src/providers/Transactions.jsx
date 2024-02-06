@@ -98,16 +98,18 @@ function Transactions({ children }) {
     }
 
     const fetchAndUpdateData = async () => {
-        setGettingData(true);
-        try {
-            await currentTeam.safes.reduce(async (prevPromise, teamSafe) => {
-                await prevPromise;
-                return fetchAndPostTransactions(teamSafe);
-            }, Promise.resolve());
-        } catch (error) {
-            console.error("Error in fetchAndUpdateData function:", error);
-        } finally {
-            setGettingData(false);
+        if (currentTeam?.safes?.length > 0) {
+            setGettingData(true);
+            try {
+                await currentTeam.safes.reduce(async (prevPromise, teamSafe) => {
+                    await prevPromise;
+                    return fetchAndPostTransactions(teamSafe);
+                }, Promise.resolve());
+            } catch (error) {
+                console.error("Error in fetchAndUpdateData function:", error);
+            } finally {
+                setGettingData(false);
+            }
         }
     };
 
