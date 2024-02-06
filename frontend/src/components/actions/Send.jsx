@@ -274,7 +274,12 @@ export default function Send() {
                                 >
                                     {(loadingTokens && <Spinner speed="1s" />) ||
                                         (selectedToken && (
-                                            <Box display="flex" alignItems="center" justifyContent="center">
+                                            <Box
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                whiteSpace="normal"
+                                            >
                                                 <Image
                                                     boxSize="1.5rem"
                                                     borderRadius="full"
@@ -293,6 +298,7 @@ export default function Send() {
                                                 {selectedToken.contract_ticker_symbol}
                                             </Box>
                                         )) ||
+                                        (safe && "Select token") ||
                                         "Token"}
                                 </MenuButton>
                                 <MenuList maxHeight="50vh" overflow="auto" display={isOpen ? "block" : "none"}>

@@ -36,6 +36,9 @@ service cloud.firestore {
             }
         }
 
+        match /invitations/{inviteID} {
+            allow read, update: if request.auth != null;
+        }
 
         match /assetsByWalletAddress/{walletID} {
             allow read: if request.auth != null;

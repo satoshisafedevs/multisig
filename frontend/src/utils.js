@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 export const formatPhoneNumber = (phoneNumber) => {
     // Use regular expression to match and capture the groups of digits
     const match = phoneNumber.match(/^(\d{3})?(\d{3})?(\d{4})?$/);
@@ -99,4 +101,21 @@ export const convertToISOString = (timestamp) => {
     date.setMilliseconds(date.getMilliseconds() + millisecondsFromNanoseconds);
 
     return date.toISOString();
+};
+
+export const toHumanReadable = (value, decimals) => {
+    // Use the BigNumber utility from ethers.js
+    const bigNumberValue = ethers.BigNumber.from(value);
+    // Divide by 10 to the power of decimals to get the human-readable number
+    const humanReadable = ethers.utils.formatUnits(bigNumberValue, decimals);
+    return humanReadable;
+};
+
+export const fromHumanReadable = (value, decimals) => {
+    // Truncate the number to the desired decimal places
+    const factor = 10 ** decimals;
+    const truncatedValue = Math.floor(value * factor) / factor;
+    // Convert a human-readable number to its representation in the smallest unit
+    const formattedValue = ethers.utils.parseUnits(truncatedValue.toString(), decimals);
+    return formattedValue.toString();
 };

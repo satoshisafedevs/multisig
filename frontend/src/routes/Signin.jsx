@@ -39,7 +39,13 @@ function Signin() {
 
     useEffect(() => {
         document.title = "Sign in - Satoshi Safe";
-    }, []);
+        if (noAccount) {
+            document.title = "Create account - Satoshi Safe";
+        }
+        if (forgotPassword) {
+            document.title = "Reset password - Satoshi Safe";
+        }
+    }, [noAccount, forgotPassword]);
 
     const handleNoAccount = () => {
         setNoAccount(!noAccount);

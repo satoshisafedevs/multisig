@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import { ethers } from "ethers";
 import {
     Alert,
     AlertIcon,
@@ -17,88 +16,58 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
+    Spinner,
     useColorModeValue,
+    useToast,
 } from "@chakra-ui/react";
 import { IoSearchOutline } from "react-icons/io5";
+import { useUser } from "../../providers/User";
+import { formatNumber, toHumanReadable } from "../../utils";
+import networks from "../../utils/networks.json";
 
-function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData }) {
+function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData, network }) {
     const [searchString, setSearchString] = useState("");
     const descriptionColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
     const searchTokenRef = useRef();
+    const { user } = useUser();
+    const [availableTokens, setAvailableTokens] = useState("");
+    const toast = useToast();
 
-    // eslint-disable-next-line no-unused-vars
-    const getBalances = async () => {
-        const rpcUrl = "https://arb1.arbitrum.io/rpc";
-        // this works only for arbitrum network
-
-        const tokenAddresses = tokens.map((token) => token.address).slice(0, 25);
-        // NOTE: only 25 here to reduce throttle by rpc!!!
-
-        const erc20Abi = [
-            {
-                constant: true,
-                inputs: [],
-                name: "decimals",
-                outputs: [
-                    {
-                        name: "",
-                        type: "uint8",
+    const getTokenBalance = async () => {
+        if (safe && network) {
+            try {
+                const targetChainID = networks[network].id;
+                const baseUrl = "https://api-getwallettokenbalances-mojsb2l5zq-uc.a.run.app";
+                const response = await fetch(`${baseUrl}/?chainId=${targetChainID}&safeAddress=${safe}`, {
+                    headers: {
+                        Authorization: `Bearer ${user.accessToken}`,
                     },
-                ],
-                type: "function",
-            },
-            {
-                constant: true,
-                inputs: [{ name: "_owner", type: "address" }],
-                name: "balanceOf",
-                outputs: [
-                    {
-                        name: "balance",
-                        type: "uint256",
-                    },
-                ],
-                type: "function",
-            },
-        ];
-
-        async function batchRequest() {
-            const batchProvider = new ethers.providers.JsonRpcBatchProvider(rpcUrl);
-
-            const tokenContracts = tokenAddresses.map((address) => {
-                if (address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
-                    return batchProvider.getBalance(safe);
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message);
                 }
-                // need to redo here to something like:
-                // const balance = await tokenContract.balanceOf(safe);
-                // const decimals = await tokenContract.decimals();
-                // and in balance below:
-                // ethers.utils.formatUnits(balance, decimals)
-                return new ethers.Contract(address, erc20Abi, batchProvider).balanceOf(safe);
-            });
-
-            const balances = await Promise.all(tokenContracts);
-
-            const balanceData = balances.map((balance, index) => ({
-                tokenAddress: tokenAddresses[index],
-                balance: ethers.utils.formatEther(balance),
-            }));
-
-            console.log(balanceData);
+                const data = await response.json();
+                const sanitizedData = data.data.items.filter((el) => el.type === "cryptocurrency" && el.quote_rate);
+                setAvailableTokens(sanitizedData);
+            } catch (error) {
+                toast({
+                    description: `Failed to get tokens list: ${error.message}`,
+                    position: "top",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
         }
-
-        batchRequest();
     };
-
-    // if (isOpen && tokens.length) {
-    //     getBalances();
-    // this is just not finished POC work...
-    // }
 
     useEffect(() => {
         if (isOpen) {
             setTimeout(() => {
                 searchTokenRef.current?.focus();
             }, 0);
+            getTokenBalance();
         }
     }, [isOpen]);
 
@@ -106,6 +75,7 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
         setIsOpen(false);
         setSearchString("");
         setRouteData();
+        setAvailableTokens();
     };
 
     const handleTokenSearch = (e) => {
@@ -196,6 +166,28 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                                                 {token.name}
                                             </Box>
                                         </Box>
+                                        <Box display="flex" flex="1" justifyContent="flex-end">
+                                            {availableTokens ? (
+                                                availableTokens
+                                                    .filter(
+                                                        (el) =>
+                                                            el.contract_address.toLowerCase() ===
+                                                            token.address.toLowerCase(),
+                                                    )
+                                                    .map((filteredToken) => (
+                                                        <div key={filteredToken.contract_address}>
+                                                            {formatNumber(
+                                                                toHumanReadable(
+                                                                    filteredToken.balance,
+                                                                    filteredToken.contract_decimals,
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    ))
+                                            ) : (
+                                                <Spinner speed="1s" color={descriptionColor} />
+                                            )}
+                                        </Box>
                                     </Button>
                                 </Box>
                             ))}
@@ -214,6 +206,7 @@ SelectTokenModal.propTypes = {
     setIsOpen: PropTypes.func,
     setToken: PropTypes.func,
     safe: PropTypes.string,
+    network: PropTypes.string,
     setRouteData: PropTypes.func,
 };
 export default SelectTokenModal;
