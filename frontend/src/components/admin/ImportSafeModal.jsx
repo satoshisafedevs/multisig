@@ -49,12 +49,9 @@ function ImportSafeModal({
     // Updated function to handle asynchronous refresh list
     const handleRefreshList = async () => {
         setIsRefreshing(true);
-        try {
-            await refreshSafeList({ walletAddress: userTeamData.userWalletAddress });
-        } catch (error) {
-            console.error("Error refreshing safe list:", error);
-            // Optionally handle errors, e.g., show a notification
-        }
+
+        await refreshSafeList({ walletAddress: userTeamData.userWalletAddress });
+
         setIsRefreshing(false);
     };
     return (
@@ -114,13 +111,13 @@ function ImportSafeModal({
                             <AlertIcon />
                             It appears that you don&apos;t have a Gnosis Safe associated with your wallet.
                         </Alert>
-                        <Button
+                        {/* <Button
                             marginTop="20px"
                             colorScheme="blue"
                             onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}
                         >
                             Refresh List
-                        </Button>
+                        </Button> */}
                     </>
                 )}
             </ModalBody>

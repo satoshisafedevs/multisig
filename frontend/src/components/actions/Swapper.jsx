@@ -172,6 +172,7 @@ function Swapper({
                 tokens={chainTokens}
                 setToken={setToken}
                 safe={safe}
+                network={networkName}
                 setRouteData={setRouteData}
             />
             <Box display="flex" flexDirection="row">
@@ -257,6 +258,7 @@ function Swapper({
                                 {token.symbol}
                             </Box>
                         )) ||
+                        (safe && "Select token") ||
                         "Token"
                     )}
                 </Button>
