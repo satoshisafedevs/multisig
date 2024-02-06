@@ -138,6 +138,18 @@ deploy-functions-playground:
         - cd $CI_PROJECT_DIR/functions
         - rm -f .env
 
+deploy-firestore-rules-playground:
+    stage: deploy
+    only:
+        - main
+    before_script:
+        - yarn install
+        - yarn global add firebase-tools
+    script:
+        - echo "Deploying firestore rules..."
+        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only firestore:rules --project playground
+        - echo "Firestore rules successfully deployed."
+
 deploy-hosting-production:
     stage: deploy
     only:
@@ -179,4 +191,4 @@ deploy-functions-production:
         - echo "Firebase functions successfully deployed."
     after_script:
         - cd $CI_PROJECT_DIR/functions
-        - rm -f .env        
+        - rm -f .env

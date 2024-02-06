@@ -1,8 +1,57 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+    match /databases/{database}/documents {
+        match /{document=**} {
+            allow read, write: if false;
+        }
+
+        match /users/{userID} {
+            allow read: if request.auth != null;
+            allow create, update: if request.auth != null && request.auth.uid == userID;
+
+            match /teams/{teamID} {
+                allow read: if request.auth != null;
+                allow write: if request.auth != null && request.auth.uid == userID;
+            }
+        }
+
+        match /teams/{teamID} {
+            allow create: if request.auth != null;
+            allow read: if request.auth != null && request.auth.uid in resource.data.users;
+            allow update: if request.auth != null
+                && request.auth.uid in resource.data.users
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['safes']);
+
+            match /transactions/{transactionID} {
+                allow read, create: if request.auth != null
+                    && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamID)).data.users;
+            }
+
+            match /messages/{messageID} {
+                allow read, create: if request.auth != null
+                    && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamID)).data.users;
+
+                // Allow update and delete only if the request.auth.uid matches the uid field in the message document
+                allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+            }
+        }
+
+
+        match /assetsByWalletAddress/{walletID} {
+            allow read: if request.auth != null;
+
+            match /allTokenList/{document=**} {
+                allow read: if request.auth != null;
+            }
+
+            match /complexProtocolList/{document=**} {
+                allow read: if request.auth != null;
+            }
+
+            match /totalBalance/{document=**} {
+                allow read: if request.auth != null;
+            }
+        }
+
     }
-  }
 }

@@ -93,7 +93,7 @@ function User({ children }) {
     const setUserTeamWallet = async (walletAddress) => {
         try {
             const userTeamRef = doc(db, "users", user.uid, "teams", currentTeam.id);
-            updateDoc(userTeamRef, { userWalletAddress: walletAddress });
+            await updateDoc(userTeamRef, { userWalletAddress: walletAddress });
         } catch (error) {
             toast({
                 description: `Failed to update wallet address: ${error.message}`,
@@ -108,12 +108,13 @@ function User({ children }) {
     const leaveTeam = async (team) => {
         try {
             const userTeamRef = doc(db, "users", user.uid, "teams", team.id);
-            deleteDoc(userTeamRef);
+            await deleteDoc(userTeamRef);
             const teamRef = doc(db, "teams", team.id);
             const getTeamSnap = await getDoc(teamRef);
-            updateDoc(teamRef, {
+            await updateDoc(teamRef, {
                 users: getTeamSnap.data().users.filter((userUid) => userUid !== user.uid),
             });
+            return true;
         } catch (error) {
             toast({
                 description: `Failed to leave the team: ${error.message}`,
@@ -126,7 +127,7 @@ function User({ children }) {
     };
 
     const getSafeData = async (safe, network) => {
-        const response = await fetch(`${networks[network].safeTransactionService}api/v1/safes/${safe}/`);
+        const response = await fetch(`${networks[network].safeTransactionService}/api/v1/safes/${safe}/`);
         if (!response.ok) {
             let errorMessage = "Unprocessable Entity";
             const data = await response.json();
@@ -162,29 +163,31 @@ function User({ children }) {
     };
 
     const fetchAndUpdateLatestSafesData = async () => {
-        try {
-            const fetchedDataList = await fetchSafesData(currentTeam.safes);
-            const combinedData = fetchedDataList.reduce((acc, currData) => ({ ...acc, ...currData }), {});
+        if (currentTeam?.safes?.length > 0) {
+            try {
+                const fetchedDataList = await fetchSafesData(currentTeam.safes);
+                const combinedData = fetchedDataList.reduce((acc, currData) => ({ ...acc, ...currData }), {});
 
-            if (Object.keys(combinedData).length) {
-                const { updatedSafesData, isUpdateNeeded } = getUpdatedSafesData(currentTeam.safes, combinedData);
+                if (Object.keys(combinedData).length) {
+                    const { updatedSafesData, isUpdateNeeded } = getUpdatedSafesData(currentTeam.safes, combinedData);
 
-                if (isUpdateNeeded) {
-                    const teamRef = doc(db, "teams", currentTeam.id);
-                    await updateDoc(teamRef, { safes: updatedSafesData });
-                    setCurrentTeam((prevState) => ({ ...prevState, safes: updatedSafesData }));
-                    console.log("Updated safes data");
+                    if (isUpdateNeeded) {
+                        const teamRef = doc(db, "teams", currentTeam.id);
+                        await updateDoc(teamRef, { safes: updatedSafesData });
+                        setCurrentTeam((prevState) => ({ ...prevState, safes: updatedSafesData }));
+                        console.log("Updated safes data");
+                    }
                 }
+            } catch (error) {
+                if (error.message.includes("The operation was aborted.")) return;
+                toast({
+                    description: `Failed to sync safes data: ${error.message}`,
+                    position: "top",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
             }
-        } catch (error) {
-            if (error.message.includes("The operation was aborted.")) return;
-            toast({
-                description: `Failed to sync safes data: ${error.message}`,
-                position: "top",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
         }
     };
 

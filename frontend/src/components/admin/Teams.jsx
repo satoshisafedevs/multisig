@@ -1,5 +1,26 @@
-import React, { useState } from "react";
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Flex, Heading, Text, Button, useToast } from "@chakra-ui/react";
+import React, { useState, useRef, useEffect } from "react";
+import {
+    Box,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    Flex,
+    Heading,
+    Text,
+    Button,
+    useToast,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure,
+} from "@chakra-ui/react";
 import { IoExitOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/User";
@@ -8,67 +29,122 @@ import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 function Teams() {
     const { teamsData, leaveTeam, currentTeam, getUserTeamsData } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
-    const { navigate } = useNavigate();
+    const navigate = useNavigate();
     const toast = useToast();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [leave, setLeave] = useState();
+    const cancelRef = useRef();
 
-    const handleLeaveTeam = (team) => {
+    useEffect(() => {
+        if (isOpen) {
+            setTimeout(() => {
+                cancelRef.current?.focus();
+            }, 0);
+        }
+    }, [isOpen]);
+
+    const handleLeaveTeam = async (team) => {
         // your logic to handle leaving the team goes here
-        leaveTeam(team);
+        onClose();
+        setLeave();
         if (team.id === currentTeam.id) {
             navigate("/");
         }
-        getUserTeamsData();
-        toast({
-            title: "Left Team",
-            description: `You have left the team ${team.name}`,
-            status: "success",
-            position: "top",
-            duration: 5000,
-            isClosable: true,
-        });
+        leaveTeam(team);
+        const resp = await getUserTeamsData();
+        if (resp) {
+            toast({
+                title: "Team left",
+                description: `You have left the team ${team.name}.`,
+                status: "success",
+                position: "top",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     };
 
     return (
-        <Box padding="10px" minWidth="500px">
-            <Flex justifyContent="space-between" alignItems="center" mb="20px">
+        <>
+            <Modal
+                isOpen={isOpen}
+                onClose={() => {
+                    onClose();
+                    setLeave();
+                }}
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Leave team</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>{`Are you sure to leave team ${leave?.name}?`}</ModalBody>
+
+                    <ModalFooter>
+                        <Button
+                            // stupid Chakra focus not working for button
+                            _focus={{
+                                boxShadow: "var(--chakra-shadows-outline)",
+                            }}
+                            ref={cancelRef}
+                            mr={3}
+                            onClick={() => {
+                                onClose();
+                                setLeave();
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button colorScheme="red" onClick={() => handleLeaveTeam(leave)}>
+                            Leave
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+
+            <Box padding="10px" minWidth="500px">
+                <Flex justifyContent="space-between" alignItems="center" mb="20px">
+                    <Box>
+                        <Heading mb="10px" size="lg">
+                            Teams
+                        </Heading>
+                        <Text>Manage the teams associated with your account</Text>
+                    </Box>
+                </Flex>
                 <Box>
-                    <Heading mb="10px" size="lg">
-                        Teams
-                    </Heading>
-                    <Text>Manage the teams associated with your account</Text>
-                </Box>
-            </Flex>
-            <Box>
-                <Table>
-                    <Thead>
-                        <Tr>
-                            <Th>Team Name</Th>
-                            <Th>Users</Th>
-                            <Th>Actions</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {teamsData.map((team) => (
-                            <Tr key={team.name}>
-                                <Td>{team.name}</Td>
-                                <Td>{team.users.length}</Td>
-                                <Td>
-                                    <Button
-                                        rightIcon={<IoExitOutline size="20px" />}
-                                        colorScheme="red"
-                                        variant="outline"
-                                        onClick={() => handleLeaveTeam(team)}
-                                    >
-                                        Leave Team
-                                    </Button>
-                                </Td>
+                    <Table>
+                        <Thead>
+                            <Tr>
+                                <Th>Team Name</Th>
+                                <Th>Users</Th>
+                                <Th>Actions</Th>
                             </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-                <AddSatoshiSafeModal isOpen={modalOpen} setIsOpen={setModalOpen} />
+                        </Thead>
+                        <Tbody>
+                            {teamsData.map((team) => (
+                                <Tr key={team.name}>
+                                    <Td>{team.name}</Td>
+                                    <Td>{team.users.length}</Td>
+                                    <Td>
+                                        <Button
+                                            rightIcon={<IoExitOutline size="20px" />}
+                                            colorScheme="red"
+                                            variant="outline"
+                                            onClick={() => {
+                                                onOpen();
+                                                setLeave(team);
+                                            }}
+                                        >
+                                            Leave Team
+                                        </Button>
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                    <AddSatoshiSafeModal isOpen={modalOpen} setIsOpen={setModalOpen} />
+                </Box>
             </Box>
-        </Box>
+        </>
     );
 }
 
