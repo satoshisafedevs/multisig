@@ -77,7 +77,7 @@ function Teams() {
                 <ModalContent>
                     <ModalHeader>Leave team</ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody>{`Are you sure to leave team ${leave?.name}?`}</ModalBody>
+                    <ModalBody>{`Are you sure you want to leave ${leave?.name}?`}</ModalBody>
 
                     <ModalFooter>
                         <Button
