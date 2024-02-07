@@ -22,6 +22,7 @@ import {
     Tooltip,
     Checkbox,
     Spinner,
+    useToast,
 } from "@chakra-ui/react";
 import { IoChevronBackOutline } from "react-icons/io5";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
@@ -45,12 +46,22 @@ function ImportSafeModal({
     `;
     const { refreshSafeList } = useGnosisSafe();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const toast = useToast();
 
     // Updated function to handle asynchronous refresh list
     const handleRefreshList = async () => {
         setIsRefreshing(true);
 
-        await refreshSafeList({ walletAddress: userTeamData.userWalletAddress });
+        const resp = await refreshSafeList({ walletAddress: userTeamData.userWalletAddress });
+        if (resp) {
+            toast({
+                description: "Safes list has been successfully refreshed.",
+                position: "top",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
 
         setIsRefreshing(false);
     };

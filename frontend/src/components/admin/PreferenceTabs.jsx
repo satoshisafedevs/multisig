@@ -1,5 +1,5 @@
 import React from "react";
-import { Tabs, TabList, Tab, TabPanels, TabPanel, Box, Card, useColorModeValue } from "@chakra-ui/react";
+import { Tabs, TabList, Tab, TabPanels, TabPanel, Text, Box, Card, useColorModeValue } from "@chakra-ui/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Profile from "./Profile";
 import Safes from "./Safes";
@@ -91,7 +91,9 @@ function PreferenceTabs() {
                         <TabPanel>
                             <Users />
                         </TabPanel>
-                        <TabPanel>{/* Notifications Content */}</TabPanel>
+                        <TabPanel>
+                            <Text as="i">Work in progress...</Text>
+                        </TabPanel>
                     </TabPanels>
                 </Card>
             </Box>

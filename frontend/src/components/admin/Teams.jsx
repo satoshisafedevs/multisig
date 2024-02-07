@@ -134,7 +134,7 @@ function Teams() {
                                                 setLeave(team);
                                             }}
                                         >
-                                            Leave Team
+                                            Leave team
                                         </Button>
                                     </Td>
                                 </Tr>

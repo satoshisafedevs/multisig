@@ -269,7 +269,14 @@ function Swapper({
                     value={amount}
                     onChange={(e) => {
                         const { value } = e.target;
-                        const validValue = value.replace(/[^0-9.]/g, "");
+                        // Remove any characters that aren't digits or a period
+                        let validValue = value.replace(/[^0-9.]/g, "");
+                        // Remove leading zeros, but keep the number as a valid decimal
+                        validValue = validValue.replace(/^0+(\d)/, "$1");
+                        // If the string starts with a period, prepend a '0'
+                        if (validValue.startsWith(".")) {
+                            validValue = `0${validValue}`;
+                        }
                         setAmount(validValue);
                         setRouteData();
                     }}

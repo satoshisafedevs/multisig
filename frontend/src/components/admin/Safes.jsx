@@ -45,6 +45,7 @@ function Safes() {
                     fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
                 />
             ))}
+            {!currentTeam.safes && <Text as="i">This team has no safes yet.</Text>}
         </Box>
     );
 }
