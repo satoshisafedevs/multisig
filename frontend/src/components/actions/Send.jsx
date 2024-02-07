@@ -157,7 +157,7 @@ export default function Send() {
     const satoshiData = {
         type: "send",
         from: safe && ethers.utils.getAddress(safe),
-        to: recipient && ethers.utils.getAddress(recipient),
+        to: recipient && ethers.utils.isAddress(recipient) && ethers.utils.getAddress(recipient),
         token: selectedToken.native_token ? "ETH" : selectedToken.contract_ticker_symbol,
         amount,
     };

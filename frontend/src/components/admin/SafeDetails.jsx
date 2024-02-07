@@ -192,7 +192,8 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                         <Tag fontSize="15px" colorScheme="red">
                             {data.name || data.safeAddress}
                         </Tag>
-                        ?<br /> This cannot be undone and will reset Portfolio data for this safe.
+                        ?<br /> This action cannot be undone and will result in the resetting of all Portfolio data and
+                        custom transaction metadata associated with this safe.
                     </ModalBody>
                     <ModalFooter>
                         <Button
