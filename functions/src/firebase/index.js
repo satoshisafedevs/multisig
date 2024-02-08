@@ -11,6 +11,7 @@ const {
     Timestamp,
     onCall,
     FieldValue,
+    HttpsError,
 } = require("./firebase");
 const {
     createOrUpdatePrivateKey,
@@ -38,4 +39,5 @@ module.exports = {
     Timestamp,
     onCall,
     FieldValue,
+    HttpsError,
 };

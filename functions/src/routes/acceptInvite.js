@@ -1,40 +1,48 @@
-const { onCall } = require("../firebase");
-const { db, auth } = require("../firebase");
+const { db, auth, onCall, FieldValue, HttpsError } = require("../firebase");
 
 exports.acceptInvite = onCall(async (req, res) => {
     try {
-        // Get the email, teamId, and userMessage from the request body
-        const inviteId = req.data.inviteId;
-        const userId = req.data.userId;
-        const password = req.data.password;
+        const { inviteId, userId, password, username, walletAddress, teamId } = req.data;
 
-        // Lookup the invite in the invitations collection
+        // Lookup the invite
         const inviteRef = db.collection("invitations").doc(inviteId);
         const inviteDoc = await inviteRef.get();
-
         if (!inviteDoc.exists) {
-            console.error("Invite not found.");
-            return;
+            throw new Error("Invite not found.");
         }
 
         const inviteData = inviteDoc.data();
-
-        // Check if setPassword is true
         if (inviteData.setPassword) {
-            // Fetch the user and update the password
-            const user = await auth.getUser(userId);
-            if (user) {
-                await auth.updateUser(userId, { password: password });
-                console.log("Password updated successfully.");
-
-                console.log("Updated user setPassword status to false.");
-            } else {
-                console.error("User not found.");
-            }
+            // Assume the existence of a function to update the user's password
+            await auth.updateUser(userId, { password });
         }
-        // Update the status field of the invite document and disable password setting
+
+        // Conditionally prepare the user data for update
+        const userData = {
+            userWalletAddress: walletAddress,
+        };
+        if (username !== null && username !== "") {
+            userData.displayName = username;
+        }
+
+        // Update user document with displayName (if not null) and wallet address
+        await db.collection("users").doc(userId).set(userData, { merge: true });
+
+        // Add user to team
+        const teamUsersRef = db.collection("teams").doc(teamId);
+        await teamUsersRef.update({
+            users: FieldValue.arrayUnion(userId),
+        });
+        const teamDoc = await teamUsersRef.get();
+        const teamSlug = teamDoc.data().slug;
+
+        // Update the invite to reflect completion
         await inviteRef.update({ status: "complete", setPassword: false });
+
+        // Return success message or other relevant data
+        return { message: "Invite accepted successfully", teamId: teamId, teamSlug: teamSlug };
     } catch (error) {
-        console.error(error);
+        console.error("Error handling invite:", error);
+        throw new HttpsError("unknown", error.message);
     }
 });

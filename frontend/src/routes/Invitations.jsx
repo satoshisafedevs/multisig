@@ -1,4 +1,3 @@
-import { arrayUnion } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -16,7 +15,7 @@ import {
     useToast,
     Flex,
 } from "@chakra-ui/react";
-import { doc, getDoc, db, setDoc, acceptInvite } from "../firebase";
+import { doc, getDoc, db, acceptInvite } from "../firebase";
 
 function Invite() {
     const location = useLocation();
@@ -72,6 +71,7 @@ function Invite() {
                 const inviteRef = doc(db, "invitations", id);
                 const inviteSnap = await getDoc(inviteRef);
                 if (inviteSnap.exists()) {
+                    console.log(inviteSnap.data());
                     setInvite(inviteSnap.data());
                 } else {
                     setInvite(null);
@@ -120,33 +120,16 @@ function Invite() {
                     });
                     return;
                 }
-                const userDocRef = doc(db, "users", invite.userId);
-                await setDoc(
-                    userDocRef,
-                    {
-                        displayName: username,
-                    },
-                    { merge: true },
-                );
             }
-
-            const docRef = doc(db, "users", invite.userId, "teams", invite.teamId);
-            await setDoc(docRef, {
-                userWalletAddress: walletAddress,
+            const res = await acceptInvite({
+                userId: invite.userId,
+                inviteId: id,
+                password,
+                username,
+                walletAddress,
+                teamId: invite.teamId,
             });
-            const teamDocRef = doc(db, "teams", invite.teamId);
-            await setDoc(
-                teamDocRef,
-                {
-                    users: arrayUnion(invite.userId),
-                },
-                { merge: true },
-            );
-            const teamSnap = await getDoc(teamDocRef);
-            acceptInvite({ userId: invite.userId, inviteId: id, password });
-            navigate(`/team/${teamSnap.data().slug}`);
-
-            console.log("Document written with ID: ", docRef.id);
+            navigate(`/team/${res.data.teamSlug}`);
         } catch (error) {
             console.error("Error adding document: ", error);
         }

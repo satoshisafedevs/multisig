@@ -2,7 +2,7 @@ const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, Timestamp, FieldValue } = require("firebase-admin/firestore");
 const { error, log } = require("firebase-functions/logger");
-const { onRequest, onCall } = require("firebase-functions/v2/https");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onDocumentCreated, onDocumentUpdated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 
@@ -31,4 +31,5 @@ module.exports = {
     Timestamp,
     onCall,
     FieldValue,
+    HttpsError,
 };
