@@ -37,7 +37,12 @@ service cloud.firestore {
         }
 
         match /invitations/{inviteID} {
-            allow read, update: if request.auth != null;
+            allow get: if true;
+        }
+
+        // Explicitly deny querying the entire collection
+        match /invitations {
+            allow list: if false;
         }
 
         match /assetsByWalletAddress/{walletID} {
