@@ -28,9 +28,13 @@ import CopyToClipboard from "./CopyToClipboard";
 
 function Transaction({ transaction }) {
     const { chain, chains, metaMaskInstalled, switchNetwork, address, walletMismatch } = useWagmi();
-    const { getSafeService, confirmTransaction, executeTransaction } = useGnosisSafe();
+    const { getSafeService, confirmTransaction, executeTransaction, rejectTransaction } = useGnosisSafe();
     const [executing, setExecuting] = useState(false);
     const [executed, setExecuted] = useState(false);
+    const [rejected, setRejected] = useState(false);
+    const [rejecting, setRejecting] = useState(false);
+    const [approved, setApproved] = useState(false);
+    const [approving, setApproving] = useState(false);
     const backgroundColor = useColorModeValue("gray.100", "whiteAlpha.200");
     const codeBackground = useColorModeValue("gray.100", "none");
     const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
@@ -43,8 +47,20 @@ function Transaction({ transaction }) {
         (transaction.network === "mainnet" ? chain.network !== "homestead" : chain.network !== transaction.network);
 
     const approve = async (network, safeAddress, safeTxHash) => {
+        setApproving(true);
         const safeService = await getSafeService(network);
-        confirmTransaction(safeService, safeAddress, safeTxHash);
+        const success = await confirmTransaction(safeService, safeAddress, safeTxHash);
+        if (success) {
+            toast({
+                description: "Transaction approved successfully! Please await status update.",
+                position: "top",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+            setApproved(true);
+        }
+        setApproving(false);
     };
 
     const execute = async (network, safeAddress, safeTxHash) => {
@@ -53,7 +69,7 @@ function Transaction({ transaction }) {
         const success = await executeTransaction(safeService, safeAddress, safeTxHash);
         if (success) {
             toast({
-                description: "Transaction executed successfully! Please await the status update.",
+                description: "Transaction executed successfully! Please await status update.",
                 position: "top",
                 status: "success",
                 duration: 5000,
@@ -62,6 +78,22 @@ function Transaction({ transaction }) {
             setExecuted(true);
         }
         setExecuting(false);
+    };
+
+    const reject = async (network, safeAddress, nonce) => {
+        setRejecting(true);
+        const success = await rejectTransaction(network, safeAddress, nonce, address);
+        if (success) {
+            toast({
+                description: "Rejection transaction created successfully! Please await status update.",
+                position: "top",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+            setRejected(true);
+        }
+        setRejecting(false);
     };
 
     const showButtons = () => {
@@ -82,7 +114,7 @@ function Transaction({ transaction }) {
             transaction.confirmations &&
             transaction.confirmationsRequired === transaction.confirmations.length
         ) {
-            const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled;
+            const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled || executed;
 
             return (
                 <Stack
@@ -112,7 +144,9 @@ function Transaction({ transaction }) {
                         }}
                     >
                         <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-                            {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) || "Execute"}
+                            {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
+                                (executed && "Executed") ||
+                                "Execute"}
                         </Text>
                     </Button>
                 </Stack>
@@ -120,7 +154,13 @@ function Transaction({ transaction }) {
         }
 
         const isApproveRejectDisabled =
-            walletMismatch || !address || !metaMaskInstalled || transaction.isExecuted || transaction.executionDate;
+            walletMismatch ||
+            !address ||
+            !metaMaskInstalled ||
+            transaction.isExecuted ||
+            transaction.executionDate ||
+            rejected ||
+            approved;
 
         const alreadyApproved =
             transaction.confirmations &&
@@ -128,23 +168,37 @@ function Transaction({ transaction }) {
             transaction.confirmations.some((c) => c.owner === address);
 
         return (
-            <Stack spacing="4" direction="column" flex="1" justifyContent="center" alignSelf="center" maxWidth="35%">
+            <Stack
+                spacing={["4", "4", "4", "4", "4", "3"]}
+                padding={["0", "0", "0", "0", "0", "2px 0"]}
+                direction="column"
+                flex="1"
+                justifyContent="center"
+                alignSelf="center"
+                maxWidth="35%"
+            >
                 <Button
                     as={Text}
                     variant="outline"
                     colorScheme={networkMismatch ? "orange" : "red"}
                     size="sm"
+                    isLoading={rejecting}
+                    loadingText="Rejecting..."
                     rightIcon={<IoCloseOutline />}
                     isDisabled={isApproveRejectDisabled}
                     onClick={(event) => {
                         event.preventDefault();
                         if (networkMismatch) {
                             switchNetwork(correctChain.id);
+                        } else if (!isApproveRejectDisabled) {
+                            reject(transaction.network, transaction.safe, transaction.nonce, address);
                         }
                     }}
                 >
                     <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) || "Reject"}
+                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
+                            (rejected && "Rejected") ||
+                            "Reject"}
                     </Text>
                 </Button>
                 <Button
@@ -152,6 +206,8 @@ function Transaction({ transaction }) {
                     variant="outline"
                     colorScheme={networkMismatch ? "orange" : "green300"}
                     size="sm"
+                    isLoading={approving}
+                    loadingText="Approving..."
                     rightIcon={<IoCheckmarkOutline />}
                     isDisabled={isApproveRejectDisabled || alreadyApproved}
                     onClick={(event) => {
@@ -164,7 +220,10 @@ function Transaction({ transaction }) {
                     }}
                 >
                     <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) || "Approve"}
+                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
+                            (approved && "Approved") ||
+                            (alreadyApproved && "You approved") ||
+                            "Approve"}
                     </Text>
                 </Button>
             </Stack>
@@ -178,6 +237,7 @@ function Transaction({ transaction }) {
                     <>
                         <Stack direction="row" justify="space-between" gap="0">
                             <AccordionButton
+                                borderRadius={isExpanded ? "5px 5px 0 0" : "5px"}
                                 width="initial"
                                 padding="5px 0 5px 10px"
                                 flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
@@ -289,6 +349,7 @@ function Transaction({ transaction }) {
                                                     upperFirst(transaction.dataDecoded?.method)) ||
                                                     (transaction.from && "Receive") ||
                                                     (transaction.to && Number(transaction.value) > 0 && "Send") ||
+                                                    upperFirst(transaction?.satoshiData?.type) ||
                                                     "Unspecified"}
                                             </Text>
                                         </Flex>

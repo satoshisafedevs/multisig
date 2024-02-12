@@ -13,6 +13,9 @@ const checkDbForTxs = async (transactions, teamid) => {
             const queryValue = transaction.safeTxHash || transaction.txHash;
             const querySnapshot = await txsRef.where(queryField, "==", queryValue).get();
             const sanitizedTx = convertNestedArrays(transaction);
+            sanitizedTx.unifiedDate =
+                sanitizedTx.executionDate || sanitizedTx.modified || sanitizedTx.submissionDate || null;
+            // since firestore can not sort by 2 or more different fields - we need some commmon field
 
             if (!querySnapshot.empty) {
                 // Transaction found in the database

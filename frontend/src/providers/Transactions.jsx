@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from "
 import PropTypes from "prop-types";
 import { useUser } from "./User";
 import networks from "../utils/networks.json";
-import { db, collection, onSnapshot } from "../firebase";
+import { db, collection, onSnapshot, query, orderBy, limit, getCountFromServer } from "../firebase";
 
 const TransactionsContext = createContext();
 const TransactionsProvider = TransactionsContext.Provider;
@@ -20,23 +20,50 @@ function Transactions({ children }) {
     const [lastActiveTime, setLastActiveTime] = useState(Date.now());
     const [isUserActive, setIsUserActive] = useState(true);
     const activityTimeout = 3 * 60 * 1000; // 3 minutes in milliseconds
+    const [isTransactionsLoading, setIsTransactionsLoading] = useState(false);
+    const [limitTransactionsValue, setLimitTransactionsValue] = useState(25);
+    const [allTransactionsCount, setAllTransactionsCount] = useState(0);
+
+    const getAllTransactionCount = async () => {
+        const snapshot = await getCountFromServer(collection(db, "teams", currentTeam.id, "transactions"));
+        setAllTransactionsCount(snapshot && snapshot.data().count);
+    };
+
+    const loadMoreTransactions = () => {
+        setLimitTransactionsValue((prevValue) => prevValue + 25);
+    };
 
     useEffect(() => {
         if (!currentTeam || !currentTeam.id) return;
 
-        const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
+        setIsTransactionsLoading(true);
+        getAllTransactionCount();
 
-        const unsubscribe = onSnapshot(transactionsRef, (querySnapshot) => {
-            const transactionDocs = querySnapshot.docs.map((msg) => ({
+        const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
+        const transactionsQuery = query(transactionsRef, orderBy("unifiedDate", "desc"), limit(limitTransactionsValue));
+
+        const unsubscribe = onSnapshot(transactionsQuery, (querySnapshot) => {
+            let transactionDocs = querySnapshot.docs.map((msg) => ({
                 ...msg.data(),
                 id: msg.id,
             }));
 
+            if (allTransactionsCount > limitTransactionsValue) {
+                transactionDocs = [
+                    { id: "loadMore", unifiedDate: transactionDocs[transactionDocs.length - 1].unifiedDate || null },
+                    ...transactionDocs,
+                ];
+            }
+
             setFirestoreTransactions(transactionDocs);
+            setIsTransactionsLoading(false);
         });
 
-        return unsubscribe;
-    }, [currentTeam]);
+        return () => {
+            unsubscribe();
+            setIsTransactionsLoading(false);
+        };
+    }, [currentTeam, limitTransactionsValue, allTransactionsCount]);
 
     const postNewTransactions = async (tData) => {
         try {
@@ -197,6 +224,10 @@ function Transactions({ children }) {
             gettingData,
             setGettingData,
             setIsDataLoaded,
+            setAllTransactionsCount,
+            loadMoreTransactions,
+            isTransactionsLoading,
+            setLimitTransactionsValue,
         }),
         [
             firestoreTransactions,
@@ -205,6 +236,10 @@ function Transactions({ children }) {
             gettingData,
             setGettingData,
             setIsDataLoaded,
+            setAllTransactionsCount,
+            loadMoreTransactions,
+            isTransactionsLoading,
+            setLimitTransactionsValue,
         ],
     );
 

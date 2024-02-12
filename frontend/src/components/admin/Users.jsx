@@ -29,6 +29,14 @@ function Users() {
                     </Heading>
                     <Text>Manage the users associated with the team</Text>
                 </Box>
+                <Button
+                    leftIcon={<IoAdd size="25px" />}
+                    colorScheme="green300"
+                    onClick={() => setModalOpen(true)}
+                    alignSelf="flex-start"
+                >
+                    Add User
+                </Button>
             </Flex>
             <Box>
                 <Table>
@@ -62,16 +70,7 @@ function Users() {
                         ))}
                     </Tbody>
                 </Table>
-                <Button
-                    leftIcon={<IoAdd size="25px" />}
-                    colorScheme="green300"
-                    onClick={() => setModalOpen(true)}
-                    position="absolute"
-                    top="20px"
-                    right="20px"
-                >
-                    Add User
-                </Button>
+
                 <InviteUserModal isOpen={modalOpen} setIsOpen={setModalOpen} />
             </Box>
         </Box>

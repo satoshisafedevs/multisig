@@ -107,7 +107,7 @@ export default function Swap() {
         } catch (error) {
             setLoadingRoute(false);
             toast({
-                description: `Failed to get swap estimate: ${error.message}`,
+                description: `Failed to get swap estimate: ${error.response.data.errors[0].message || error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
