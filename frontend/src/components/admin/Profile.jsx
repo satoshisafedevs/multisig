@@ -65,7 +65,7 @@ function Profile() {
     };
 
     return (
-        <Box minWidth="500px" margin="10px">
+        <Box minWidth="500px" padding="10px">
             <Flex justifyContent="space-between" alignItems="center">
                 <Box>
                     <Heading mb="10px" size="lg">
@@ -120,7 +120,7 @@ function Profile() {
             </Flex>
             <Divider my={4} />
             <Flex justifyContent="space-between" alignItems="center">
-                <Text fontWeight="bold">Wallet Address</Text>
+                <Text fontWeight="bold">Wallet address</Text>
                 {isEditing.walletAddress ? (
                     <Input w="70%" value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} />
                 ) : (

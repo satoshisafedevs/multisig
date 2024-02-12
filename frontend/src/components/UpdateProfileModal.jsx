@@ -17,12 +17,14 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoSave } from "react-icons/io5";
-import { db, doc, updateDoc, updateProfile } from "../firebase";
+import { db, doc, updateDoc } from "../firebase";
 import { useUser } from "../providers/User";
+import useAuth from "../hooks/useAuth";
 
 export default function UpdateProfileModal({ isOpen, setIsOpen }) {
     const toast = useToast();
     const { user, firestoreUser, setFirestoreUser, currentTeam, userTeamData, setTeamUsersInfo } = useUser();
+    const { updateUserData } = useAuth();
     const [displayName, setDisplayName] = useState("");
     const [team, setTeam] = useState("");
     const [userWalletAddress, setUserWalletAddress] = useState("");
@@ -61,7 +63,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
         setSaving(true);
         try {
             const trimmedDisplayName = displayName.trim();
-            await updateProfile(user, { displayName: trimmedDisplayName });
+            await updateUserData(user, { displayName: trimmedDisplayName });
             const userRef = doc(db, "users", user.uid);
             await updateDoc(userRef, { displayName: trimmedDisplayName });
             setFirestoreUser((prevState) => ({ ...prevState, displayName: trimmedDisplayName }));
@@ -96,7 +98,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
                     <Box width="100%">
                         <Stack direction="row" align="center" paddingBottom="20px">
                             <InputGroup>
-                                <InputLeftAddon width="150px">Display Name</InputLeftAddon>
+                                <InputLeftAddon width="150px">Name</InputLeftAddon>
                                 <Input value={displayName} onChange={handleDisplayName} ref={firstInput} />
                             </InputGroup>
                         </Stack>
@@ -108,7 +110,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
                         </Stack>
                         <Stack direction="row" align="center">
                             <InputGroup>
-                                <InputLeftAddon width="150px">ETH Address</InputLeftAddon>
+                                <InputLeftAddon width="150px">Wallet address</InputLeftAddon>
                                 <Input
                                     value={userWalletAddress}
                                     onChange={handleUserWalletAddress}

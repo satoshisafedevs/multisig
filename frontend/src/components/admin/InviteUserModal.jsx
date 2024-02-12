@@ -58,7 +58,7 @@ function InviteUserModal({ isOpen, setIsOpen }) {
         <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Invite User</ModalHeader>
+                <ModalHeader>Invite user</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <FormControl id="email" mb={4}>
@@ -71,7 +71,7 @@ function InviteUserModal({ isOpen, setIsOpen }) {
                         />
                     </FormControl>
                     <FormControl id="message">
-                        <FormLabel>Invitation Message</FormLabel>
+                        <FormLabel>Invitation message</FormLabel>
                         <Textarea
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
@@ -85,7 +85,7 @@ function InviteUserModal({ isOpen, setIsOpen }) {
                         onClick={handleInvite}
                         rightIcon={<IoPaperPlaneOutline size="20px" />}
                     >
-                        Send Invite
+                        Send invite
                     </Button>
                 </ModalFooter>
             </ModalContent>

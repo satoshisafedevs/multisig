@@ -30,7 +30,7 @@ import InFlightTransaction from "../InFlightTransaction";
 export default function Chat() {
     const toast = useToast();
     const { firestoreUser, teamsData, currentTeam, teamUsersInfo } = useUser();
-    const { firestoreTransactions } = useTransactions();
+    const { firestoreTransactions, loadMoreTransactions, isTransactionsLoading } = useTransactions();
     const { slug } = useParams();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
@@ -42,6 +42,7 @@ export default function Chat() {
     const [hoverID, setHoverID] = useState();
     const [activeTab, setActiveTab] = useState("all");
     const lastMessage = useRef();
+    const loadingMoreTransactions = useRef(false);
 
     const StyledTrashIcon = styled(IoTrash)`
         &:hover {
@@ -51,10 +52,16 @@ export default function Chat() {
     `;
 
     useEffect(() => {
-        if (messages && lastMessage.current) {
+        if (messages && lastMessage.current && !loadingMoreTransactions.current) {
             lastMessage.current.scrollIntoView();
         }
+        loadingMoreTransactions.current = false;
     }, [messages, activeTab, firestoreTransactions]);
+
+    const handleLoadMoreTransactions = () => {
+        loadingMoreTransactions.current = true;
+        loadMoreTransactions();
+    };
 
     const handleMouseEnter = useCallback(
         (id) => {
@@ -207,31 +214,16 @@ export default function Chat() {
         return msg.message;
     };
 
-    // display latest 100 transactions
-    const maxTransactions = -100;
-
-    const sortTransactionsByDateAndSlice = useMemo(
-        () =>
-            firestoreTransactions &&
-            firestoreTransactions
-                .sort(
-                    (a, b) =>
-                        new Date(a.executionDate || a.submissionDate) - new Date(b.executionDate || b.submissionDate),
-                )
-                .slice(maxTransactions),
-        [firestoreTransactions],
-    );
-
     const filterSameNonceTransactions = useMemo(() => {
         const results = [];
 
         // If there are no transactions, we don't need to do any work
-        if (!sortTransactionsByDateAndSlice) {
+        if (!firestoreTransactions) {
             return results;
         }
 
         // Group transactions by 'safe'
-        const groupedBySafe = sortTransactionsByDateAndSlice.reduce((acc, transaction) => {
+        const groupedBySafe = firestoreTransactions.reduce((acc, transaction) => {
             if (!acc[transaction.safe]) acc[transaction.safe] = [];
             acc[transaction.safe].push(transaction);
             return acc;
@@ -256,19 +248,18 @@ export default function Chat() {
             });
         });
         return results;
-    }, [sortTransactionsByDateAndSlice]);
+    }, [firestoreTransactions]);
 
     // Combine the two arrays
     const combinedArray = useMemo(() => {
         const tempArray = [...messages, ...(filterSameNonceTransactions || [])];
-        return tempArray.sort(
-            (a, b) =>
-                new Date(a.isoDate || a.executionDate || a.submissionDate) -
-                new Date(b.isoDate || b.executionDate || b.submissionDate),
-        );
+        return tempArray.sort((a, b) => new Date(a.isoDate || a.unifiedDate) - new Date(b.isoDate || b.unifiedDate));
     }, [messages, filterSameNonceTransactions]);
 
-    const filterMessages = useMemo(() => combinedArray.filter((el) => !el.isoDate), [combinedArray]);
+    const sortSameNonceTransactions = useMemo(
+        () => filterSameNonceTransactions.sort((a, b) => new Date(a.unifiedDate) - new Date(b.unifiedDate)),
+        [filterSameNonceTransactions],
+    );
 
     return (
         <>
@@ -306,43 +297,57 @@ export default function Chat() {
                     <Stack spacing="2">
                         {activeTab === "all" &&
                             combinedArray &&
-                            combinedArray.map((msg) => {
-                                if (msg.txHash || msg.transactionHash || msg.nonce || msg.data) {
-                                    return <Transaction key={msg.id} transaction={msg} />;
+                            combinedArray.map((el) => {
+                                if (el.id === "loadMore") {
+                                    return (
+                                        <Button
+                                            size="sm"
+                                            key="loadMore"
+                                            onClick={handleLoadMoreTransactions}
+                                            isLoading={isTransactionsLoading}
+                                            borderRadius="5px"
+                                            fontWeight="normal"
+                                        >
+                                            Load more transactions
+                                        </Button>
+                                    );
                                 }
-                                if (msg.uid) {
+                                if (el.txHash || el.transactionHash || el.nonce || el.data) {
+                                    return <Transaction key={el.id} transaction={el} />;
+                                }
+                                if (el.uid) {
                                     return (
                                         <Stack
                                             direction="row"
                                             align="center"
-                                            key={msg.id}
+                                            key={el.id}
                                             spacing="0"
                                             paddingLeft="3px"
                                             paddingTop="2px"
                                             paddingBottom="2px"
-                                            _hover={{ backgroundColor: backgroundHover, borderRadius: "3px" }}
-                                            onMouseEnter={() => handleMouseEnter(msg.id)}
+                                            _hover={{ backgroundColor: backgroundHover, borderRadius: "5px" }}
+                                            onMouseEnter={() => handleMouseEnter(el.id)}
                                             onMouseLeave={handleMouseLeave}
                                         >
                                             <Avatar
                                                 size="sm"
-                                                alt={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
-                                                src={teamUsersInfo ? teamUsersInfo[msg.uid].photoUrl : null}
-                                                name={teamUsersInfo ? teamUsersInfo[msg.uid].displayName : null}
+                                                alt={teamUsersInfo ? teamUsersInfo[el.uid].displayName : null}
+                                                src={teamUsersInfo ? teamUsersInfo[el.uid].photoUrl : null}
+                                                name={teamUsersInfo ? teamUsersInfo[el.uid].displayName : null}
                                             />
                                             <Box flexGrow="1" paddingLeft="6px">
                                                 <Stack direction="row" spacing="5px">
                                                     <Text fontSize="xs" fontWeight="bold">
-                                                        {teamUsersInfo ? teamUsersInfo[msg.uid].displayName : "No name"}
+                                                        {teamUsersInfo ? teamUsersInfo[el.uid].displayName : "No name"}
                                                     </Text>
-                                                    <Text fontSize="xs">{messageTimeFormat(msg.createdAt)}</Text>
+                                                    <Text fontSize="xs">{messageTimeFormat(el.createdAt)}</Text>
                                                 </Stack>
-                                                <Text fontSize="xs">{renderMessage(msg)}</Text>
+                                                <Text fontSize="xs">{renderMessage(el)}</Text>
                                             </Box>
-                                            {firestoreUser && firestoreUser.uid === msg.uid && msg.id === hoverID && (
+                                            {firestoreUser && firestoreUser.uid === el.uid && el.id === hoverID && (
                                                 <IconButton
                                                     icon={<StyledTrashIcon />}
-                                                    onClick={() => handleDelete(msg.id)}
+                                                    onClick={() => handleDelete(el.id)}
                                                     height="36px"
                                                     width="36px"
                                                     borderRadius="3px"
@@ -353,11 +358,25 @@ export default function Chat() {
                                         </Stack>
                                     );
                                 }
-                                return <InFlightTransaction key={msg.id} transaction={msg} />;
+                                return <InFlightTransaction key={el.id} transaction={el} />;
                             })}
                         {activeTab === "transactions" &&
-                            filterMessages &&
-                            filterMessages.map((transaction) => {
+                            sortSameNonceTransactions &&
+                            sortSameNonceTransactions.map((transaction) => {
+                                if (transaction.id === "loadMore") {
+                                    return (
+                                        <Button
+                                            size="sm"
+                                            key="loadMore"
+                                            onClick={handleLoadMoreTransactions}
+                                            isLoading={isTransactionsLoading}
+                                            borderRadius="5px"
+                                            fontWeight="normal"
+                                        >
+                                            Load more transactions
+                                        </Button>
+                                    );
+                                }
                                 if (
                                     transaction.txHash ||
                                     transaction.transactionHash ||

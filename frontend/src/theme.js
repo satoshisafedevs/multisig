@@ -11,7 +11,7 @@ const styles = {
     global: (props) => ({
         "html, body, #root": {
             height: "100%",
-            overflow: "auto",
+            overflow: "unset",
             margin: "0",
             padding: "0",
             scrollbarColor: props.colorMode === "light" ? "lightgray transparent" : "dimgray transparent",
