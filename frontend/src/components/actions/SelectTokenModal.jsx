@@ -93,6 +93,30 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
         return tokens;
     }, [tokens, searchString]);
 
+    const sortTokensByAvailability = (a, b) => {
+        // Check if token A is in availableTokens
+        const isATokenAvailable = availableTokens?.some(
+            (el) => el.contract_address.toLowerCase() === a.address.toLowerCase(),
+        );
+        // Check if token B is in availableTokens
+        const isBTokenAvailable = availableTokens?.some(
+            (el) => el.contract_address.toLowerCase() === b.address.toLowerCase(),
+        );
+
+        // Order tokens that are available before those that aren't
+        if (isATokenAvailable && !isBTokenAvailable) {
+            return -1; // A comes before B
+        }
+        if (!isATokenAvailable && isBTokenAvailable) {
+            return 1; // B comes before A
+        }
+        return 0; // No change in order
+    };
+
+    if (availableTokens) {
+        searchTokens.sort(sortTokensByAvailability);
+    }
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
             <ModalOverlay />

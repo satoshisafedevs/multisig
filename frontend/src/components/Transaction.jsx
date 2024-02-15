@@ -109,49 +109,8 @@ function Transaction({ transaction }) {
         if (transaction.txHash || transaction.transactionHash || executed) {
             return null;
         }
-        if (
-            transaction &&
-            transaction.confirmations &&
-            transaction.confirmationsRequired === transaction.confirmations.length
-        ) {
-            const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled || executed;
 
-            return (
-                <Stack
-                    spacing="4"
-                    direction="column"
-                    flex="1"
-                    justifyContent="center"
-                    alignSelf="center"
-                    maxWidth="35%"
-                >
-                    <Button
-                        as={Text}
-                        variant="outline"
-                        colorScheme={networkMismatch ? "orange" : "green300"}
-                        size="sm"
-                        isLoading={executing}
-                        loadingText="Executing..."
-                        rightIcon={<IoPlayOutline />}
-                        isDisabled={isExecuteDisabled}
-                        onClick={(event) => {
-                            event.preventDefault();
-                            if (networkMismatch) {
-                                switchNetwork(correctChain.id);
-                            } else if (!isExecuteDisabled) {
-                                execute(transaction.network, transaction.safe, transaction.safeTxHash);
-                            }
-                        }}
-                    >
-                        <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-                            {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
-                                (executed && "Executed") ||
-                                "Execute"}
-                        </Text>
-                    </Button>
-                </Stack>
-            );
-        }
+        const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled || executed;
 
         const isApproveRejectDisabled =
             walletMismatch ||
@@ -201,31 +160,60 @@ function Transaction({ transaction }) {
                             "Reject"}
                     </Text>
                 </Button>
-                <Button
-                    as={Text}
-                    variant="outline"
-                    colorScheme={networkMismatch ? "orange" : "green300"}
-                    size="sm"
-                    isLoading={approving}
-                    loadingText="Approving..."
-                    rightIcon={<IoCheckmarkOutline />}
-                    isDisabled={isApproveRejectDisabled || alreadyApproved}
-                    onClick={(event) => {
-                        event.preventDefault();
-                        if (networkMismatch) {
-                            switchNetwork(correctChain.id);
-                        } else if (!isApproveRejectDisabled) {
-                            approve(transaction.network, transaction.safe, transaction.safeTxHash);
-                        }
-                    }}
-                >
-                    <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
-                            (approved && "Approved") ||
-                            (alreadyApproved && "You approved") ||
-                            "Approve"}
-                    </Text>
-                </Button>
+                {transaction &&
+                transaction.confirmations &&
+                transaction.confirmationsRequired === transaction.confirmations.length ? (
+                    <Button
+                        as={Text}
+                        variant="outline"
+                        colorScheme={networkMismatch ? "orange" : "green300"}
+                        size="sm"
+                        isLoading={executing}
+                        loadingText="Executing..."
+                        rightIcon={<IoPlayOutline />}
+                        isDisabled={isExecuteDisabled}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            if (networkMismatch) {
+                                switchNetwork(correctChain.id);
+                            } else if (!isExecuteDisabled) {
+                                execute(transaction.network, transaction.safe, transaction.safeTxHash);
+                            }
+                        }}
+                    >
+                        <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
+                            {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
+                                (executed && "Executed") ||
+                                "Execute"}
+                        </Text>
+                    </Button>
+                ) : (
+                    <Button
+                        as={Text}
+                        variant="outline"
+                        colorScheme={networkMismatch ? "orange" : "green300"}
+                        size="sm"
+                        isLoading={approving}
+                        loadingText="Approving..."
+                        rightIcon={<IoCheckmarkOutline />}
+                        isDisabled={isApproveRejectDisabled || alreadyApproved}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            if (networkMismatch) {
+                                switchNetwork(correctChain.id);
+                            } else if (!isApproveRejectDisabled) {
+                                approve(transaction.network, transaction.safe, transaction.safeTxHash);
+                            }
+                        }}
+                    >
+                        <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
+                            {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
+                                (approved && "Approved") ||
+                                (alreadyApproved && "You approved") ||
+                                "Approve"}
+                        </Text>
+                    </Button>
+                )}
             </Stack>
         );
     };
