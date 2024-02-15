@@ -388,7 +388,6 @@ const useGnosisSafe = () => {
             const senderSignature = await protocolKit.signTransactionHash(safeTxHash);
             await postNewTransactionToDb(network, safeAddress, safeTxHash, {
                 type: "rejectTransaction",
-                rejectedBy: senderAddress,
                 nonce,
             });
             const safeService = await getSafeService(network);

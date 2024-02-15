@@ -307,6 +307,7 @@ export default function Chat() {
                                             isLoading={isTransactionsLoading}
                                             borderRadius="5px"
                                             fontWeight="normal"
+                                            colorScheme="green300"
                                         >
                                             Load more transactions
                                         </Button>
@@ -372,6 +373,7 @@ export default function Chat() {
                                             isLoading={isTransactionsLoading}
                                             borderRadius="5px"
                                             fontWeight="normal"
+                                            colorScheme="green300"
                                         >
                                             Load more transactions
                                         </Button>
