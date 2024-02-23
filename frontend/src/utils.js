@@ -39,11 +39,18 @@ export const formatNumber = (num, price = false) => {
     const absNum = Math.abs(num);
     // If number is less than 1 and not 0, round to 4 significant figures
     if (absNum !== 0 && absNum < 1) {
-        return Number((num < 0 ? -1 : 1) * absNum.toPrecision(4));
+        // return Number((num < 0 ? -1 : 1) * Number(absNum.toFixed(4)));
+        const numStr = absNum.toString();
+        const firstNonZeroIndex = numStr.indexOf(numStr.match(/[1-9]/)?.[0]);
+        const endIndex = firstNonZeroIndex + 4;
+        // Construct the number string with up to 4 significant figures without rounding
+        const resultStr = numStr.substring(0, endIndex);
+        // Convert the string back to number, preserving the sign of the original input
+        return (num < 0 ? -1 : 1) * parseFloat(resultStr);
     }
     // Otherwise round to 2 decimal places
     return Intl.NumberFormat("en-US", { style: "decimal" }).format(
-        ((num < 0 ? -1 : 1) * Math.round((absNum + Number.EPSILON) * 100)) / 100,
+        ((num < 0 ? -1 : 1) * Math.floor(absNum * 100)) / 100,
     );
 };
 
@@ -112,10 +119,18 @@ export const toHumanReadable = (value, decimals) => {
 };
 
 export const fromHumanReadable = (value, decimals) => {
-    // Truncate the number to the desired decimal places
-    const factor = 10 ** decimals;
-    const truncatedValue = Math.floor(value * factor) / factor;
-    // Convert a human-readable number to its representation in the smallest unit
-    const formattedValue = ethers.utils.parseUnits(truncatedValue.toString(), decimals);
+    // Convert the value to a string to ensure proper decimal handling
+    let valueStr = value.toString();
+
+    // Check if value is in exponential format and convert it to a fixed decimal string
+    if (valueStr.includes("e")) {
+        const valueNum = Number(valueStr);
+        valueStr = valueNum.toFixed(decimals);
+    }
+
+    // Use ethers.js to parse the value string with the specified decimals
+    // This effectively multiplies the human-readable value by 10**decimals to get the smallest unit
+    const formattedValue = ethers.utils.parseUnits(valueStr, decimals);
+
     return formattedValue.toString();
 };

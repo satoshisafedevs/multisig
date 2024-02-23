@@ -12,6 +12,7 @@ import {
     Text,
     Spinner,
     useColorMode,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import { isEmpty } from "lodash";
 import { ethers } from "ethers";
@@ -42,6 +43,7 @@ function Swapper({
     const [networkName, setNetworkName] = useState("");
     const [tokenBalance, setTokenBalance] = useState("");
     const { colorMode } = useColorMode();
+    const grayColor = useColorModeValue("blackAlpha.700", "whiteAlpha.700");
 
     const chainTokens = useMemo(() => {
         // Ensure that squid and squid.tokens are defined
@@ -74,6 +76,7 @@ function Swapper({
         setToken({});
         setRouteData();
         setTokenBalance();
+        setAmount("");
     };
 
     const latestTokenPrice = useMemo(
@@ -101,28 +104,6 @@ function Swapper({
             setTotalUSDFrom(initialUSDValue);
         }
     }, [amount, latestTokenPrice?.usdPrice, totalUSDFrom]);
-
-    // const getTokenBalance = async () => {
-    //     const rpcUrl = networks[networkName].url;
-    //     const erc20Abi = [
-    //         "function balanceOf(address owner) view returns (uint256)",
-    //         "function decimals() view returns (uint8)",
-    //     ];
-    //     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    //     if (token.address === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
-    //         const balance = await provider.getBalance(safe);
-    //         const convertedBalance = ethers.utils.formatEther(balance);
-    //         setTokenBalance(convertedBalance);
-    //         setFromBalance(convertedBalance);
-    //         return;
-    //     }
-    //     const tokenContract = new ethers.Contract(token.address, erc20Abi, provider);
-    //     const balance = await tokenContract.balanceOf(safe);
-    //     const decimals = await tokenContract.decimals();
-    //     const convertedBalance = ethers.utils.formatUnits(balance, decimals);
-    //     setTokenBalance(convertedBalance);
-    //     setFromBalance(convertedBalance);
-    // };
 
     const getBalances = async () => {
         const rpcUrl = networks[networkName].url;
@@ -288,10 +269,10 @@ function Swapper({
                 />
             </Box>
             <Box display="flex" flexDirection="row" justifyContent="space-between">
-                <Text fontSize="xs" alignSelf="start" height="18px">
+                <Text fontSize="xs" alignSelf="start" height="18px" color={grayColor}>
                     {displayTokenBalance()}
                 </Text>
-                <Text fontSize="xs" alignSelf="end" height="18px">
+                <Text fontSize="xs" alignSelf="end" height="18px" color={grayColor}>
                     {amount && totalUSDValue()}
                 </Text>
             </Box>

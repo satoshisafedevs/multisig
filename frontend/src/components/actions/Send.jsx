@@ -14,13 +14,16 @@ import {
     useColorMode,
     useStyleConfig,
     useToast,
+    useColorModeValue,
+    InputGroup,
+    InputRightElement,
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { upperFirst } from "lodash";
 import { IoCashOutline, IoRefreshOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import { useWagmi } from "../../providers/Wagmi";
-import { formatNumber } from "../../utils";
+import { formatNumber, fromHumanReadable, toHumanReadable } from "../../utils";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
 
@@ -39,23 +42,7 @@ export default function Send() {
     const { createAndApproveSendTransaction } = useGnosisSafe();
     const inputStyles = useStyleConfig("Input");
     const toast = useToast();
-
-    const toHumanReadable = (value, decimals) => {
-        // Use the BigNumber utility from ethers.js
-        const bigNumberValue = ethers.BigNumber.from(value);
-        // Divide by 10 to the power of decimals to get the human-readable number
-        const humanReadable = ethers.utils.formatUnits(bigNumberValue, decimals);
-        return humanReadable;
-    };
-
-    const fromHumanReadable = (value, decimals) => {
-        // Truncate the number to the desired decimal places
-        const factor = 10 ** decimals;
-        const truncatedValue = Math.floor(value * factor) / factor;
-        // Convert a human-readable number to its representation in the smallest unit
-        const formattedValue = ethers.utils.parseUnits(truncatedValue.toString(), decimals);
-        return formattedValue.toString();
-    };
+    const grayColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
 
     const getTokenBalance = async (network, safeAddress) => {
         const targetChainID = networks[network].id;
@@ -211,6 +198,7 @@ export default function Send() {
                                                 onClick={() => {
                                                     selectSafe(s);
                                                     setSelectedToken("");
+                                                    setAmount("");
                                                 }}
                                             >
                                                 <Image
@@ -254,8 +242,15 @@ export default function Send() {
             </Box>
             <Box display="flex" flexDirection="row">
                 <Box minWidth="35%">
-                    <Text fontSize="xs" minWidth="35%" color="gray.500">
-                        Available balance
+                    <Text
+                        fontSize="xs"
+                        minWidth="35%"
+                        color="gray.500"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                    >
+                        Balance{selectedToken && `: ${selectedToken.pretty_quote}`}
                     </Text>
                     <Menu>
                         {({ isOpen }) => (
@@ -318,8 +313,10 @@ export default function Send() {
                                                     fallbackStrategy="onError"
                                                 />
                                                 {formatNumber(toHumanReadable(token.balance, token.contract_decimals))}
-                                                {"  "}
-                                                {token.contract_ticker_symbol}
+                                                <Box color={grayColor} whiteSpace="nowrap">
+                                                    &nbsp;
+                                                    {token.contract_ticker_symbol}
+                                                </Box>
                                             </MenuItem>
                                         ))}
                                     {availableTokens && (
@@ -348,31 +345,50 @@ export default function Send() {
                 </Box>
                 <Box width="100%">
                     <Text fontSize="xs" color="gray.500">
-                        Amount
+                        Amount{amount && selectedToken && `: ${formatNumber(amount * selectedToken.quote_rate, true)}`}
                     </Text>
-                    <Input
-                        borderLeftColor="transparent"
-                        _hover={{ borderLeftColor: `${!exceedingAmount} && transparent` }}
-                        // eslint-disable-next-line no-underscore-dangle
-                        _focusVisible={{ ...inputStyles.field._focusVisible }}
-                        borderLeftRadius="0"
-                        marginLeft="-1px"
-                        placeholder="0.0"
-                        value={amount}
-                        onChange={(event) => {
-                            const { value } = event.target;
-                            // Remove any characters that aren't digits or a period
-                            let validValue = value.replace(/[^0-9.]/g, "");
-                            // Remove leading zeros, but keep the number as a valid decimal
-                            validValue = validValue.replace(/^0+(\d)/, "$1");
-                            // If the string starts with a period, prepend a '0'
-                            if (validValue.startsWith(".")) {
-                                validValue = `0${validValue}`;
-                            }
-                            setAmount(validValue);
-                        }}
-                        isInvalid={exceedingAmount}
-                    />
+                    <InputGroup>
+                        <Input
+                            borderLeftColor="transparent"
+                            _hover={{ borderLeftColor: `${!exceedingAmount} && transparent` }}
+                            // eslint-disable-next-line no-underscore-dangle
+                            _focusVisible={{ ...inputStyles.field._focusVisible }}
+                            borderLeftRadius="0"
+                            marginLeft="-1px"
+                            paddingRight="4.5rem"
+                            placeholder="0.0"
+                            value={amount}
+                            onChange={(event) => {
+                                const { value } = event.target;
+                                // Remove any characters that aren't digits or a period
+                                let validValue = value.replace(/[^0-9.]/g, "");
+                                // Remove leading zeros, but keep the number as a valid decimal
+                                validValue = validValue.replace(/^0+(\d)/, "$1");
+                                // If the string starts with a period, prepend a '0'
+                                if (validValue.startsWith(".")) {
+                                    validValue = `0${validValue}`;
+                                }
+                                setAmount(validValue);
+                            }}
+                            isInvalid={exceedingAmount}
+                        />
+                        {selectedToken && (
+                            <InputRightElement width="4.5rem">
+                                <Button
+                                    h="1.75rem"
+                                    size="sm"
+                                    fontSize="smaller"
+                                    onClick={() =>
+                                        setAmount(
+                                            toHumanReadable(selectedToken.balance, selectedToken.contract_decimals),
+                                        )
+                                    }
+                                >
+                                    MAX
+                                </Button>
+                            </InputRightElement>
+                        )}
+                    </InputGroup>
                 </Box>
             </Box>
             <Button

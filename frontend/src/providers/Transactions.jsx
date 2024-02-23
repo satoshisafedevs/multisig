@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from "
 import PropTypes from "prop-types";
 import { useUser } from "./User";
 import networks from "../utils/networks.json";
-import { db, collection, onSnapshot, query, orderBy, limit, getCountFromServer } from "../firebase";
+import { db, collection, onSnapshot, query, where, orderBy, limit, getCountFromServer } from "../firebase";
 
 const TransactionsContext = createContext();
 const TransactionsProvider = TransactionsContext.Provider;
@@ -23,9 +23,21 @@ function Transactions({ children }) {
     const [isTransactionsLoading, setIsTransactionsLoading] = useState(false);
     const [limitTransactionsValue, setLimitTransactionsValue] = useState(25);
     const [allTransactionsCount, setAllTransactionsCount] = useState(0);
+    const [filteredSafes, setFilteredSafes] = useState([]);
 
     const getAllTransactionCount = async () => {
-        const snapshot = await getCountFromServer(collection(db, "teams", currentTeam.id, "transactions"));
+        const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
+        let transactionsQuery;
+        if (filteredSafes.length > 0) {
+            transactionsQuery = query(
+                transactionsRef,
+                where("safe", "in", filteredSafes),
+                orderBy("unifiedDate", "desc"),
+            );
+        } else {
+            transactionsQuery = query(transactionsRef, orderBy("unifiedDate", "desc"));
+        }
+        const snapshot = await getCountFromServer(transactionsQuery);
         setAllTransactionsCount(snapshot && snapshot.data().count);
     };
 
@@ -40,7 +52,18 @@ function Transactions({ children }) {
         getAllTransactionCount();
 
         const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
-        const transactionsQuery = query(transactionsRef, orderBy("unifiedDate", "desc"), limit(limitTransactionsValue));
+        let transactionsQuery;
+
+        if (filteredSafes.length > 0) {
+            transactionsQuery = query(
+                transactionsRef,
+                where("safe", "in", filteredSafes),
+                orderBy("unifiedDate", "desc"),
+                limit(limitTransactionsValue),
+            );
+        } else {
+            transactionsQuery = query(transactionsRef, orderBy("unifiedDate", "desc"), limit(limitTransactionsValue));
+        }
 
         const unsubscribe = onSnapshot(transactionsQuery, (querySnapshot) => {
             let transactionDocs = querySnapshot.docs.map((msg) => ({
@@ -63,7 +86,7 @@ function Transactions({ children }) {
             unsubscribe();
             setIsTransactionsLoading(false);
         };
-    }, [currentTeam, limitTransactionsValue, allTransactionsCount]);
+    }, [currentTeam, limitTransactionsValue, allTransactionsCount, filteredSafes]);
 
     const postNewTransactions = async (tData) => {
         try {
@@ -228,6 +251,7 @@ function Transactions({ children }) {
             loadMoreTransactions,
             isTransactionsLoading,
             setLimitTransactionsValue,
+            setFilteredSafes,
         }),
         [
             firestoreTransactions,
@@ -240,6 +264,7 @@ function Transactions({ children }) {
             loadMoreTransactions,
             isTransactionsLoading,
             setLimitTransactionsValue,
+            setFilteredSafes,
         ],
     );
 

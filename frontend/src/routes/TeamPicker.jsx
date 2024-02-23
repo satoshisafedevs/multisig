@@ -36,8 +36,13 @@ function TeamPicker() {
     const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
-    const { setFirestoreTransactions, setIsDataLoaded, setAllTransactionsCount, setLimitTransactionsValue } =
-        useTransactions();
+    const {
+        setFirestoreTransactions,
+        setIsDataLoaded,
+        setAllTransactionsCount,
+        setLimitTransactionsValue,
+        setFilteredSafes,
+    } = useTransactions();
     const { disconnectAll } = useWalletConnect();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -57,6 +62,7 @@ function TeamPicker() {
         setIsDataLoaded(false);
         setAllTransactionsCount(0);
         setLimitTransactionsValue(25);
+        setFilteredSafes([]);
     }, []);
 
     useEffect(() => {
