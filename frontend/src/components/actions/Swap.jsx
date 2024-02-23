@@ -6,7 +6,7 @@ import { upperFirst } from "lodash";
 import { IoShuffleOutline, IoArrowDownCircleOutline, IoPaperPlane } from "react-icons/io5";
 import { useWagmi } from "../../providers/Wagmi";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
-import { formatNumber } from "../../utils";
+import { formatNumber, fromHumanReadable, toHumanReadable } from "../../utils";
 import erc20Abi from "./erc20Abi.json";
 import Swapper from "./Swapper";
 
@@ -28,6 +28,8 @@ export default function Swap() {
     const [loadingRoute, setLoadingRoute] = useState(false);
     const [routeData, setRouteData] = useState();
     const [totalUSDFrom, setTotalUSDFrom] = useState();
+    const [countdown, setCountdown] = useState(30);
+    const [countdownMessage, setCountdownMessage] = useState("");
 
     const getSquidSDK = async () => {
         try {
@@ -52,22 +54,22 @@ export default function Swap() {
         getSquidSDK();
     }, []);
 
-    const fromHumanReadable = (value, decimals) => {
-        // Truncate the number to the desired decimal places
-        const factor = 10 ** decimals;
-        const truncatedValue = Math.floor(value * factor) / factor;
-        // Convert a human-readable number to its representation in the smallest unit
-        const formattedValue = ethers.utils.parseUnits(truncatedValue.toString(), decimals);
-        return formattedValue.toString();
-    };
-
-    const toHumanReadable = (value, decimals) => {
-        // Use the BigNumber utility from ethers.js
-        const bigNumberValue = ethers.BigNumber.from(value);
-        // Divide by 10 to the power of decimals to get the human-readable number
-        const humanReadable = ethers.utils.formatUnits(bigNumberValue, decimals);
-        return humanReadable;
-    };
+    useEffect(() => {
+        let timerId;
+        // Start the countdown only if routeData is present
+        if (routeData && countdown > 0) {
+            setCountdownMessage(`Estimate valid for ${countdown} seconds`); // Set initial countdown message
+            timerId = setTimeout(() => {
+                setCountdown(countdown - 1); // Decrement countdown
+            }, 1000);
+        } else if (countdown <= 0) {
+            // Once countdown reaches 0, call setRouteData
+            setRouteData();
+            setCountdownMessage("Get swap estimate");
+        }
+        // Cleanup the timeout on component unmount or when countdown changes
+        return () => clearTimeout(timerId);
+    }, [routeData, countdown]);
 
     // const slippage = 1.0;
 
@@ -98,6 +100,7 @@ export default function Swap() {
 
     const getSquidRoute = async () => {
         try {
+            setCountdown(30);
             setRouteData();
             setLoadingRoute(true);
             const { route } = await squid.getRoute(params);
@@ -233,7 +236,7 @@ export default function Swap() {
                     !toSafe
                 }
             >
-                Get swap estimate
+                {(routeData && countdownMessage) || "Get swap estimate"}
             </Button>
             {routeData && (
                 <Button

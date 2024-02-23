@@ -159,6 +159,7 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                                         flexGrow="1"
                                         justifyContent="start"
                                         paddingLeft="5px"
+                                        paddingRight="10px"
                                         margin="5px"
                                         variant="ghost"
                                         leftIcon={
@@ -199,14 +200,22 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                                                             token.address.toLowerCase(),
                                                     )
                                                     .map((filteredToken) => (
-                                                        <div key={filteredToken.contract_address}>
+                                                        <Box
+                                                            key={filteredToken.contract_address}
+                                                            display="flex"
+                                                            flexDirection="column"
+                                                            alignItems="end"
+                                                        >
                                                             {formatNumber(
                                                                 toHumanReadable(
                                                                     filteredToken.balance,
                                                                     filteredToken.contract_decimals,
                                                                 ),
                                                             )}
-                                                        </div>
+                                                            <Box fontSize="smaller" color={descriptionColor}>
+                                                                {filteredToken.pretty_quote}
+                                                            </Box>
+                                                        </Box>
                                                     ))
                                             ) : (
                                                 <Spinner speed="1s" color={descriptionColor} />

@@ -8,8 +8,12 @@ function Admin() {
     const { currentTeam, teamUsersInfo } = useUser();
 
     useEffect(() => {
+        if (currentTeam?.name) {
+            document.title = `Admin Panel - ${currentTeam.name} - Satoshi Safe`;
+            return;
+        }
         document.title = "Admin Panel - Satoshi Safe";
-    }, []);
+    }, [currentTeam]);
 
     return (
         <>

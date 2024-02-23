@@ -18,8 +18,12 @@ function Home() {
     const [displayStyle, setDisplayStyle] = useState("unset");
 
     useEffect(() => {
+        if (currentTeam?.name) {
+            document.title = `Home - ${currentTeam.name} - Satoshi Safe`;
+            return;
+        }
         document.title = "Satoshi Safe";
-    }, []);
+    }, [currentTeam]);
 
     useEffect(() => {
         if (firestoreUser && !firestoreUser.displayName) {
