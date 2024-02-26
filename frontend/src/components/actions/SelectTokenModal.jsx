@@ -31,13 +31,14 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
     const searchTokenRef = useRef();
     const { user } = useUser();
     const [availableTokens, setAvailableTokens] = useState("");
+    const [tokenError, setTokenError] = useState(false);
     const toast = useToast();
 
     const getTokenBalance = async () => {
         if (safe && network) {
             try {
-                const targetChainID = networks[network].id;
                 const baseUrl = "https://api-getwallettokenbalances-mojsb2l5zq-uc.a.run.app";
+                const targetChainID = networks[network].id;
                 const response = await fetch(`${baseUrl}/?chainId=${targetChainID}&safeAddress=${safe}`, {
                     headers: {
                         Authorization: `Bearer ${user.accessToken}`,
@@ -45,12 +46,17 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                 });
                 if (!response.ok) {
                     const data = await response.json();
-                    throw new Error(data.message);
+                    setTokenError(true);
+                    throw new Error(data);
                 }
                 const data = await response.json();
+                if (data.error_message) {
+                    throw new Error(data.error_message);
+                }
                 const sanitizedData = data.data.items.filter((el) => el.type === "cryptocurrency" && el.quote_rate);
                 setAvailableTokens(sanitizedData);
             } catch (error) {
+                setTokenError(true);
                 toast({
                     description: `Failed to get tokens list: ${error.message}`,
                     position: "top",
@@ -191,36 +197,38 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                                                 {token.name}
                                             </Box>
                                         </Box>
-                                        <Box display="flex" flex="1" justifyContent="flex-end">
-                                            {availableTokens ? (
-                                                availableTokens
-                                                    .filter(
-                                                        (el) =>
-                                                            el.contract_address.toLowerCase() ===
-                                                            token.address.toLowerCase(),
-                                                    )
-                                                    .map((filteredToken) => (
-                                                        <Box
-                                                            key={filteredToken.contract_address}
-                                                            display="flex"
-                                                            flexDirection="column"
-                                                            alignItems="end"
-                                                        >
-                                                            {formatNumber(
-                                                                toHumanReadable(
-                                                                    filteredToken.balance,
-                                                                    filteredToken.contract_decimals,
-                                                                ),
-                                                            )}
-                                                            <Box fontSize="smaller" color={descriptionColor}>
-                                                                {filteredToken.pretty_quote}
+                                        {!tokenError && (
+                                            <Box display="flex" flex="1" justifyContent="flex-end">
+                                                {availableTokens ? (
+                                                    availableTokens
+                                                        .filter(
+                                                            (el) =>
+                                                                el.contract_address.toLowerCase() ===
+                                                                token.address.toLowerCase(),
+                                                        )
+                                                        .map((filteredToken) => (
+                                                            <Box
+                                                                key={filteredToken.contract_address}
+                                                                display="flex"
+                                                                flexDirection="column"
+                                                                alignItems="end"
+                                                            >
+                                                                {formatNumber(
+                                                                    toHumanReadable(
+                                                                        filteredToken.balance,
+                                                                        filteredToken.contract_decimals,
+                                                                    ),
+                                                                )}
+                                                                <Box fontSize="smaller" color={descriptionColor}>
+                                                                    {filteredToken.pretty_quote}
+                                                                </Box>
                                                             </Box>
-                                                        </Box>
-                                                    ))
-                                            ) : (
-                                                <Spinner speed="1s" color={descriptionColor} />
-                                            )}
-                                        </Box>
+                                                        ))
+                                                ) : (
+                                                    <Spinner speed="1s" color={descriptionColor} />
+                                                )}
+                                            </Box>
+                                        )}
                                     </Button>
                                 </Box>
                             ))}
