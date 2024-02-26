@@ -45,10 +45,10 @@ export default function Send() {
     const grayColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
 
     const getTokenBalance = async (network, safeAddress) => {
-        const targetChainID = networks[network].id;
         try {
             setLoadingTokens(true);
             const baseUrl = "https://api-getwallettokenbalances-mojsb2l5zq-uc.a.run.app";
+            const targetChainID = networks[network].id;
             const response = await fetch(`${baseUrl}/?chainId=${targetChainID}&safeAddress=${safeAddress}`, {
                 headers: {
                     Authorization: `Bearer ${user.accessToken}`,
@@ -59,6 +59,9 @@ export default function Send() {
                 throw new Error(data.message);
             }
             const data = await response.json();
+            if (data.error_message) {
+                throw new Error(data.error_message);
+            }
             const sanitizedData = data.data.items.filter((el) => el.type === "cryptocurrency" && el.quote_rate);
             setAvailableTokens(sanitizedData);
         } catch (error) {
