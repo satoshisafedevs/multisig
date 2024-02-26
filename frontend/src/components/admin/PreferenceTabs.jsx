@@ -15,7 +15,7 @@ function PreferenceTabs() {
     const tab = searchParams.get("tab") || "Profile";
 
     const handleTabsChange = (index) => {
-        const tabName = ["Profile", "Safes", "Teams", "Users", "Notifications"][index];
+        const tabName = ["Profile", "Safes", "Teams", "Users"][index];
         navigate(`?tab=${tabName}`);
     };
 
@@ -24,7 +24,6 @@ function PreferenceTabs() {
         Safes: 1,
         Teams: 2,
         Users: 3,
-        Notifications: 4,
     }[tab];
 
     return (
@@ -67,13 +66,6 @@ function PreferenceTabs() {
                             _selected={{ bg: selectedBG, color: selectedColor }}
                         >
                             Users
-                        </Tab>
-                        <Tab
-                            borderRadius="0 5px 5px 0"
-                            color={colorValue}
-                            _selected={{ bg: selectedBG, color: selectedColor }}
-                        >
-                            Notifications
                         </Tab>
                     </TabList>
                 </Card>
