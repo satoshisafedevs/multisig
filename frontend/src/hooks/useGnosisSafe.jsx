@@ -150,7 +150,15 @@ const useGnosisSafe = () => {
         }
     };
 
-    const createAndApproveTransaction = async (safe, safeService, safeAddress, tx, fromAddress) => {
+    const createAndApproveTransaction = async (
+        network,
+        safe,
+        safeService,
+        safeAddress,
+        tx,
+        fromAddress,
+        satoshiData,
+    ) => {
         try {
             const safeTx = await safe.createTransaction({
                 safeTransactionData: {
@@ -162,6 +170,7 @@ const useGnosisSafe = () => {
             const txhash = await safe.getTransactionHash(safeTx);
             const signature = await safe.signTransactionHash(txhash);
             safeTx.addSignature(signature);
+            await postNewTransactionToDb(network, safeAddress, txhash, satoshiData);
             await safeService.proposeTransaction({
                 safeAddress: ethers.utils.getAddress(safeAddress),
                 senderAddress: ethers.utils.getAddress(fromAddress),

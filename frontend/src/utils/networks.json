@@ -83,27 +83,6 @@
             }
         }
     },
-    "baseGoerli": {
-        "url": "https://goerli.base.org",
-        "svg": "/networks/base.svg",
-        "safeTransactionService": "https://safe-transaction-base-testnet.safe.global",
-        "id": 84531,
-        "currency": "ETH",
-        "title": "Base Goerli",
-        "scanUrl": "https://goerli.basescan.org/",
-        "eip": "eip155:84531",
-        "metamaskSettings": {
-            "chainId": "0x14a33",
-            "chainName": "Base Goerli",
-            "rpcUrls": ["https://goerli.base.org"],
-            "blockExplorerUrls": ["https://goerli.basescan.org/"],
-            "nativeCurrency": {
-                "name": "ETH",
-                "symbol": "ETH",
-                "decimals": 18
-            }
-        }
-    },
     "bsc": {
         "url": "https://bsc-dataseed.binance.org/",
         "svg": "/networks/bnb.svg",

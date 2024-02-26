@@ -27,7 +27,8 @@ function WalletConnect({ children }) {
     const [modalType, setModalType] = useState("transaction");
     const [pairings, setPairings] = useState([]);
     const [sessions, setSessions] = useState(null);
-    const { currentTeam, userTeamData } = useUser();
+    const [selectedSafes, setSelectedSafes] = useState([]);
+    const { userTeamData, safes } = useUser();
     const { createAndApproveTransaction, loadSafe } = useGnosisSafe();
     const toast = useToast();
 
@@ -39,20 +40,21 @@ function WalletConnect({ children }) {
     }, [web3wallet]);
 
     const getChainsAndAccounts = () => {
-        if (currentTeam && currentTeam.safes) {
-            const { safes } = currentTeam;
-            const uniqueNetworks = [...new Set(safes.map(({ network }) => network))];
-            const chains = uniqueNetworks
-                .map((network) => NETWORK_EIP[network])
-                .filter((chainId) => chainId !== undefined);
-            const accounts = safes
-                .map(({ network, safeAddress }) => {
-                    const chainId = NETWORK_EIP[network];
-                    return chainId ? `${chainId}:${safeAddress}` : null;
-                })
-                .filter((account) => account !== null);
-            return { chains, accounts, uniqueNetworks };
-        }
+        // Filter the `safes` array to only include safes that are in the `selectedSafes` array
+        const filteredSafes = safes.filter((safe) => selectedSafes.includes(safe.safeAddress));
+
+        // Now, map over the filtered safes to get unique networks and accounts
+        const uniqueNetworks = [...new Set(filteredSafes.map((safe) => safe.network))];
+        const chains = uniqueNetworks.map((network) => NETWORK_EIP[network]).filter((chainId) => chainId !== undefined);
+
+        const accounts = filteredSafes
+            .map((safe) => {
+                const chainId = NETWORK_EIP[safe.network];
+                return chainId ? `${chainId}:${safe.safeAddress}` : null;
+            })
+            .filter((account) => account !== null);
+
+        return { chains, accounts, uniqueNetworks };
     };
 
     const handleApproveConnection = async () => {
@@ -77,8 +79,10 @@ function WalletConnect({ children }) {
                     namespaces: approvedNamespaces,
                 });
                 const newSessions = await web3wallet.getActiveSessions();
+                console.log("New sessions after approve:", newSessions);
                 setSessions(newSessions);
             } catch (e) {
+                console.log("Failed to approve session", e);
                 toast({
                     description: "Failed to approve session",
                     position: "top",
@@ -94,19 +98,25 @@ function WalletConnect({ children }) {
 
     const handleApproveTransaction = async () => {
         try {
-            const { safes } = currentTeam;
             const fromAddress = transactionRequest.params.request.params[0].from;
             const fromAddressLC = fromAddress.toLowerCase();
             const safe = safes.find((s) => s.safeAddress.toLowerCase() === fromAddressLC);
             const network = safe ? safe.network : "mainnet";
             await checkNetwork(network);
             const { gnosisSafe, safeService } = await loadSafe(safe.safeAddress, network);
+            const satoshiData = {
+                type: "walletconnect",
+                from: safe.safeAddress,
+                network,
+            };
             await createAndApproveTransaction(
+                network,
                 gnosisSafe,
                 safeService,
                 fromAddress,
                 transactionRequest,
                 userTeamData.userWalletAddress,
+                satoshiData,
             );
         } catch (error) {
             toast({
@@ -208,8 +218,10 @@ function WalletConnect({ children }) {
             sessions,
             disconnect,
             disconnectAll,
+            selectedSafes,
+            setSelectedSafes,
         }),
-        [pairings, sessions, sessionProposal, transactionRequest, modalType, isOpen],
+        [pairings, sessions, sessionProposal, transactionRequest, modalType, isOpen, selectedSafes, setSelectedSafes],
     );
     return <WalletConnectProvider value={values}>{children}</WalletConnectProvider>;
 }

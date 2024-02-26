@@ -6,7 +6,7 @@ import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 import SafeDetails from "./SafeDetails";
 
 function Safes() {
-    const { fetchAndUpdateLatestSafesData, currentTeam } = useUser();
+    const { fetchAndUpdateLatestSafesData, safes } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ function Safes() {
                     Add Satoshi Safe
                 </Button>
             </Flex>
-            {currentTeam?.safes?.map((safe) => (
+            {safes.map((safe) => (
                 <SafeDetails
                     key={safe.safeAddress}
                     data={safe}
@@ -45,7 +45,7 @@ function Safes() {
                     fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
                 />
             ))}
-            {!currentTeam.safes && <Text as="i">This team has no safes yet.</Text>}
+            {safes.length < 1 && <Text as="i">This team has no safes yet.</Text>}
         </Box>
     );
 }

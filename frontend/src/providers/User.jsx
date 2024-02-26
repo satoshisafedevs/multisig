@@ -16,6 +16,7 @@ function User({ children }) {
     const [user, setUser] = useState(null);
     const [gettingUserAuthStatus, setGettingUserAuthStatus] = useState(true);
     const [firestoreUser, setFirestoreUser] = useState(null);
+    const [safes, setSafes] = useState([]);
     const [teamsData, setTeamsData] = useState(null);
     const [userTeamData, setUserTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
@@ -37,6 +38,12 @@ function User({ children }) {
         });
         return unsubscribe;
     }, []);
+
+    useEffect(() => {
+        if (currentTeam && currentTeam.safes && currentTeam.safes.length > 0) {
+            setSafes(currentTeam.safes);
+        }
+    }, [currentTeam]);
 
     const getUserTeamsData = async () => {
         try {
@@ -142,8 +149,7 @@ function User({ children }) {
         return { [safe]: responseData };
     };
 
-    const fetchSafesData = async (safes) =>
-        Promise.all(safes.map((safe) => getSafeData(safe.safeAddress, safe.network)));
+    const fetchSafesData = async () => Promise.all(safes.map((safe) => getSafeData(safe.safeAddress, safe.network)));
 
     const getUpdatedSafesData = (currentSafes, fetchedData) => {
         let isUpdateNeeded = false;
@@ -195,6 +201,7 @@ function User({ children }) {
         () => ({
             user,
             setUser,
+            safes,
             gettingUserAuthStatus,
             firestoreUser,
             setFirestoreUser,
@@ -215,6 +222,7 @@ function User({ children }) {
         [
             user,
             setUser,
+            safes,
             gettingUserAuthStatus,
             firestoreUser,
             setFirestoreUser,
