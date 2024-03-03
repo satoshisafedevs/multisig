@@ -76,7 +76,7 @@ function Swapper({
         setToken({});
         setRouteData();
         setTokenBalance();
-        setAmount("");
+        if (!destinationSafe) setAmount("");
     };
 
     const latestTokenPrice = useMemo(
@@ -120,17 +120,17 @@ function Swapper({
             const decimals = await tokenContract.decimals();
             const convertedBalance = ethers.utils.formatUnits(balance, decimals);
             setTokenBalance(convertedBalance);
-            setFromBalances({ ETH: convertedEthBalance, [token.symbol]: convertedBalance });
+            if (!destinationSafe) setFromBalances({ ETH: convertedEthBalance, [token.symbol]: convertedBalance });
             return;
         }
         setTokenBalance(convertedEthBalance);
-        setFromBalances({ ETH: convertedEthBalance });
+        if (!destinationSafe) setFromBalances({ ETH: convertedEthBalance });
     };
 
     useEffect(() => {
         if (safe && token.address) {
             setTokenBalance();
-            setFromBalances();
+            if (!destinationSafe) setFromBalances();
             getBalances();
         }
     }, [safe, token.address]);
@@ -138,7 +138,29 @@ function Swapper({
     const displayTokenBalance = () => {
         if (token.symbol) {
             if (tokenBalance) {
-                return `Balance: ${tokenBalance} ${token.symbol}`;
+                return (
+                    <div>
+                        Balance:{" "}
+                        {destinationSafe ? (
+                            tokenBalance
+                        ) : (
+                            <Button
+                                variant="link"
+                                fontWeight="normal"
+                                fontSize="xs"
+                                minWidth="unset"
+                                color={grayColor}
+                                onClick={() => {
+                                    setAmount(tokenBalance);
+                                    setRouteData();
+                                }}
+                            >
+                                {tokenBalance}
+                            </Button>
+                        )}{" "}
+                        {token.symbol}
+                    </div>
+                );
             }
             return "Balance: loading...";
         }
@@ -269,9 +291,9 @@ function Swapper({
                 />
             </Box>
             <Box display="flex" flexDirection="row" justifyContent="space-between">
-                <Text fontSize="xs" alignSelf="start" height="18px" color={grayColor}>
+                <Box fontSize="xs" alignSelf="start" height="18px" color={grayColor}>
                     {displayTokenBalance()}
-                </Text>
+                </Box>
                 <Text fontSize="xs" alignSelf="end" height="18px" color={grayColor}>
                     {amount && totalUSDValue()}
                 </Text>

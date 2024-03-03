@@ -210,9 +210,7 @@ export default function Swap() {
                         ? toHumanReadable(routeData.estimate.toAmount, routeData.estimate.toToken.decimals)
                         : ""
                 }
-                setAmount={() => {}}
                 setFromNetwork={setToNetwork}
-                setFromBalances={() => {}}
                 totalUSDFrom={totalUSDFrom}
                 setRouteData={setRouteData}
                 destinationSafe
