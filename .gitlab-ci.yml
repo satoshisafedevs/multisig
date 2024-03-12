@@ -72,7 +72,7 @@ deploy-preview:
         - cd $CI_PROJECT_DIR/frontend && yarn install
         - yarn global add firebase-tools
     script:
-        - yarn build:playground
+        - yarn build:development
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase hosting:channel:deploy $CI_COMMIT_BRANCH --project playground
     only:
         - branches

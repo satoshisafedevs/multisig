@@ -2,8 +2,9 @@
     "name": "vite-template-react",
     "version": "1.2.0",
     "scripts": {
-        "start": "vite --mode playground",
-        "dev": "vite --mode playground",
+        "start": "vite --mode development",
+        "dev": "vite --mode development",
+        "build:development": "vite build --mode development",
         "build:playground": "vite build --mode playground",
         "serve:playground": "vite preview --mode playground",
         "build": "vite build --mode production",

@@ -24,11 +24,9 @@ import {
 import { IoExitOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/User";
-import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 
 function Teams() {
     const { teamsData, leaveTeam, currentTeam, getUserTeamsData } = useUser();
-    const [modalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -141,7 +139,6 @@ function Teams() {
                             ))}
                         </Tbody>
                     </Table>
-                    <AddSatoshiSafeModal isOpen={modalOpen} setIsOpen={setModalOpen} />
                 </Box>
             </Box>
         </>

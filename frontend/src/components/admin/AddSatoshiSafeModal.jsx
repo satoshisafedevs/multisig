@@ -157,7 +157,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                                 leftIcon={<IoAddCircleOutline size="20px" />}
                                 onClick={() => setModalState("new")}
                             >
-                                Create New Safe
+                                Create new Safe
                             </Button>
                             <Button
                                 colorScheme="green300"

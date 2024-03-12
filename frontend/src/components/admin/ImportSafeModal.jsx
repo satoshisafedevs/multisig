@@ -67,7 +67,7 @@ function ImportSafeModal({
     };
     return (
         <>
-            <ModalHeader>Welcome to Satoshi Safe</ModalHeader>
+            <ModalHeader>Import Gnosis Safe</ModalHeader>
             <ModalCloseButton top="var(--chakra-space-3)" />
             <ModalBody paddingTop="0">
                 Select the Safe(s) from the list below that you would like to import for this team.
@@ -120,14 +120,14 @@ function ImportSafeModal({
                     <>
                         <Alert status="warning" marginTop="20px" borderRadius="var(--chakra-radii-base)">
                             <AlertIcon />
-                            It appears that you don&apos;t have a Gnosis Safe associated with your wallet.
+                            It appears that you don&apos;t have a Gnosis Safe(s) associated with your wallet.
                         </Alert>
                         {/* <Button
                             marginTop="20px"
                             colorScheme="blue"
                             onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}
                         >
-                            Refresh List
+                            Refresh list
                         </Button> */}
                     </>
                 )}
@@ -142,7 +142,7 @@ function ImportSafeModal({
                 </StyledButton>
                 <Stack direction="row" spacing={4}>
                     <Button onClick={handleRefreshList} isLoading={isRefreshing} spinner={<Spinner size="sm" />}>
-                        Refresh List
+                        Refresh list
                     </Button>
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
