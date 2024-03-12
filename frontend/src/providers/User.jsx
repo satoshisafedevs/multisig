@@ -42,7 +42,7 @@ function User({ children }) {
     useEffect(() => {
         if (currentTeam && currentTeam.safes && currentTeam.safes.length > 0) {
             setSafes(currentTeam.safes);
-        }
+        } else setSafes([]);
     }, [currentTeam]);
 
     const getUserTeamsData = async () => {

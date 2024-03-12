@@ -29,7 +29,6 @@ import { useUser } from "../providers/User";
 import useAuth from "../hooks/useAuth";
 import { useWagmi } from "../providers/Wagmi";
 import ReactLogo from "../img/ReactLogo";
-import SafesModal from "./SafesModal";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("green300.500", "green300.300");
@@ -54,7 +53,6 @@ export default function Header({ withTeam }) {
         chains,
         switchNetwork,
     } = useWagmi();
-    const [safesModalOpen, setSafesModalOpen] = useState(false);
     const [hoverActive, setHoverActive] = useState(false);
     const { slug } = useParams();
     const navigate = useNavigate();
@@ -130,7 +128,6 @@ export default function Header({ withTeam }) {
 
     return (
         <Flex margin="10px 10px 0 10px">
-            <SafesModal isOpen={safesModalOpen} setIsOpen={setSafesModalOpen} />
             <Card direction="column" width="100%">
                 <Flex direction="row" justify="space-between" padding="10px">
                     <Stack direction="row" spacing={8}>

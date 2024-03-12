@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { isEmpty } from "lodash";
 import {
     ModalHeader,
     ModalCloseButton,
-    Td,
     ModalBody,
     Button,
     ModalFooter,
@@ -11,21 +11,54 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Select,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
+    Tooltip,
     IconButton,
     useToast,
     Spinner,
     Link,
+    Box,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
 } from "@chakra-ui/react";
-import { IoChevronBackOutline, IoAdd, IoRemove } from "react-icons/io5";
+import { IoChevronBackOutline, IoChevronDown, IoPersonRemove } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
+
+let joinedNetowrks = networks;
+
+if (import.meta.env.MODE === "development") {
+    const sepolia = {
+        sepolia: {
+            url: "https://rpc.sepolia.dev",
+            svg: "/networks/mainnet.svg",
+            safeTransactionService: "https://safe-transaction-sepolia.safe.global",
+            id: 11155111,
+            currency: "SepoliaETH",
+            title: "Sepolia Testnet",
+            scanUrl: "https://sepolia.etherscan.io",
+            metamaskSettings: {
+                chainId: "0xAA36A7",
+                chainName: "Sepolia Testnet",
+                nativeCurrency: {
+                    name: "Ether",
+                    symbol: "SepoliaETH",
+                    decimals: 18,
+                },
+                rpcUrls: ["https://rpc.sepolia.dev"],
+                blockExplorerUrls: ["https://sepolia.etherscan.io"],
+            },
+        },
+    };
+    joinedNetowrks = { ...joinedNetowrks, ...sepolia };
+}
 
 function CreateNewSafeModal({ onClose, setModalState }) {
     const { teamUsersInfo } = useUser();
@@ -33,7 +66,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
     const toast = useToast();
     const [safeName, setSafeName] = useState("");
     const [network, setNetwork] = useState("");
-    const [threshold, setThreshold] = useState("");
+    const [threshold, setThreshold] = useState(1);
     const [selectedOwners, setSelectedOwners] = useState([]);
     const [transactionHash, setTransactionHash] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -41,22 +74,15 @@ function CreateNewSafeModal({ onClose, setModalState }) {
     // Initialize selectedOwners with all team members
     useEffect(() => {
         setSelectedOwners(Object.keys(teamUsersInfo));
-        setThreshold(Math.min(1, Object.keys(teamUsersInfo).length));
+        setThreshold(Object.keys(teamUsersInfo).length);
     }, [teamUsersInfo]);
 
-    const addOwner = () => {
-        setSelectedOwners([...selectedOwners, ""]); // Add an empty value for a new selection
-    };
-
-    const updateOwner = (index, value) => {
-        const newOwners = [...selectedOwners];
-        newOwners[index] = value;
-        setSelectedOwners(newOwners);
-    };
-
     const removeOwner = (index) => {
-        const newOwners = selectedOwners.filter((_, i) => i !== index);
+        const newOwners = selectedOwners.filter((_, i) => i !== index).filter((owner) => owner !== "");
         setSelectedOwners(newOwners);
+        if (threshold > 1 && threshold > newOwners.length) {
+            setThreshold((prevState) => prevState - 1);
+        }
     };
 
     const handleCreateSafe = async () => {
@@ -106,7 +132,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
     if (isLoading) {
         return (
             <>
-                <ModalHeader>Create New Safe</ModalHeader>
+                <ModalHeader>Create new Safe</ModalHeader>
                 <ModalCloseButton top="var(--chakra-space-3)" />
                 <ModalBody>
                     <Spinner />
@@ -131,7 +157,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
 
     return (
         <>
-            <ModalHeader>Create New Safe</ModalHeader>
+            <ModalHeader>Create new Safe</ModalHeader>
             <ModalCloseButton top="var(--chakra-space-3)" />
             <ModalBody paddingTop="0">
                 <FormControl>
@@ -141,72 +167,83 @@ function CreateNewSafeModal({ onClose, setModalState }) {
 
                 <FormControl mt={4}>
                     <FormLabel>Network</FormLabel>
-                    <Select placeholder="Select network" value={network} onChange={(e) => setNetwork(e.target.value)}>
-                        {Object.entries(networks).map(([key, value]) => (
-                            <option key={key} value={key}>
-                                {value.metamaskSettings.chainName}
-                            </option>
-                        ))}
-                    </Select>
+                    <Menu>
+                        <MenuButton as={Button} rightIcon={<IoChevronDown />}>
+                            {(network && joinedNetowrks[network].metamaskSettings.chainName) || "Select network"}
+                        </MenuButton>
+                        <MenuList>
+                            {Object.entries(joinedNetowrks).map(([key, value]) => (
+                                <MenuItem key={key} value={key} onClick={() => setNetwork(key)}>
+                                    {value.metamaskSettings.chainName}
+                                </MenuItem>
+                            ))}
+                        </MenuList>
+                    </Menu>
                 </FormControl>
-
                 <FormControl mt={4}>
                     <FormLabel>Owners</FormLabel>
-                    <Table size="sm">
-                        <Thead>
-                            <Tr>
-                                <Th>Owner</Th>
-                                <Th>Action</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {selectedOwners.map((ownerId, index) => (
-                                <Tr key={ownerId}>
-                                    <Td>
-                                        <Select
-                                            placeholder="Select team member"
-                                            value={ownerId}
-                                            onChange={(e) => updateOwner(index, e.target.value)}
-                                            flex="1"
-                                        >
-                                            {Object.entries(teamUsersInfo).map(([id, { displayName }]) => (
-                                                <option key={id} value={id}>
-                                                    {displayName}
-                                                </option>
-                                            ))}
-                                        </Select>
-                                    </Td>
-                                    <Td>
-                                        <IconButton
-                                            aria-label="Remove owner"
-                                            icon={<IoRemove />}
-                                            onClick={() => removeOwner(index)}
-                                            ml={2}
-                                        />
-                                    </Td>
-                                </Tr>
+                    <Box paddingLeft="15px" paddingBottom="10px">
+                        {selectedOwners.length > 0 &&
+                            selectedOwners.map((ownerId, index) => (
+                                <Box display="flex" flexDirection="row" alignItems="center" key={ownerId}>
+                                    <Box>{teamUsersInfo[ownerId].displayName || teamUsersInfo[ownerId].email}</Box>
+                                    <Box>
+                                        <Tooltip label="Remove owner">
+                                            <IconButton
+                                                variant="ghost"
+                                                aria-label="Remove owner"
+                                                icon={<IoPersonRemove />}
+                                                onClick={() => removeOwner(index)}
+                                                ml={2}
+                                            />
+                                        </Tooltip>
+                                    </Box>
+                                </Box>
                             ))}
-                        </Tbody>
-                    </Table>
-                    <Button mt={2} leftIcon={<IoAdd />} onClick={addOwner}>
-                        Add Owner
-                    </Button>
+                    </Box>
+                    <Menu>
+                        <MenuButton
+                            as={Button}
+                            rightIcon={<IoChevronDown />}
+                            isDisabled={selectedOwners.length >= Object.keys(teamUsersInfo).length}
+                        >
+                            Add owner
+                        </MenuButton>
+                        <MenuList>
+                            {Object.entries(teamUsersInfo)
+                                .filter(([key]) => !selectedOwners.includes(key))
+                                .map(([id, { displayName, email }]) => (
+                                    <MenuItem
+                                        key={id}
+                                        value={id}
+                                        onClick={() => setSelectedOwners((prevState) => [...prevState, id])}
+                                    >
+                                        {displayName || email}
+                                    </MenuItem>
+                                ))}
+                        </MenuList>
+                    </Menu>
                 </FormControl>
-
                 <FormControl mt={4}>
                     <FormLabel>Threshold</FormLabel>
-                    <Select
-                        value={threshold}
-                        onChange={(e) => setThreshold(Number(e.target.value))}
-                        placeholder="Select threshold"
-                        isDisabled={selectedOwners.length === 0}
-                    >
-                        {Array.from({ length: selectedOwners.length }, (_, i) => (
-                            <option key={i + 1} value={i + 1}>
-                                {i + 1}
-                            </option>
-                        ))}
-                    </Select>
+                    <Box display="flex" flexDirection="row" alignItems="center" paddingTop="10px">
+                        <NumberInput
+                            size="md"
+                            maxW={20}
+                            defaultValue={threshold}
+                            min={1}
+                            max={selectedOwners.length || 1}
+                            onChange={(value) => setThreshold(value)}
+                            value={threshold}
+                            // isDisabled={loading}
+                        >
+                            <NumberInputField />
+                            <NumberInputStepper>
+                                <NumberIncrementStepper />
+                                <NumberDecrementStepper />
+                            </NumberInputStepper>
+                        </NumberInput>
+                    </Box>
                 </FormControl>
             </ModalBody>
             <ModalFooter justifyContent="space-between">
@@ -220,7 +257,11 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
-                    <Button colorScheme="green300" onClick={handleCreateSafe}>
+                    <Button
+                        colorScheme="green300"
+                        onClick={handleCreateSafe}
+                        isDisabled={!safeName || !network || threshold === 0 || isEmpty(selectedOwners)}
+                    >
                         Create Safe
                     </Button>
                 </Stack>

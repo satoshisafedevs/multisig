@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { IoImageOutline } from "react-icons/io5";
 import { Box, Circle, Divider, Flex, Heading, Text, Button, Image, Input, useColorModeValue } from "@chakra-ui/react";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
+import { ethers } from "ethers";
 import { useUser } from "../../providers/User";
 import useAuth from "../../hooks/useAuth";
+import useGnosisSafe from "../../hooks/useGnosisSafe";
 
 function Profile() {
     const [isEditing, setIsEditing] = useState({ displayName: false, email: false, walletAddress: false });
@@ -13,6 +15,7 @@ function Profile() {
     const [walletAddress, setWalletAddress] = useState(null);
     const { firestoreUser, userTeamData, setUserTeamWallet } = useUser();
     const { updateUserData } = useAuth();
+    const { refreshSafeList } = useGnosisSafe();
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
 
     // Load user profile information from Firebase
@@ -33,6 +36,7 @@ function Profile() {
         }
         if (isEditing.walletAddress) {
             setUserTeamWallet(walletAddress);
+            refreshSafeList({ walletAddress });
         }
         toggleEditing(field);
     };
@@ -128,7 +132,10 @@ function Profile() {
                         {walletAddress}
                     </Text>
                 )}
-                <Button onClick={() => saveProfile("walletAddress")}>
+                <Button
+                    onClick={() => saveProfile("walletAddress")}
+                    isDisabled={isEditing.walletAddress && !ethers.utils.isAddress(walletAddress)}
+                >
                     {isEditing.walletAddress ? "Save" : "Edit"}
                 </Button>
             </Flex>

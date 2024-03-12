@@ -21,6 +21,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoAdd } from "react-icons/io5";
+import { ethers } from "ethers";
 import { db, addDoc, collection, setDoc, doc } from "../firebase";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
@@ -211,7 +212,11 @@ function TeamPicker() {
                                     colorScheme="green300"
                                     onClick={handleNewTeamSubmit}
                                     isLoading={loading}
-                                    isDisabled={teamName.length === 0 || walletAddress.length === 0}
+                                    isDisabled={
+                                        teamName.length === 0 ||
+                                        walletAddress.length === 0 ||
+                                        !ethers.utils.isAddress(walletAddress)
+                                    }
                                 >
                                     Create
                                 </Button>
