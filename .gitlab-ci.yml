@@ -78,6 +78,7 @@ deploy-preview:
         - branches
     except:
         - main
+        - production
 
 build-frontend:
     stage: build
