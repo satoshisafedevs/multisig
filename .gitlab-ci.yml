@@ -192,3 +192,15 @@ deploy-functions-production:
     after_script:
         - cd $CI_PROJECT_DIR/functions
         - rm -f .env
+
+deploy-firestore-rules-production:
+    stage: deploy
+    only:
+        - production
+    before_script:
+        - yarn install
+        - yarn global add firebase-tools
+    script:
+        - echo "Deploying firestore rules..."
+        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only firestore:rules --project production
+        - echo "Firestore rules successfully deployed."

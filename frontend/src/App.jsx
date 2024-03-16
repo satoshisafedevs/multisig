@@ -3,7 +3,7 @@ import { Buffer } from "buffer";
 import { ChakraProvider, ColorModeScript, Flex } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { mainnet, arbitrum, optimism } from "wagmi/chains";
+import { mainnet, arbitrum, optimism, aurora, avalanche, base, bsc, polygon, sepolia } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import User from "./providers/User";
@@ -68,14 +68,17 @@ if (import.meta.hot) {
     );
 }
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-    [mainnet, arbitrum, optimism],
-    [
-        // alchemyProvider({ apiKey: 'yourAlchemyApiKey' }),
-        // infuraProvider({ apiKey: 'yourInfuraApiKey' }),
-        publicProvider(),
-    ],
-);
+let chainList = [arbitrum, aurora, avalanche, base, bsc, mainnet, optimism, polygon, sepolia];
+
+if (import.meta.env.MODE !== "development") {
+    chainList = chainList.filter((el) => el.network !== "sepolia");
+}
+
+const { chains, publicClient, webSocketPublicClient } = configureChains(chainList, [
+    // alchemyProvider({ apiKey: 'yourAlchemyApiKey' }),
+    // infuraProvider({ apiKey: 'yourInfuraApiKey' }),
+    publicProvider(),
+]);
 
 const config = createConfig({
     autoConnect: true,

@@ -42,6 +42,7 @@ function Swapper({
     const [isTokenModalOpen, setTokenModalOpen] = useState(false);
     const [networkName, setNetworkName] = useState("");
     const [tokenBalance, setTokenBalance] = useState("");
+    const [unsupportedNetwork, setUnsupportedNetwork] = useState(false);
     const { colorMode } = useColorMode();
     const grayColor = useColorModeValue("blackAlpha.700", "whiteAlpha.700");
 
@@ -51,7 +52,11 @@ function Swapper({
 
         // If tokens are available and chain is found, filter the tokens
         if (tokens && chain) {
-            return tokens.filter((t) => t.chainId === chain);
+            const val = tokens.filter((t) => t.chainId === chain);
+            if (val.length === 0) {
+                setUnsupportedNetwork(true);
+            }
+            return val;
         }
 
         // If any of the conditions are not met, return an empty array
@@ -177,6 +182,7 @@ function Swapper({
                 safe={safe}
                 network={networkName}
                 setRouteData={setRouteData}
+                unsupportedNetwork={unsupportedNetwork}
             />
             <Box display="flex" flexDirection="row">
                 <Menu>
