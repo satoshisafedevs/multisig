@@ -32,32 +32,19 @@ import { useUser } from "../../providers/User";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
 
-let joinedNetowrks = networks;
+let updatedNetworks = networks;
 
-if (import.meta.env.MODE === "development") {
-    const sepolia = {
-        sepolia: {
-            url: "https://rpc.sepolia.dev",
-            svg: "/networks/mainnet.svg",
-            safeTransactionService: "https://safe-transaction-sepolia.safe.global",
-            id: 11155111,
-            currency: "SepoliaETH",
-            title: "Sepolia Testnet",
-            scanUrl: "https://sepolia.etherscan.io",
-            metamaskSettings: {
-                chainId: "0xAA36A7",
-                chainName: "Sepolia Testnet",
-                nativeCurrency: {
-                    name: "Ether",
-                    symbol: "SepoliaETH",
-                    decimals: 18,
-                },
-                rpcUrls: ["https://rpc.sepolia.dev"],
-                blockExplorerUrls: ["https://sepolia.etherscan.io"],
-            },
-        },
-    };
-    joinedNetowrks = { ...joinedNetowrks, ...sepolia };
+// Function to remove a key object
+const filterOutKeyObject = (obj, keyToRemove) =>
+    Object.entries(obj).reduce((acc, [key, value]) => {
+        if (key !== keyToRemove) {
+            acc[key] = value;
+        }
+        return acc;
+    }, {});
+
+if (import.meta.env.MODE !== "development") {
+    updatedNetworks = filterOutKeyObject(networks, "sepolia");
 }
 
 function CreateNewSafeModal({ onClose, setModalState }) {
@@ -169,10 +156,10 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                     <FormLabel>Network</FormLabel>
                     <Menu>
                         <MenuButton as={Button} rightIcon={<IoChevronDown />}>
-                            {(network && joinedNetowrks[network].metamaskSettings.chainName) || "Select network"}
+                            {(network && updatedNetworks[network].metamaskSettings.chainName) || "Select network"}
                         </MenuButton>
                         <MenuList>
-                            {Object.entries(joinedNetowrks).map(([key, value]) => (
+                            {Object.entries(updatedNetworks).map(([key, value]) => (
                                 <MenuItem key={key} value={key} onClick={() => setNetwork(key)}>
                                     {value.metamaskSettings.chainName}
                                 </MenuItem>

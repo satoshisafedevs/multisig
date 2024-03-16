@@ -54,6 +54,7 @@ module.exports = {
         safeTransactionService: "https://safe-transaction-polygon.safe.global/",
         deBankChainID: "matic",
         rpcUrl: "https://polygon-bor.publicnode.com",
+        id: 137,
     },
     base: {
         safeTransactionService: "https://safe-transaction-base.safe.global/",

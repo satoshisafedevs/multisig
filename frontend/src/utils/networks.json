@@ -105,6 +105,7 @@
         }
     },
     "mainnet": {
+        "url": "https://1rpc.io/eth",
         "svg": "/networks/mainnet.svg",
         "safeTransactionService": "https://safe-transaction-mainnet.safe.global",
         "id": 1,
@@ -112,7 +113,6 @@
         "title": "Ethereum",
         "scanUrl": "https://etherscan.io",
         "eip": "eip155:1",
-        "url": "https://1rpc.io/eth",
         "metamaskSettings": {
             "chainId": "0x1",
             "chainName": "Ethereum Mainnet",
@@ -165,6 +165,26 @@
             },
             "rpcUrls": ["https://polygon-rpc.com"],
             "blockExplorerUrls": ["https://polygonscan.com/"]
+        }
+    },
+    "sepolia": {
+        "url": "https://rpc.sepolia.dev",
+        "svg": "/networks/mainnet.svg",
+        "safeTransactionService": "https://safe-transaction-sepolia.safe.global",
+        "id": 11155111,
+        "currency": "SepoliaETH",
+        "title": "Sepolia Testnet",
+        "scanUrl": "https://sepolia.etherscan.io",
+        "metamaskSettings": {
+            "chainId": "0xAA36A7",
+            "chainName": "Sepolia Testnet",
+            "nativeCurrency": {
+                "name": "Ether",
+                "symbol": "SepoliaETH",
+                "decimals": 18
+            },
+            "rpcUrls": ["https://rpc.sepolia.dev"],
+            "blockExplorerUrls": ["https://sepolia.etherscan.io"]
         }
     }
 }

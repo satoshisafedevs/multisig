@@ -25,7 +25,7 @@ import { useUser } from "../../providers/User";
 import { formatNumber, toHumanReadable } from "../../utils";
 import networks from "../../utils/networks.json";
 
-function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData, network }) {
+function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData, network, unsupportedNetwork }) {
     const [searchString, setSearchString] = useState("");
     const descriptionColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
     const searchTokenRef = useRef();
@@ -144,10 +144,16 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                     <Box fontSize="small" padding="5px 5px 0 5px" color={descriptionColor}>
                         {searchTokens.length} Tokens
                     </Box>
-                    {tokens.length === 0 && (
+                    {tokens.length === 0 && !unsupportedNetwork && (
                         <Alert status="warning" marginTop="5px">
                             <AlertIcon />
                             Ensure a safe is chosen before selecting a token
+                        </Alert>
+                    )}
+                    {unsupportedNetwork && (
+                        <Alert status="warning" marginTop="5px">
+                            <AlertIcon />
+                            Network is not supported.
                         </Alert>
                     )}
                     {tokens.length > 0 && searchTokens.length === 0 ? (
@@ -249,5 +255,6 @@ SelectTokenModal.propTypes = {
     safe: PropTypes.string,
     network: PropTypes.string,
     setRouteData: PropTypes.func,
+    unsupportedNetwork: PropTypes.bool,
 };
 export default SelectTokenModal;
