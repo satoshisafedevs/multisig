@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { IoImageOutline } from "react-icons/io5";
-import { Box, Circle, Divider, Flex, Heading, Text, Button, Image, Input, useColorModeValue } from "@chakra-ui/react";
-import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
+import { Box, Button, Circle, Divider, Flex, Heading, Image, Input, Text, useColorModeValue } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import { useUser } from "../../providers/User";
+import { getDownloadURL, getStorage, ref, uploadString } from "firebase/storage";
+import React, { useEffect, useState } from "react";
+import { IoImageOutline } from "react-icons/io5";
 import useAuth from "../../hooks/useAuth";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
+import { useUser } from "../../providers/User";
+import { compressImageTo1MB } from "../../utils";
+import ImageCropperModal from "./ImageCopperModal";
 
 function Profile() {
     const [isEditing, setIsEditing] = useState({ displayName: false, email: false, walletAddress: false });
+    const [isSaving, setIsSaving] = useState(false);
     const [displayName, setName] = useState("John Doe");
     const [email, setEmail] = useState("johndoe@example.com");
     const [image, setImage] = useState();
+    const [selectedImage, setSelectedImage] = useState();
     const [walletAddress, setWalletAddress] = useState(null);
     const { firestoreUser, userTeamData, setUserTeamWallet } = useUser();
     const { updateUserData } = useAuth();
@@ -41,30 +45,49 @@ function Profile() {
         toggleEditing(field);
     };
 
-    const handleImageChange = (e) => {
+    const handleImageInput = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onloadend = async () => {
             // Get the data URL of the uploaded file
             const dataURL = reader.result;
-
-            // Get a reference to Firebase Storage
-            const storage = getStorage();
-
-            const imageRef = ref(storage, `profile-images/${firestoreUser.uid}`);
-
-            // Upload the data URL to Firebase Storage
-            const uploadTaskSnapshot = await uploadString(imageRef, dataURL, "data_url");
-
-            // Get the download URL of the uploaded image
-            const downloadURL = await getDownloadURL(uploadTaskSnapshot.ref);
-
-            // Update the image state
-            setImage(downloadURL);
-            updateUserData(firestoreUser, { photoURL: downloadURL });
+            setSelectedImage(dataURL);
         };
         if (file) {
             reader.readAsDataURL(file);
+        }
+    };
+
+    const handleImageSave = (cropper) => {
+        setIsSaving(true);
+        try {
+            cropper.getCroppedCanvas().toBlob((blob) => {
+                compressImageTo1MB(blob, async (compressedBlob) => {
+                    const reader = new FileReader();
+                    reader.onloadend = async () => {
+                        const imageUri = reader.result;
+                        const storage = getStorage();
+
+                        const imageRef = ref(storage, `profile-images/${firestoreUser.uid}`);
+
+                        // Upload the data URL to Firebase Storage
+                        const uploadTaskSnapshot = await uploadString(imageRef, imageUri, "data_url");
+
+                        // Get the download URL of the uploaded image
+                        const downloadURL = await getDownloadURL(uploadTaskSnapshot.ref);
+
+                        // Update the image state
+                        setImage(downloadURL);
+                        updateUserData(firestoreUser, { photoURL: downloadURL });
+                        setSelectedImage(null);
+                        setIsSaving(false);
+                    };
+                    reader.readAsDataURL(compressedBlob);
+                });
+            }, "image/jpeg");
+        } catch (error) {
+            setIsSaving(false);
+            console.log(error);
         }
     };
 
@@ -83,8 +106,9 @@ function Profile() {
                             type="file"
                             hidden
                             id="image-upload"
-                            onChange={handleImageChange}
+                            onChange={handleImageInput}
                             aria-label="Profile Picture Upload"
+                            accept="image/*"
                         />
                         <Circle size="70px" cursor="pointer" _hover={{ backgroundColor: backgroundHover }}>
                             {image ? (
@@ -139,6 +163,13 @@ function Profile() {
                     {isEditing.walletAddress ? "Save" : "Edit"}
                 </Button>
             </Flex>
+            <ImageCropperModal
+                isOpen={Boolean(selectedImage)}
+                onClose={() => setSelectedImage(false)}
+                isSaving={isSaving}
+                selectedImage={selectedImage}
+                handleImageSave={(cropper) => handleImageSave(cropper)}
+            />
         </Box>
     );
 }
