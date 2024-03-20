@@ -134,3 +134,46 @@ export const fromHumanReadable = (value, decimals) => {
 
     return formattedValue.toString();
 };
+
+// Compress the image to approximately 1MB
+export const compressImageTo1MB = (blob, callback, maxWidth = 800, maxHeight = 800, targetQuality = 0.9) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(blob);
+    img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let { width } = img;
+        let { height } = img;
+
+        if (width > height) {
+            if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+            }
+        } else if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compress = (quality) => {
+            canvas.toBlob(
+                (compressedImageBlob) => {
+                    if (compressedImageBlob.size < 1024 * 1024 || quality <= 0.1) {
+                        callback(compressedImageBlob);
+                    } else {
+                        compress(quality - 0.05);
+                    }
+                },
+                "image/jpeg",
+                quality,
+            );
+        };
+
+        compress(targetQuality);
+    };
+};

@@ -1,5 +1,4 @@
 import { extendTheme } from "@chakra-ui/react";
-
 // when testing new initial values of color mode config make sure to delete
 // browsers app local storage for chakra-ui-color-mode and refresh
 const config = {
