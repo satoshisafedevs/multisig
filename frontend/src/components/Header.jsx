@@ -31,8 +31,8 @@ import { useWagmi } from "../providers/Wagmi";
 import ReactLogo from "../img/ReactLogo";
 
 export default function Header({ withTeam }) {
-    const bgValue = useColorModeValue("green300.500", "green300.300");
-    const hoverBgValue = useColorModeValue("green300.600", "green300.400");
+    const bgValue = useColorModeValue("bronzeSwatch.500", "bronzeSwatch.300");
+    const hoverBgValue = useColorModeValue("bronzeSwatch.600", "bronzeSwatch.400");
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
@@ -88,12 +88,12 @@ export default function Header({ withTeam }) {
 
     const setColorScheme = () => {
         if (preflightCheck) {
-            return "gray";
+            return "blueSwatch";
         }
         if (!metaMaskInstalled) {
-            return "orange";
+            return "blueSwatch";
         }
-        return "green300";
+        return "blueSwatch";
     };
 
     const handleClick = () => {
@@ -131,7 +131,7 @@ export default function Header({ withTeam }) {
             <Card direction="column" width="100%">
                 <Flex direction="row" justify="space-between" padding="10px">
                     <Stack direction="row" spacing={8}>
-                        <Box paddingLeft="10px" height="40px" width="150px" display="flex">
+                        <Box paddingLeft="10px" paddingTop="3px" display="flex">
                             <ReactLogo />
                         </Box>
                         {withTeam && (
@@ -252,7 +252,7 @@ export default function Header({ withTeam }) {
                                             size="md"
                                             onChange={toggleColorMode}
                                             isChecked={colorMode !== "light"}
-                                            colorScheme="green300"
+                                            colorScheme="blueSwatch"
                                         />
                                     </Box>
                                 </MenuList>

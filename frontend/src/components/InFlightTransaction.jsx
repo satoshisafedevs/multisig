@@ -119,7 +119,7 @@ function InFlightTransaction({ transaction }) {
                                                         href={`${
                                                             networks[transaction.network.toLowerCase()].scanUrl
                                                         }/tx/${transaction.txHash || transaction.transactionHash}`}
-                                                        color="green300.500"
+                                                        color="blueSwatch.500"
                                                         isExternal
                                                         display="flex"
                                                         alignItems="center"

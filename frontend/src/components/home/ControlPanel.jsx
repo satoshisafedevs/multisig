@@ -263,7 +263,7 @@ export default function Chat() {
                                     isLoading={isTransactionsLoading}
                                     borderRadius="5px"
                                     fontWeight="normal"
-                                    colorScheme="green300"
+                                    colorScheme="blueSwatch"
                                 >
                                     Load more transactions
                                 </Button>
@@ -295,7 +295,7 @@ export default function Chat() {
                 <Box>
                     <Button
                         marginLeft="20px"
-                        colorScheme="green300"
+                        colorScheme="blueSwatch"
                         rightIcon={<IoSend size="20px" />}
                         onClick={() => {
                             if (message.trim().length !== 0) {

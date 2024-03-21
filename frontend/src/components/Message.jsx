@@ -16,7 +16,7 @@ const StyledTrashIcon = styled(IoTrash)`
 
 function Message({ message, hoverID, setHoverID }) {
     const { firestoreUser, teamUsersInfo } = useUser();
-    const satoshiColor = useColorModeValue(theme.colors.green300[700], theme.colors.green300[200]);
+    const satoshiColor = useColorModeValue(theme.colors.blueSwatch[700], theme.colors.blueSwatch[200]);
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [messageID, setMessageID] = useState();

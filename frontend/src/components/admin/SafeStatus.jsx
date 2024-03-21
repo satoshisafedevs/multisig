@@ -30,7 +30,7 @@ function UnregisteredSafeOwnersAlert({ safe, teamUsersInfo }) {
     return (
         <Tooltip label={tooltipMessage}>
             <HStack>
-                <Icon as={IoAlertCircle} color="yellow.500" boxSize={8} />
+                <Icon as={IoAlertCircle} color="orangeWarning" boxSize={8} />
             </HStack>
         </Tooltip>
     );

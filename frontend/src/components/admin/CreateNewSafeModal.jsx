@@ -245,7 +245,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                         Cancel
                     </Button>
                     <Button
-                        colorScheme="green300"
+                        colorScheme="blueSwatch"
                         onClick={handleCreateSafe}
                         isDisabled={!safeName || !network || threshold === 0 || isEmpty(selectedOwners)}
                     >

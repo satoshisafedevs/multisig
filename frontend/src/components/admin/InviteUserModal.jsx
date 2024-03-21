@@ -81,7 +81,7 @@ function InviteUserModal({ isOpen, setIsOpen }) {
                 </ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="green300"
+                        colorScheme="blueSwatch"
                         onClick={handleInvite}
                         rightIcon={<IoPaperPlaneOutline size="20px" />}
                     >

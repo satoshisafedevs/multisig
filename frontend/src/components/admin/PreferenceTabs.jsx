@@ -11,7 +11,7 @@ function PreferenceTabs() {
     const [searchParams] = useSearchParams();
     const colorValue = useColorModeValue("var(--chakra-colors-gray-600)", "var(--chakra-colors-gray-200)");
     const selectedColor = useColorModeValue("white", "var(--chakra-colors-gray-700)");
-    const selectedBG = useColorModeValue("var(--chakra-colors-green300-300)", "var(--chakra-colors-green300-200)");
+    const selectedBG = useColorModeValue("var(--chakra-colors-blueSwatch-300)", "var(--chakra-colors-blueSwatch-200)");
     const tab = searchParams.get("tab") || "Profile";
 
     const handleTabsChange = (index) => {
@@ -29,7 +29,7 @@ function PreferenceTabs() {
     return (
         <Tabs
             variant="soft-rounded"
-            colorScheme="green300"
+            colorScheme="blueSwatch"
             isLazy
             height="100%"
             width="100%"

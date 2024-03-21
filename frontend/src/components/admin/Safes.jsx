@@ -30,7 +30,7 @@ function Safes() {
                 </Box>
                 <Button
                     leftIcon={<IoAdd size="25px" />}
-                    colorScheme="green300"
+                    colorScheme="blueSwatch"
                     onClick={() => setModalOpen(true)}
                     alignSelf="flex-start"
                 >

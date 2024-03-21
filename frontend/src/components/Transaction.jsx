@@ -166,7 +166,7 @@ function Transaction({ transaction }) {
                     <Button
                         as={Text}
                         variant="outline"
-                        colorScheme={networkMismatch ? "orange" : "green300"}
+                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
                         size="sm"
                         isLoading={executing}
                         loadingText="Executing..."
@@ -191,7 +191,7 @@ function Transaction({ transaction }) {
                     <Button
                         as={Text}
                         variant="outline"
-                        colorScheme={networkMismatch ? "orange" : "green300"}
+                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
                         size="sm"
                         isLoading={approving}
                         loadingText="Approving..."
@@ -300,7 +300,7 @@ function Transaction({ transaction }) {
                                                         href={`${
                                                             networks[transaction.network.toLowerCase()].scanUrl
                                                         }/tx/${transaction.txHash || transaction.transactionHash}`}
-                                                        color="green300.500"
+                                                        color="blue3"
                                                         isExternal
                                                         display="flex"
                                                         alignItems="center"

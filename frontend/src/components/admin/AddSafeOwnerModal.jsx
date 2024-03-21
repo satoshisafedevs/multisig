@@ -73,7 +73,7 @@ function AddSafeOwnerModal({
                 <ModalCloseButton />
                 <ModalBody>
                     Add owner to safe{" "}
-                    <Tag fontSize="15px" colorScheme="green300">
+                    <Tag fontSize="15px" colorScheme="blueSwatch">
                         {safeName || safeAddress}
                     </Tag>
                     <Input
@@ -108,7 +108,7 @@ function AddSafeOwnerModal({
                         Cancel
                     </Button>
                     <Button
-                        colorScheme={networkMismatch ? "orange" : "green300"}
+                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
                         rightIcon={<IoPersonAdd />}
                         isDisabled={
                             !ethers.utils.isAddress(newOwner) ||

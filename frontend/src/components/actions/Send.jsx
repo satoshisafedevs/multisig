@@ -334,7 +334,7 @@ export default function Send() {
                                                 size="24px"
                                                 style={{
                                                     marginRight: "12px",
-                                                    color: "var(--chakra-colors-green300-500)",
+                                                    color: "var(--chakra-colors-blueSwatch-500)",
                                                 }}
                                             />
                                             Refresh token list
@@ -395,7 +395,7 @@ export default function Send() {
                 </Box>
             </Box>
             <Button
-                colorScheme={networkMismatch && safe ? "orange" : "green300"}
+                colorScheme={networkMismatch && safe ? "orange" : "blueSwatch"}
                 rightIcon={<IoCashOutline size="25px" />}
                 isLoading={sending}
                 loadingText="Creating send transaction..."

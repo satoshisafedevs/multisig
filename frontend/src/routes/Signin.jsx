@@ -111,7 +111,7 @@ function Signin() {
                 <Card margin="20px">
                     <CardBody>
                         <Stack spacing="15px" width="300px">
-                            <Box width="250px" display="flex" margin="auto" padding="20px 0">
+                            <Box display="flex" margin="auto" padding="20px 0">
                                 <ReactLogo />
                             </Box>
                             <Center>
@@ -187,7 +187,7 @@ function Signin() {
                                 hasArrow
                             >
                                 <Button
-                                    colorScheme="green300"
+                                    colorScheme="blueSwatch"
                                     onClick={handleSubmit}
                                     isLoading={isSigningIn || isResettingPassword}
                                     isDisabled={noAccount && password !== confirmPassword}
