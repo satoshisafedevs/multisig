@@ -1,8 +1,3 @@
-import React, { useState } from "react";
-import styled from "@emotion/styled";
-import { PropTypes } from "prop-types";
-import { useNavigate, useParams } from "react-router-dom";
-import { isEmpty } from "lodash";
 import {
     Alert,
     AlertIcon,
@@ -10,25 +5,30 @@ import {
     Box,
     Button,
     Card,
+    Flex,
     Menu,
     MenuButton,
-    MenuItemOption,
-    MenuGroup,
-    MenuList,
-    MenuItem,
     MenuDivider,
+    MenuGroup,
+    MenuItem,
+    MenuItemOption,
+    MenuList,
     Stack,
-    Flex,
-    Tooltip,
     Switch,
-    useColorModeValue,
+    Tooltip,
     useColorMode,
+    useColorModeValue,
 } from "@chakra-ui/react";
-import { IoWalletOutline, IoPeopleOutline } from "react-icons/io5";
-import { useUser } from "../providers/User";
+import styled from "@emotion/styled";
+import { isEmpty } from "lodash";
+import { PropTypes } from "prop-types";
+import React, { useState } from "react";
+import { IoPeopleOutline, IoWalletOutline } from "react-icons/io5";
+import { useNavigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { useWagmi } from "../providers/Wagmi";
 import ReactLogo from "../img/ReactLogo";
+import { useUser } from "../providers/User";
+import { useWagmi } from "../providers/Wagmi";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("green300.500", "green300.300");
@@ -75,7 +75,7 @@ export default function Header({ withTeam }) {
             return "Preflight check...";
         }
         if (!metaMaskInstalled) {
-            return "Please install MetaMask, sign in, and then refresh this page";
+            return "Please install MetaMask and refresh this page";
         }
         if (connectIsLoading) {
             return "Approve connection with MetaMask";
