@@ -75,7 +75,7 @@ export default function Header({ withTeam }) {
             return "Preflight check...";
         }
         if (!metaMaskInstalled) {
-            return "Please install MetaMask, sign in, and then refresh this page";
+            return "Please install MetaMask and refresh this page";
         }
         if (connectIsLoading) {
             return "Approve connection with MetaMask";
