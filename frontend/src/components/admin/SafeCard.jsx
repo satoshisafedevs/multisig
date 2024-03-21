@@ -36,7 +36,7 @@ function SafeCard() {
             <Button
                 leftIcon={<IoAdd size="25px" />}
                 width="100%"
-                colorScheme="green300"
+                colorScheme="blueSwatch"
                 onClick={() => setModalOpen(true)}
             >
                 Add Satoshi Safe

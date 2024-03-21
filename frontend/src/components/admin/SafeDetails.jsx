@@ -315,7 +315,7 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                                     <Button
                                         size="sm"
                                         marginTop="5px"
-                                        colorScheme="green300"
+                                        colorScheme="blueSwatch"
                                         variant="outline"
                                         isDisabled={loading}
                                         rightIcon={<IoPersonAdd />}
@@ -351,7 +351,7 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                                         <IconButton
                                             size="sm"
                                             variant="ghost"
-                                            colorScheme="green300"
+                                            colorScheme="blueSwatch"
                                             marginLeft="5px"
                                             icon={<IoCogOutline />}
                                             isDisabled={loading}

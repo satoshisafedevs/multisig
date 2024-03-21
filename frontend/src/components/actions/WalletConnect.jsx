@@ -136,7 +136,7 @@ export default function WalletConnect() {
                         <Text textAlign="center" color="gray.500">
                             You don&apos;t have any connections yet. Pair with a dApp to get started.
                         </Text>
-                        <Button colorScheme="blue" onClick={onOpen}>
+                        <Button colorScheme="blueSwatch" onClick={onOpen}>
                             Pair a New dApp
                         </Button>
                     </>
@@ -144,7 +144,7 @@ export default function WalletConnect() {
             </VStack>
             {/* Button at the bottom */}
             {sessions && !isEmpty(sessions) && (
-                <Button onClick={onOpen} colorScheme="green300" w="100%">
+                <Button onClick={onOpen} colorScheme="blueSwatch" w="100%">
                     Add Connection
                 </Button>
             )}

@@ -34,18 +34,36 @@ const styles = {
 
 // use generator https://supercolorpalette.com/ to create new custom color scheme of any hex for 10 colors
 const colors = {
-    green300: {
-        50: "#dbfae7",
-        100: "#c2f5d5",
-        200: "#aaeec4",
-        300: "#93e6b3",
-        400: "#7ddea2",
-        500: "#68d391",
-        600: "#56c881",
-        700: "#44bb72",
-        800: "#40a065",
-        900: "#3b8758",
+    blue1: "#0F2143",
+    blue2: "#556981",
+    blue3: "#6196E5",
+    bronze: "#AF937F",
+    blueSwatch: {
+        50: "#e9f3ff",
+        100: "#cdd8e6",
+        200: "#b0becf",
+        300: "#92a4b9",
+        400: "#758aa4",
+        500: "#5b718a",
+        600: "#46586d",
+        700: "#313f4f",
+        800: "#1a2632",
+        900: "#000f17",
     },
+    bronzeSwatch: {
+        50: "#fdf1e4",
+        100: "#e7d6cb",
+        200: "#d0bdaf",
+        300: "#bba290",
+        400: "#a78872",
+        500: "#8d6e58",
+        600: "#6f5644",
+        700: "#4f3d2f",
+        800: "#312419",
+        900: "#190900",
+    },
+    orangeWarning: "#FFA500",
+    redWarning: "#CC0000",
 };
 
 const components = {

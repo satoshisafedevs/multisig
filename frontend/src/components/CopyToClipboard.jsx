@@ -35,7 +35,7 @@ function CopyToClipboard({ copy, tooltipSuffix, size }) {
                 size="sm"
                 aria-label="Copy icon"
                 variant="ghost"
-                colorScheme="green300"
+                colorScheme="blueSwatch"
                 icon={icon}
                 onClick={(event) => {
                     event.preventDefault();

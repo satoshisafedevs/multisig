@@ -125,7 +125,7 @@ export default function UpdateProfileModal({ isOpen, setIsOpen }) {
                     <Stack direction="row" spacing={4}>
                         <Button onClick={onClose}>Cancel</Button>
                         <Button
-                            colorScheme="green300"
+                            colorScheme="blueSwatch"
                             rightIcon={<IoSave size="20px" />}
                             isDisabled={displayName.length === 0 || userWalletAddress.length === 0}
                             isLoading={saving}

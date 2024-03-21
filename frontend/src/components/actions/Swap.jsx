@@ -193,7 +193,7 @@ export default function Swap() {
             <Box paddingBottom="18px" display="flex" justifyContent="center" alignItems="center">
                 <Divider />
                 <IoArrowDownCircleOutline
-                    style={{ minWidth: "25px", minHeight: "25px", color: "var(--chakra-colors-green300-500)" }}
+                    style={{ minWidth: "25px", minHeight: "25px", color: "var(--chakra-colors-blueSwatch-500)" }}
                 />
                 <Divider />
             </Box>
@@ -217,7 +217,7 @@ export default function Swap() {
             />
             <Button
                 marginTop="12px"
-                colorScheme="green300"
+                colorScheme="blueSwatch"
                 rightIcon={<IoShuffleOutline size="25px" />}
                 onClick={getSquidRoute}
                 isLoading={loadingRoute}
@@ -245,7 +245,7 @@ export default function Swap() {
                         insufficientEthBalance ||
                         ethOnlySwapInsufficientBalance
                             ? "orange"
-                            : "green300"
+                            : "blueSwatch"
                     }
                     rightIcon={<IoPaperPlane size="25px" />}
                     onClick={() => {

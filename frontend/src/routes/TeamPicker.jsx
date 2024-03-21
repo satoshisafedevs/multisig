@@ -179,7 +179,7 @@ function TeamPicker() {
                                     {team.name}
                                 </Button>
                             ))}
-                        <Button leftIcon={<IoAdd size="25px" />} colorScheme="green300" onClick={onOpen}>
+                        <Button leftIcon={<IoAdd size="25px" />} colorScheme="blueSwatch" onClick={onOpen}>
                             Create new team
                         </Button>
                     </Stack>
@@ -209,7 +209,7 @@ function TeamPicker() {
                                     Cancel
                                 </Button>
                                 <Button
-                                    colorScheme="green300"
+                                    colorScheme="blueSwatch"
                                     onClick={handleNewTeamSubmit}
                                     isLoading={loading}
                                     isDisabled={

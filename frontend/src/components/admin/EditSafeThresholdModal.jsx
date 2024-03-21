@@ -68,7 +68,7 @@ function EditSafeThresholdModal({
                 <ModalCloseButton />
                 <ModalBody>
                     Edit threshold for safe{" "}
-                    <Tag fontSize="15px" colorScheme="green300">
+                    <Tag fontSize="15px" colorScheme="blueSwatch">
                         {safeName || safeAddress}
                     </Tag>
                     <Box display="flex" flexDirection="row" alignItems="center" paddingTop="10px">
@@ -94,7 +94,7 @@ function EditSafeThresholdModal({
                         Cancel
                     </Button>
                     <Button
-                        colorScheme={networkMismatch ? "orange" : "green300"}
+                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
                         rightIcon={<IoCogOutline />}
                         isDisabled={!newThreshold || !metaMaskInstalled || !address || walletMismatch}
                         isLoading={loading}

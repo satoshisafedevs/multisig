@@ -98,7 +98,7 @@ function ImportSafeModal({
                                                 <Tooltip placement="top" label={isAddressInSafes && "Already imported"}>
                                                     <span>
                                                         <Checkbox
-                                                            colorScheme="green300"
+                                                            colorScheme="blueSwatch"
                                                             isChecked={
                                                                 checkedSafes[safe.safeAddress] || isAddressInSafes
                                                             }
@@ -148,7 +148,7 @@ function ImportSafeModal({
                         Cancel
                     </Button>
                     <Button
-                        colorScheme="green300"
+                        colorScheme="blueSwatch"
                         onClick={importSafes}
                         isLoading={loading}
                         isDisabled={

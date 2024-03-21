@@ -87,7 +87,7 @@ export default function CompleteProfileModal() {
                 </ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="green300"
+                        colorScheme="blueSwatch"
                         rightIcon={<IoSave size="20px" />}
                         isDisabled={displayName.length === 0}
                         isLoading={saving}

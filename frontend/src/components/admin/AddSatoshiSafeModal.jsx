@@ -152,7 +152,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                         wallets. You can start by either importing an existing Gnosis Safe or creating a new one.
                         <Flex padding="50px" justify="space-around">
                             <Button
-                                colorScheme="green300"
+                                colorScheme="blueSwatch"
                                 size="lg"
                                 leftIcon={<IoAddCircleOutline size="20px" />}
                                 onClick={() => setModalState("new")}
@@ -160,7 +160,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                                 Create new Safe
                             </Button>
                             <Button
-                                colorScheme="green300"
+                                colorScheme="blueSwatch"
                                 size="lg"
                                 leftIcon={<IoEnterOutline size="20px" />}
                                 onClick={() => setModalState("import")}

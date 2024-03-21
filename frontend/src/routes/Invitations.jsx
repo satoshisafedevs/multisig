@@ -156,7 +156,7 @@ function Invite() {
                                 />
                             </FormControl>
 
-                            <Button colorScheme="green300" onClick={() => handleAcceptInvite()} m="20px">
+                            <Button colorScheme="blueSwatch" onClick={() => handleAcceptInvite()} m="20px">
                                 Accept Invite
                             </Button>
                         </VStack>
