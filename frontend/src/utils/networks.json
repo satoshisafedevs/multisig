@@ -168,7 +168,7 @@
         }
     },
     "sepolia": {
-        "url": "https://rpc.sepolia.dev",
+        "url": "https://sepolia.dev/",
         "svg": "/networks/mainnet.svg",
         "safeTransactionService": "https://safe-transaction-sepolia.safe.global",
         "id": 11155111,
@@ -183,7 +183,7 @@
                 "symbol": "SepoliaETH",
                 "decimals": 18
             },
-            "rpcUrls": ["https://rpc.sepolia.dev"],
+            "rpcUrls": ["https://rpc.sepolia.org"],
             "blockExplorerUrls": ["https://sepolia.etherscan.io"]
         }
     }
