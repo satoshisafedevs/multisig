@@ -282,7 +282,7 @@ export default function Chat() {
             </CardBody>
             <CardFooter paddingTop="5px">
                 <Input
-                    placeholder="Chat or action"
+                    placeholder="Write a message..."
                     value={message}
                     onChange={(event) => setMessage(event.target.value)}
                     onKeyDown={(e) => {
