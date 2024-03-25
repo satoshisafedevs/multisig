@@ -16,6 +16,7 @@ import {
     Button,
     IconButton,
     useColorModeValue,
+    useColorMode,
 } from "@chakra-ui/react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useUser } from "../providers/User";
@@ -36,6 +37,7 @@ function Signin() {
     const colorValue = useColorModeValue("blackAlpha.800", "whiteAlpha.900");
     const hoverValue = useColorModeValue("blackAlpha.800", "white");
     const chromeAutofill = useColorModeValue("white", theme.colors.gray[700]); // just gray.700 not working here
+    const { colorMode } = useColorMode();
 
     useEffect(() => {
         document.title = "Sign in - Satoshi Safe";
@@ -111,8 +113,14 @@ function Signin() {
                 <Card margin="20px">
                     <CardBody>
                         <Stack spacing="15px" width="300px">
-                            <Box display="flex" margin="auto" padding="20px 0">
-                                <ReactLogo />
+                            <Box display="flex" margin="auto" maxWidth="100%" padding="15px 0">
+                                <ReactLogo
+                                    satoshiTextColor={
+                                        colorMode === "light"
+                                            ? "var(--chakra-colors-blackAlpha-900)"
+                                            : "var(--chakra-colors-whiteAlpha-900)"
+                                    }
+                                />
                             </Box>
                             <Center>
                                 <Heading size="lg" paddingBottom="40px" color={colorValue}>
@@ -190,6 +198,7 @@ function Signin() {
                                     colorScheme="blueSwatch"
                                     onClick={handleSubmit}
                                     isLoading={isSigningIn || isResettingPassword}
+                                    loadingText={isSigningIn && "Signing in..."}
                                     isDisabled={noAccount && password !== confirmPassword}
                                 >
                                     {buttonLabel()}
