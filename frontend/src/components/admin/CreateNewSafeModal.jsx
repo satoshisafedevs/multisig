@@ -31,17 +31,9 @@ import { IoChevronBackOutline, IoChevronDown, IoPersonRemove } from "react-icons
 import { useUser } from "../../providers/User";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
+import { filterOutKeyObject } from "../../utils";
 
 let updatedNetworks = networks;
-
-// Function to remove a key object
-const filterOutKeyObject = (obj, keyToRemove) =>
-    Object.entries(obj).reduce((acc, [key, value]) => {
-        if (key !== keyToRemove) {
-            acc[key] = value;
-        }
-        return acc;
-    }, {});
 
 if (import.meta.env.MODE !== "development") {
     updatedNetworks = filterOutKeyObject(networks, "sepolia");
@@ -83,8 +75,16 @@ function CreateNewSafeModal({ onClose, setModalState }) {
             });
             return;
         }
-
+        setIsLoading(true);
         const ownerAddresses = selectedOwners.map((ownerId) => teamUsersInfo[ownerId].walletAddress);
+
+        // const satoshiData = {
+        //     type: "createSafe",
+        //     owners: ownerAddresses,
+        //     threshold,
+        //     name: safeName,
+        // };
+
         try {
             await createSafe({
                 network,
@@ -102,6 +102,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                         isClosable: true,
                     });
                 },
+                // satoshiData,
             });
         } catch (error) {
             toast({
@@ -116,6 +117,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
         onClose();
     };
 
+    // do we need this UI?
     if (isLoading) {
         return (
             <>
@@ -149,13 +151,12 @@ function CreateNewSafeModal({ onClose, setModalState }) {
             <ModalBody paddingTop="0">
                 <FormControl>
                     <FormLabel>Name</FormLabel>
-                    <Input value={safeName} onChange={(e) => setSafeName(e.target.value)} />
+                    <Input value={safeName} onChange={(e) => setSafeName(e.target.value)} isDisabled={isLoading} />
                 </FormControl>
-
                 <FormControl mt={4}>
                     <FormLabel>Network</FormLabel>
                     <Menu>
-                        <MenuButton as={Button} rightIcon={<IoChevronDown />}>
+                        <MenuButton as={Button} rightIcon={<IoChevronDown />} isDisabled={isLoading}>
                             {(network && updatedNetworks[network].metamaskSettings.chainName) || "Select network"}
                         </MenuButton>
                         <MenuList>
@@ -182,6 +183,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                                                 icon={<IoPersonRemove />}
                                                 onClick={() => removeOwner(index)}
                                                 ml={2}
+                                                isDisabled={isLoading}
                                             />
                                         </Tooltip>
                                     </Box>
@@ -192,7 +194,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                         <MenuButton
                             as={Button}
                             rightIcon={<IoChevronDown />}
-                            isDisabled={selectedOwners.length >= Object.keys(teamUsersInfo).length}
+                            isDisabled={selectedOwners.length >= Object.keys(teamUsersInfo).length || isLoading}
                         >
                             Add owner
                         </MenuButton>
@@ -222,7 +224,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                             max={selectedOwners.length || 1}
                             onChange={(value) => setThreshold(value)}
                             value={threshold}
-                            // isDisabled={loading}
+                            isDisabled={isLoading}
                         >
                             <NumberInputField />
                             <NumberInputStepper>
@@ -237,6 +239,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                 <Button
                     leftIcon={<IoChevronBackOutline size="18px" margin="0" />}
                     onClick={() => setModalState("welcome")}
+                    isDisabled={isLoading}
                 >
                     Back
                 </Button>
@@ -247,7 +250,9 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                     <Button
                         colorScheme="blueSwatch"
                         onClick={handleCreateSafe}
-                        isDisabled={!safeName || !network || threshold === 0 || isEmpty(selectedOwners)}
+                        isDisabled={!safeName || !network || threshold === 0 || isEmpty(selectedOwners) || isLoading}
+                        isLoading={isLoading}
+                        loadingText="Creating your safe..."
                     >
                         Create Safe
                     </Button>

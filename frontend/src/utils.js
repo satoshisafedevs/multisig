@@ -177,3 +177,12 @@ export const compressImageTo1MB = (blob, callback, maxWidth = 800, maxHeight = 8
         compress(targetQuality);
     };
 };
+
+// Function to remove a key object
+export const filterOutKeyObject = (obj, keyToRemove) =>
+    Object.entries(obj).reduce((acc, [key, value]) => {
+        if (key !== keyToRemove) {
+            acc[key] = value;
+        }
+        return acc;
+    }, {});
