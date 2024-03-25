@@ -130,9 +130,15 @@ export default function Header({ withTeam }) {
         <Flex margin="10px 10px 0 10px">
             <Card direction="column" width="100%">
                 <Flex direction="row" justify="space-between" padding="10px">
-                    <Stack direction="row" spacing={8}>
-                        <Box paddingLeft="10px" paddingTop="3px" display="flex">
-                            <ReactLogo />
+                    <Stack direction="row" spacing={8} alignItems="center">
+                        <Box paddingLeft="5px" height="24px" display="flex">
+                            <ReactLogo
+                                satoshiTextColor={
+                                    colorMode === "light"
+                                        ? "var(--chakra-colors-blackAlpha-900)"
+                                        : "var(--chakra-colors-whiteAlpha-900)"
+                                }
+                            />
                         </Box>
                         {withTeam && (
                             <>
