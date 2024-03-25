@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import { useToast } from "@chakra-ui/react";
 import networks from "../utils/networks.json";
 import checkNetwork from "../utils/checkNetwork";
-import { convertToISOString } from "../utils";
+import { convertToISOString, filterOutKeyObject } from "../utils";
 import { db, doc, setDoc, Timestamp } from "../firebase";
 import { useUser } from "../providers/User";
 
@@ -484,6 +484,7 @@ const useGnosisSafe = () => {
             console.error(error);
         }
     };
+
     const createSafe = async ({ owners, threshold, network, onTransactionSent }) => {
         try {
             checkNetwork(network);
@@ -496,19 +497,26 @@ const useGnosisSafe = () => {
             // Generate a unique saltNonce using a timestamp
             const saltNonce = new Date().getTime().toString();
             const safe = await SafeFactory.create({ ethAdapter });
-            await safe.deploySafe({
+            let txInfo;
+            const newSafe = await safe.deploySafe({
                 safeAccountConfig: {
                     owners,
                     threshold,
                 },
                 saltNonce,
                 callback: (txHash) => {
+                    txInfo = txHash;
                     console.log(`Safe creation transaction sent: ${txHash}`);
                     if (onTransactionSent) {
                         onTransactionSent(txHash);
                     }
                 },
             });
+            console.log("newSafe and txInfo", newSafe, txInfo);
+            // what is in newSafe? is anything in newSafe returned? does it have safeAddress?
+            // is txInfo a safeTxHash?
+            // await postNewTransactionToDb(network, newSafe, txInfo, satoshiData);
+            // need to add newSafe to teamSafes once we know safeAddress
             return true;
         } catch (error) {
             console.error(error);
@@ -524,8 +532,14 @@ const useGnosisSafe = () => {
     const refreshSafeList = async ({ walletAddress }) => {
         try {
             if (user && user.uid && currentTeam && currentTeam.id) {
-                const allSafesPromises = Object.keys(networks).map(async (key) => {
-                    if (!networks[key].safeTransactionService) {
+                let updatedNetworks = networks;
+
+                if (import.meta.env.MODE !== "development") {
+                    updatedNetworks = filterOutKeyObject(networks, "sepolia");
+                }
+
+                const allSafesPromises = Object.keys(updatedNetworks).map(async (key) => {
+                    if (!updatedNetworks[key].safeTransactionService) {
                         return []; // Skip if no safeTransactionService is defined
                     }
                     const safeService = await getSafeService(key);
