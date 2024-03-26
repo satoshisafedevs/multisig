@@ -1,40 +1,55 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-    Heading,
-    Card,
-    Spinner,
-    Stack,
+    Box,
     Button,
+    Card,
     Container,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton,
+    Flex,
     FormControl,
     FormLabel,
+    Heading,
+    Icon,
     Input,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Spinner,
+    Stack,
+    Text,
+    Tooltip,
+    useColorModeValue,
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
-import { IoAdd } from "react-icons/io5";
 import { ethers } from "ethers";
-import { db, addDoc, collection, setDoc, doc } from "../firebase";
+import React, { useEffect, useRef, useState } from "react";
+import { IoAdd, IoInformation } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import { addDoc, collection, db, doc, setDoc } from "../firebase";
+import { useSafeBalance } from "../providers/SafeBalance";
+import { useTransactions } from "../providers/Transactions";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
-import { useTransactions } from "../providers/Transactions";
-import { useSafeBalance } from "../providers/SafeBalance";
 import { useWalletConnect } from "../providers/WalletConnect";
-import Header from "../components/Header";
 
 const MAX_TEAM_NAME_LENGTH = 50;
 
 function TeamPicker() {
     const toast = useToast();
-    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
+    const {
+        user,
+        firestoreUser,
+        teamsData,
+        setCurrentTeam,
+        setTeamUsersInfo,
+        getUserTeamsData,
+        getSubscriptionTypes,
+        subscriptionTypes,
+    } = useUser();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const {
@@ -49,8 +64,11 @@ function TeamPicker() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [teamName, setTeamName] = useState("");
     const [walletAddress, setWalletAddress] = useState("");
+    const [selectedSubscription, setSelectedSubscription] = useState("");
     const [loading, setLoading] = useState(false);
     const inputRef = useRef();
+    const selectedBg = useColorModeValue("green.200", "green.700");
+    const bg = useColorModeValue("gray.100", "gray.700");
 
     useEffect(() => {
         document.title = "Select your team - Satoshi Safe";
@@ -59,6 +77,7 @@ function TeamPicker() {
         setWalletMismatch(false);
         resetBalanceData();
         getUserTeamsData(user);
+        getSubscriptionTypes();
         setFirestoreTransactions();
         setIsDataLoaded(false);
         setAllTransactionsCount(0);
@@ -119,6 +138,8 @@ function TeamPicker() {
             setLoading(true);
             const newTeamData = {
                 name: teamName,
+                ownerId: firestoreUser.uid,
+                subscriptionId: selectedSubscription,
                 users: [firestoreUser.uid],
                 // generate a slug from the team name
                 slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
@@ -202,6 +223,36 @@ function TeamPicker() {
                                 <FormLabel>Wallet address</FormLabel>
                                 <Input value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} />
                             </FormControl>
+                            <FormControl mt={4}>
+                                <FormLabel>Subscription type</FormLabel>
+                                <Flex justifyContent="center">
+                                    <Flex wrap="wrap" justify="space-around" align="center">
+                                        {subscriptionTypes.map((sub) => (
+                                            <Box
+                                                key={sub.id}
+                                                p={4}
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="flex-start" // Align items to the start of the box
+                                                borderWidth="1px"
+                                                borderRadius="lg"
+                                                m={2}
+                                                bg={selectedSubscription === sub.id ? selectedBg : bg}
+                                                cursor="pointer"
+                                                onClick={() => setSelectedSubscription(sub.id)}
+                                                width="180px" // Set a fixed width to accommodate the content
+                                            >
+                                                <Text fontSize="sm" isTruncated>
+                                                    {sub.name} - ${sub.price.toFixed(2).toLocaleString()}
+                                                </Text>
+                                                <Tooltip label={sub.description}>
+                                                    <Icon variant="ghost" icon={<IoInformation />} ml={2} />
+                                                </Tooltip>
+                                            </Box>
+                                        ))}
+                                    </Flex>
+                                </Flex>
+                            </FormControl>
                         </ModalBody>
                         <ModalFooter>
                             <Stack direction="row" spacing={4}>
@@ -215,7 +266,8 @@ function TeamPicker() {
                                     isDisabled={
                                         teamName.length === 0 ||
                                         walletAddress.length === 0 ||
-                                        !ethers.utils.isAddress(walletAddress)
+                                        !ethers.utils.isAddress(walletAddress) ||
+                                        !selectedSubscription
                                     }
                                 >
                                     Create

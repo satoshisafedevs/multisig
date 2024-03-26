@@ -1,24 +1,24 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
 import {
+    Button,
+    Flex,
     Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
     ModalBody,
     ModalCloseButton,
-    Flex,
-    Button,
+    ModalContent,
+    ModalHeader,
+    ModalOverlay,
+    Td,
     useColorModeValue,
     useToast,
-    Td,
 } from "@chakra-ui/react";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
 import { IoAddCircleOutline, IoEnterOutline } from "react-icons/io5";
-import { useUser } from "../../providers/User";
+import { Timestamp, db, doc, getDoc, updateDoc } from "../../firebase";
 import { useTransactions } from "../../providers/Transactions";
-import { db, doc, getDoc, updateDoc, Timestamp } from "../../firebase";
-import ImportSafeModal from "./ImportSafeModal";
+import { useUser } from "../../providers/User";
 import CreateNewSafeModal from "./CreateNewSafeModal";
+import ImportSafeModal from "./ImportSafeModal";
 
 function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");
