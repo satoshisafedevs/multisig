@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
-import PropTypes from "prop-types";
 import { useToast } from "@chakra-ui/react";
-import { auth, onAuthStateChanged, db, collection, doc, getDoc, getDocs, updateDoc, deleteDoc } from "../firebase";
+import PropTypes from "prop-types";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { auth, collection, db, deleteDoc, doc, getDoc, getDocs, onAuthStateChanged, updateDoc } from "../firebase";
 import networks from "../utils/networks.json";
 
 const UserContext = createContext();
@@ -21,6 +21,7 @@ function User({ children }) {
     const [userTeamData, setUserTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
     const [teamUsersInfo, setTeamUsersInfo] = useState(null);
+    const [subscriptionTypes, setSubscriptionTypes] = useState([]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (userAuth) => {
@@ -197,6 +198,32 @@ function User({ children }) {
         }
     };
 
+    const getSubscriptionTypes = async () => {
+        try {
+            const subscriptionTypesRef = collection(db, "subscriptionTypes");
+            const subscriptionTypesSnap = await getDocs(subscriptionTypesRef);
+            const subscriptionTypesData = [];
+            if (!subscriptionTypesSnap.empty) {
+                subscriptionTypesSnap.docs.forEach((d) => {
+                    subscriptionTypesData.push({
+                        id: d.id,
+                        ...d.data(),
+                    });
+                });
+            }
+            subscriptionTypesData.sort((a, b) => a.price - b.price);
+            setSubscriptionTypes(subscriptionTypesData);
+        } catch (error) {
+            toast({
+                description: `Failed to get subscription types: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     const values = useMemo(
         () => ({
             user,
@@ -214,6 +241,8 @@ function User({ children }) {
             teamUsersInfo,
             setTeamUsersInfo,
             getUserTeamsData,
+            subscriptionTypes,
+            getSubscriptionTypes,
             getFirestoreUserData,
             setUserTeamWallet,
             leaveTeam,

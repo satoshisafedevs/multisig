@@ -61,5 +61,9 @@ service cloud.firestore {
             }
         }
 
+        match /subscriptionTypes/{document=**} {
+        	allow read: if true;
+        }
+
     }
 }
