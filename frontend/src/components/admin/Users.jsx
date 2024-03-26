@@ -1,5 +1,5 @@
+import { Box, Button, Flex, Heading, Table, Tbody, Td, Text, Th, Thead, Tr, useColorModeValue } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Flex, Heading, Text, Button, useColorModeValue } from "@chakra-ui/react";
 import { IoAdd, IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import InviteUserModal from "./InviteUserModal";
@@ -51,7 +51,7 @@ function Users() {
                                     color: hoverColor,
                                 }}
                             >
-                                Username
+                                Name
                                 {sortAscending ? (
                                     <IoChevronUpOutline size="15px" style={iconStyle} />
                                 ) : (
