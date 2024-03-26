@@ -1,21 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import {
+    Box,
     Button,
     Card,
     Center,
-    Heading,
-    Spinner,
-    Text,
-    Input,
+    Flex,
     FormControl,
     FormLabel,
+    Heading,
+    Input,
+    Spinner,
+    Text,
     VStack,
-    Box,
     useToast,
-    Flex,
 } from "@chakra-ui/react";
-import { doc, getDoc, db, acceptInvite } from "../firebase";
+import { ethers } from "ethers";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { acceptInvite, db, doc, getDoc } from "../firebase";
 
 function Invite() {
     const location = useLocation();
@@ -25,19 +26,20 @@ function Invite() {
     const id = queryParams.get("id");
     const [invite, setInvite] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [username, setUsername] = useState("");
+    const [isSigningUpLoading, setIsSigningUpLoading] = useState(false);
+    const [displayName, setDisplayName] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [walletAddress, setWalletAddress] = useState("");
 
     const UserNameAndPasswordFields = (
         <>
-            <FormControl id="username">
-                <FormLabel>Username</FormLabel>
+            <FormControl id="displayName">
+                <FormLabel>displayName</FormLabel>
                 <Input
                     placeholder="Enter your username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     description="This is what people on the team will see."
                 />
             </FormControl>
@@ -109,6 +111,7 @@ function Invite() {
 
     const handleAcceptInvite = async () => {
         try {
+            setIsSigningUpLoading(true);
             if (invite.setPassword) {
                 if (password !== confirmPassword) {
                     toast({
@@ -120,18 +123,40 @@ function Invite() {
                     });
                     return;
                 }
+                if (password.length < 5) {
+                    toast({
+                        description: "The password must be a string with at least 6 characters.",
+                        position: "top",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+            }
+            if (!ethers.utils.isAddress(walletAddress)) {
+                toast({
+                    description: "Please enter a valid wallet address.",
+                    position: "top",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                return;
             }
             const res = await acceptInvite({
                 userId: invite.userId,
                 inviteId: id,
                 password,
-                username,
+                displayName,
                 walletAddress,
                 teamId: invite.teamId,
             });
             navigate(`/team/${res.data.teamSlug}`);
         } catch (error) {
             console.error("Error adding document: ", error);
+        } finally {
+            setIsSigningUpLoading(false);
         }
     };
 
@@ -156,7 +181,13 @@ function Invite() {
                                 />
                             </FormControl>
 
-                            <Button colorScheme="blueSwatch" onClick={() => handleAcceptInvite()} m="20px">
+                            <Button
+                                colorScheme="blueSwatch"
+                                onClick={() => handleAcceptInvite()}
+                                m="20px"
+                                isLoading={isSigningUpLoading}
+                                loadingText="Loading..."
+                            >
                                 Accept Invite
                             </Button>
                         </VStack>

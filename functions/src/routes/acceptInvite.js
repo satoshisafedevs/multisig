@@ -2,7 +2,7 @@ const { db, auth, onCall, FieldValue, HttpsError } = require("../firebase");
 
 exports.acceptInvite = onCall(async (req, res) => {
     try {
-        const { inviteId, userId, password, username, walletAddress, teamId } = req.data;
+        const { inviteId, userId, password, displayName, walletAddress, teamId } = req.data;
 
         // Lookup the invite
         const inviteRef = db.collection("invitations").doc(inviteId);
@@ -21,8 +21,8 @@ exports.acceptInvite = onCall(async (req, res) => {
         const userData = {
             userWalletAddress: walletAddress,
         };
-        if (username !== null && username !== "") {
-            userData.displayName = username;
+        if (displayName !== null && displayName !== "") {
+            userData.displayName = displayName;
         }
 
         // Update user document with displayName (if not null) and wallet address
