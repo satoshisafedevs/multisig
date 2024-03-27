@@ -1,37 +1,24 @@
-const { onRequest, error } = require("../firebase");
-const { configureCorsAndHandleOptions } = require("../utils/configureCorsAndHandleOptions");
-const { validateFirebaseIdToken } = require("../utils/validateFirebaseIdToken");
+const { onCall, HttpsError } = require("../firebase");
 
-exports.getWalletTokenBalances = onRequest(async (req, res) => {
-    const responseSent = configureCorsAndHandleOptions(req, res);
-    if (responseSent) return;
-    const authorized = await validateFirebaseIdToken(req, res);
-    if (!authorized) return;
-    if (req.method === "GET") {
-        const chainId = req.query.chainId;
-        const safeAddress = req.query.safeAddress;
-        if (chainId && safeAddress) {
-            try {
-                const response = await fetch(
-                    `https://api.covalenthq.com/v1/${chainId}/address/${safeAddress}/balances_v2/`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${process.env.COVALENTHQ_KEY}`,
-                        },
-                    },
-                );
-                const data = await response.json();
-                res.status(200).send(data);
-                return;
-            } catch (e) {
-                res.status(400).send({ message: e.message });
-                error("chainId:", chainId);
-                error("safeAddress:", safeAddress);
-                error("error:", e);
-                return;
-            }
-        } else res.status(400).send({ message: "Missing required query params." });
-    } else {
-        res.status(400).send({ message: "Wrong request method." });
+exports.getWalletTokenBalances = onCall(async (req) => {
+    if (!req.auth) {
+        throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
     }
+    const { chainId, safeAddress } = req.data;
+    if (chainId && safeAddress) {
+        try {
+            const response = await fetch(
+                `https://api.covalenthq.com/v1/${chainId}/address/${safeAddress}/balances_v2/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.COVALENTHQ_KEY}`,
+                    },
+                },
+            );
+            const data = await response.json();
+            return data;
+        } catch (e) {
+            throw new HttpsError("internal", e.message);
+        }
+    } else throw new HttpsError("aborted", "Missing required query params.");
 });

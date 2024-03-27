@@ -5,7 +5,7 @@ import { useToast } from "@chakra-ui/react";
 import networks from "../utils/networks.json";
 import checkNetwork from "../utils/checkNetwork";
 import { convertToISOString, filterOutKeyObject } from "../utils";
-import { db, doc, setDoc, Timestamp } from "../firebase";
+import { db, doc, setDoc, Timestamp, transactions } from "../firebase";
 import { useUser } from "../providers/User";
 
 const useGnosisSafe = () => {
@@ -14,35 +14,25 @@ const useGnosisSafe = () => {
 
     const postNewTransactionToDb = async (network, safe, safeTxHash, satoshiData) => {
         try {
-            const response = await fetch("https://api-transactions-mojsb2l5zq-uc.a.run.app", {
+            const response = await transactions({
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${user.accessToken}`,
-                },
-                body: JSON.stringify({
-                    teamid: currentTeam.id,
-                    transactions: [
-                        {
-                            network,
-                            safe,
-                            safeTxHash,
-                            submissionDate: convertToISOString(Timestamp.now()),
-                            satoshiData,
-                        },
-                    ],
-                }),
+                teamid: currentTeam.id,
+                transactions: [
+                    {
+                        network,
+                        safe,
+                        safeTxHash,
+                        submissionDate: convertToISOString(Timestamp.now()),
+                        satoshiData,
+                    },
+                ],
             });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message);
-            }
-            const data = await response.json();
+            const { data } = response;
             // eslint-disable-next-line no-console
             console.log("postNewTransaction response:", data);
         } catch (error) {
             toast({
-                description: `Failed to post new transaction: ${error.message}`,
+                description: `Failed to post new transaction: ${error}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -137,8 +127,8 @@ const useGnosisSafe = () => {
             //   queued: bool,
             //   trusted: bool,
             // }
-            const transactions = await safeService.getAllTransactions(safeAddress, allTxsOptions);
-            return transactions;
+            const allTxs = await safeService.getAllTransactions(safeAddress, allTxsOptions);
+            return allTxs;
         } catch (error) {
             toast({
                 description: `Failed to get all Safe transactions: ${error.message}`,

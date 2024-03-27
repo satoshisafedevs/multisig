@@ -21,15 +21,14 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { IoSearchOutline } from "react-icons/io5";
-import { useUser } from "../../providers/User";
 import { formatNumber, toHumanReadable } from "../../utils";
 import networks from "../../utils/networks.json";
+import { getWalletTokenBalances } from "../../firebase";
 
 function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData, network, unsupportedNetwork }) {
     const [searchString, setSearchString] = useState("");
     const descriptionColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
     const searchTokenRef = useRef();
-    const { user } = useUser();
     const [availableTokens, setAvailableTokens] = useState("");
     const [tokenError, setTokenError] = useState(false);
     const toast = useToast();
@@ -37,23 +36,11 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
     const getTokenBalance = async () => {
         if (safe && network) {
             try {
-                const baseUrl = "https://api-getwallettokenbalances-mojsb2l5zq-uc.a.run.app";
                 const targetChainID = networks[network].id;
-                const response = await fetch(`${baseUrl}/?chainId=${targetChainID}&safeAddress=${safe}`, {
-                    headers: {
-                        Authorization: `Bearer ${user.accessToken}`,
-                    },
-                });
-                if (!response.ok) {
-                    const data = await response.json();
-                    setTokenError(true);
-                    throw new Error(data);
-                }
-                const data = await response.json();
-                if (data.error_message) {
-                    throw new Error(data.error_message);
-                }
-                const sanitizedData = data.data.items.filter((el) => el.type === "cryptocurrency" && el.quote_rate);
+                const response = await getWalletTokenBalances({ chainId: targetChainID, safeAddress: safe });
+                const sanitizedData = response.data.data.items.filter(
+                    (el) => el.type === "cryptocurrency" && el.quote_rate,
+                );
                 setAvailableTokens(sanitizedData);
             } catch (error) {
                 setTokenError(true);

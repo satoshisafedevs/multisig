@@ -26,6 +26,7 @@ import { useWagmi } from "../../providers/Wagmi";
 import { formatNumber, fromHumanReadable, toHumanReadable } from "../../utils";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
+import { getWalletTokenBalances } from "../../firebase";
 
 export default function Send() {
     const [safe, setSafe] = useState("");
@@ -37,7 +38,7 @@ export default function Send() {
     const [amount, setAmount] = useState("");
     const [sending, setSending] = useState(false);
     const { colorMode } = useColorMode();
-    const { currentTeam, user } = useUser();
+    const { currentTeam } = useUser();
     const { address, chain, chains, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
     const { createAndApproveSendTransaction } = useGnosisSafe();
     const inputStyles = useStyleConfig("Input");
@@ -47,21 +48,8 @@ export default function Send() {
     const getTokenBalance = async (network, safeAddress) => {
         try {
             setLoadingTokens(true);
-            const baseUrl = "https://api-getwallettokenbalances-mojsb2l5zq-uc.a.run.app";
             const targetChainID = networks[network].id;
-            const response = await fetch(`${baseUrl}/?chainId=${targetChainID}&safeAddress=${safeAddress}`, {
-                headers: {
-                    Authorization: `Bearer ${user.accessToken}`,
-                },
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message);
-            }
-            const data = await response.json();
-            if (data.error_message) {
-                throw new Error(data.error_message);
-            }
+            const { data } = await getWalletTokenBalances({ chainId: targetChainID, safeAddress });
             const sanitizedData = data.data.items.filter((el) => el.type === "cryptocurrency" && el.quote_rate);
             setAvailableTokens(sanitizedData);
         } catch (error) {
