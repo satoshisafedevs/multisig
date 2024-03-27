@@ -1,87 +1,80 @@
-const { onRequest, db, error } = require("../firebase");
-const { configureCorsAndHandleOptions } = require("../utils/configureCorsAndHandleOptions");
-const { validateFirebaseIdToken } = require("../utils/validateFirebaseIdToken");
+const { onCall, db, error, HttpsError } = require("../firebase");
 const { deleteTransactionsOfSafeInTeam } = require("../utils/deleteTransactionsOfSafeInTeam");
 const { checkDbForTxs } = require("../gnosis");
 
-exports.transactions = onRequest(async (req, res) => {
-    const responseSent = configureCorsAndHandleOptions(req, res);
-    if (responseSent) return;
-    const authorized = await validateFirebaseIdToken(req, res);
-    if (!authorized) return;
-    const uid = authorized.uid;
+exports.transactions = onCall(async (req) => {
+    // Security check to ensure the request is from an authenticated user.
+    if (!req.auth) {
+        throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
+    }
+    const uid = req.auth.uid;
+    const { transactions, teamid, safe, method } = req.data;
+    // No need for CORS configuration as onCall functions handle CORS automatically.
 
-    if (req.method === "POST") {
-        if ("teamid" in req.body) {
-            const teamRef = db.doc(`teams/${req.body.teamid}`);
+    // Ensure the UID is received (already available in context.auth.uid).
+    // Proceed with your logic as required, for example:
+
+    if (method === "POST") {
+        if (teamid) {
+            const teamRef = db.doc(`teams/${teamid}`);
             try {
                 const teamDoc = await teamRef.get();
                 if (!teamDoc.exists) {
-                    res.status(404).send({ message: "Team not found." });
-                    return;
+                    throw new HttpsError("not-found", "Team not found.");
                 }
                 const teamData = teamDoc.data();
-                // Check if user UID is in the team's users array
                 if (!teamData.users.includes(uid)) {
-                    res.status(403).send({ message: "User is not authorized to access this team." });
-                    return;
+                    throw new HttpsError("permission-denied", "User is not authorized to access this team.");
                 }
-                if ("transactions" in req.body) {
-                    // Check if transactions is an array and has at least one element
-                    if (Array.isArray(req.body.transactions) && req.body.transactions.length > 0) {
+                if (transactions) {
+                    if (Array.isArray(transactions) && transactions.length > 0) {
                         try {
-                            const dbStatus = await checkDbForTxs(req.body.transactions, req.body.teamid);
-                            res.status(200).send({ status: "OK", fetchMore: dbStatus });
+                            const dbStatus = await checkDbForTxs(transactions, teamid);
+                            return { fetchMore: dbStatus };
                         } catch (err) {
                             error(err);
-                            res.status(500).send({ message: "Internal server error." });
+                            throw new HttpsError("internal", "Internal server error.");
                         }
                     } else {
-                        res.status(400).send({ message: "Transactions should be a non-empty array." });
+                        throw new HttpsError("invalid-argument", "Transactions should be a non-empty array.");
                     }
                 } else {
-                    res.status(400).send({ message: "Missing required transactions." });
+                    throw new HttpsError("invalid-argument", "Missing required transactions.");
                 }
             } catch (err) {
                 error(err);
-                res.status(500).send({ message: "Error while checking user with team." });
+                throw new HttpsError("internal", "Error while checking user with team.");
             }
         } else {
-            res.status(400).send({ message: "Missing required teamid." });
+            throw new HttpsError("invalid-argument", "Missing required teamid.");
         }
-    } else if (req.method === "DELETE") {
-        const teamid = req.query.teamid;
-        const safe = req.query.safe;
-
+    } else if (method === "DELETE") {
         if (teamid && safe) {
             const teamRef = db.doc(`teams/${teamid}`);
             try {
                 const teamDoc = await teamRef.get();
                 if (!teamDoc.exists) {
-                    res.status(404).send({ message: "Team not found." });
-                    return;
+                    throw new HttpsError("not-found", "Team not found.");
                 }
                 const teamData = teamDoc.data();
-                // Check if user UID is in the team's users array
                 if (!teamData.users.includes(uid)) {
-                    res.status(403).send({ message: "User is not authorized to access this team." });
-                    return;
+                    throw new HttpsError("permission-denied", "User is not authorized to access this team.");
                 }
                 try {
                     await deleteTransactionsOfSafeInTeam(teamid, safe);
-                    res.status(200).send({ status: "OK", message: "Transactions deleted successfully." });
+                    return "Transactions deleted successfully.";
                 } catch (err) {
                     error(err);
-                    res.status(500).send({ message: "Error while deleting transactions." });
+                    throw new HttpsError("internal", "Error while deleting transactions.");
                 }
             } catch (err) {
                 error(err);
-                res.status(500).send({ message: "Error while checking user with team." });
+                throw new HttpsError("internal", "Error while checking user with team.");
             }
         } else {
-            res.status(400).send({ message: "Missing required query parameters." });
+            throw new HttpsError("invalid-argument", "Missing required query parameters.");
         }
     } else {
-        res.status(400).send({ message: "Wrong request method." });
+        throw new HttpsError("invalid-argument", "Wrong request method.");
     }
 });

@@ -266,8 +266,7 @@ function TeamPicker() {
                                     isDisabled={
                                         teamName.length === 0 ||
                                         walletAddress.length === 0 ||
-                                        !ethers.utils.isAddress(walletAddress) ||
-                                        !selectedSubscription
+                                        !ethers.utils.isAddress(walletAddress)
                                     }
                                 >
                                     Create

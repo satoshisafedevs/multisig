@@ -2,7 +2,17 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from "
 import PropTypes from "prop-types";
 import { useUser } from "./User";
 import networks from "../utils/networks.json";
-import { db, collection, onSnapshot, query, where, orderBy, limit, getCountFromServer } from "../firebase";
+import {
+    db,
+    collection,
+    onSnapshot,
+    query,
+    where,
+    orderBy,
+    limit,
+    getCountFromServer,
+    transactions,
+} from "../firebase";
 
 const TransactionsContext = createContext();
 const TransactionsProvider = TransactionsContext.Provider;
@@ -12,7 +22,7 @@ export function useTransactions() {
 }
 
 function Transactions({ children }) {
-    const { currentTeam, user } = useUser();
+    const { currentTeam } = useUser();
     const [firestoreTransactions, setFirestoreTransactions] = useState();
     const [gettingData, setGettingData] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -90,25 +100,15 @@ function Transactions({ children }) {
 
     const postNewTransactions = async (tData) => {
         try {
-            const response = await fetch("https://api-transactions-mojsb2l5zq-uc.a.run.app", {
+            const response = await transactions({
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${user.accessToken}`,
-                },
-                body: JSON.stringify({
-                    teamid: currentTeam.id,
-                    transactions: tData,
-                }),
+                teamid: currentTeam.id,
+                transactions: tData,
             });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message);
-            }
-            const data = await response.json();
+            const { data } = response;
             return data;
         } catch (error) {
-            // error
+            throw new Error(error);
         }
     };
 
