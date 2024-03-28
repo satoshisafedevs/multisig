@@ -29,7 +29,7 @@ import {
 } from "@chakra-ui/react";
 import { IoRemoveCircleOutline, IoHelpCircleOutline, IoPersonRemove, IoPersonAdd, IoCogOutline } from "react-icons/io5";
 import { BsSafe } from "react-icons/bs";
-import { db, doc, getDoc, updateDoc } from "../../firebase";
+import { db, doc, getDoc, updateDoc, transactions } from "../../firebase";
 import { useUser } from "../../providers/User";
 import { useTransactions } from "../../providers/Transactions";
 import { formatTimestamp } from "../../utils";
@@ -42,7 +42,7 @@ import EditSafeThresholdModal from "./EditSafeThresholdModal";
 function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { currentTeam, setCurrentTeam, teamUsersInfo, user } = useUser();
+    const { currentTeam, setCurrentTeam, teamUsersInfo } = useUser();
     const { setGettingData, gettingData } = useTransactions();
     const [isEditingName, setIsEditingName] = useState(false);
     const [safeName, setSafeName] = useState(data.name || "");
@@ -127,15 +127,11 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
 
         try {
             setGettingData(true);
-            await fetch(
-                `https://api-transactions-mojsb2l5zq-uc.a.run.app/?teamid=${currentTeam.id}&safe=${safeAddress}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${user.accessToken}`,
-                    },
-                },
-            );
+            await transactions({
+                method: "DELETE",
+                teamid: currentTeam.id,
+                safe: safeAddress,
+            });
         } catch (error) {
             toast({
                 description: `Failed to clean up transactions for safe: ${error.message}`,
