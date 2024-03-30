@@ -1,16 +1,16 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
-import PropTypes from "prop-types";
-import { Web3Wallet } from "@walletconnect/web3wallet";
 import { useDisclosure, useToast } from "@chakra-ui/react";
+import { Web3Wallet } from "@walletconnect/web3wallet";
+import PropTypes from "prop-types";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { buildApprovedNamespaces } from "@walletconnect/utils";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Core } from "@walletconnect/core";
-import { useUser } from "./User";
 import WCModal from "../components/actions/WCModal";
 import useGnosisSafe from "../hooks/useGnosisSafe";
-import { NETWORK_EIP, EIP155_SIGNING_METHODS } from "../utils/networkeip";
 import checkNetwork from "../utils/checkNetwork";
+import { EIP155_SIGNING_METHODS, NETWORK_EIP } from "../utils/networkeip";
+import { useUser } from "./User";
 
 const WalletConnectContext = createContext();
 const WalletConnectProvider = WalletConnectContext.Provider;
@@ -25,9 +25,17 @@ function WalletConnect({ children }) {
     const [transactionRequest, setTransactionRequest] = useState(null);
     const [sessionProposal, setSessionProposal] = useState(null);
     const [modalType, setModalType] = useState("transaction");
+    const [namespaceInfoError, setNamespaceInfoError] = useState("");
     const [pairings, setPairings] = useState([]);
+    const [isPairingLoading, setIsPairingLoading] = useState(false);
+    const [isApprovingSession, setIsApprovingSession] = useState(false);
     const [sessions, setSessions] = useState(null);
     const [selectedSafes, setSelectedSafes] = useState([]);
+    const isGettingNamespaceInfoRef = useRef({ loading: false });
+    const setIsGettingNamespaceInfo = (value) => {
+        isGettingNamespaceInfoRef.current.loading = value;
+    };
+    const [requiredNamespaces, setRequiredNamespaces] = useState(null);
     const { userTeamData, safes } = useUser();
     const { createAndApproveTransaction, loadSafe } = useGnosisSafe();
     const toast = useToast();
@@ -38,6 +46,15 @@ function WalletConnect({ children }) {
             setSessions(web3wallet.getActiveSessions());
         }
     }, [web3wallet]);
+
+    const resetConnectionStatus = () => {
+        setSelectedSafes([]);
+        setNamespaceInfoError();
+        setRequiredNamespaces();
+        setSessionProposal();
+        setIsPairingLoading();
+        setIsApprovingSession();
+    };
 
     const getChainsAndAccounts = () => {
         // Filter the `safes` array to only include safes that are in the `selectedSafes` array
@@ -57,11 +74,12 @@ function WalletConnect({ children }) {
         return { chains, accounts, uniqueNetworks };
     };
 
-    const handleApproveConnection = async () => {
+    const handleApproveConnection = async (cb) => {
         if (sessionProposal) {
             // Logic to approve the session...
             // Extract unique networks from data
             try {
+                setIsApprovingSession(true);
                 const { chains, accounts } = getChainsAndAccounts();
                 const approvedNamespaces = buildApprovedNamespaces({
                     proposal: sessionProposal.params,
@@ -81,6 +99,14 @@ function WalletConnect({ children }) {
                 const newSessions = await web3wallet.getActiveSessions();
                 console.log("New sessions after approve:", newSessions);
                 setSessions(newSessions);
+                toast({
+                    description: "Added new connection",
+                    position: "top",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                cb();
             } catch (e) {
                 console.log("Failed to approve session", e);
                 toast({
@@ -90,6 +116,7 @@ function WalletConnect({ children }) {
                     duration: 5000,
                     isClosable: true,
                 });
+                setIsApprovingSession(false);
                 return;
             }
             onClose(); // Close the modal once approved
@@ -119,6 +146,7 @@ function WalletConnect({ children }) {
                 satoshiData,
             );
         } catch (error) {
+            console.log(error);
             toast({
                 description: "Failed to approve transaction",
                 position: "top",
@@ -151,9 +179,13 @@ function WalletConnect({ children }) {
         });
 
         newWallet.on("session_proposal", async (proposal) => {
-            setSessionProposal(proposal);
-            setModalType("connection");
-            onOpen();
+            if (isGettingNamespaceInfoRef.current.loading) {
+                setRequiredNamespaces(proposal?.params?.requiredNamespaces);
+                setIsGettingNamespaceInfo(false);
+            } else {
+                setSessionProposal(proposal);
+                setIsPairingLoading(false);
+            }
         });
 
         newWallet.on("session_request", async (request) => {
@@ -167,8 +199,30 @@ function WalletConnect({ children }) {
     };
 
     const pair = async ({ uri }) => {
+        setIsGettingNamespaceInfo(false);
+        setIsPairingLoading(true);
         if (!web3wallet) return;
         await web3wallet.pair({ uri });
+    };
+
+    const getNamespaceInfo = async ({ uri }) => {
+        setIsGettingNamespaceInfo(true);
+        setRequiredNamespaces(null);
+        if (!web3wallet) return;
+        if (!uri) {
+            setNamespaceInfoError();
+            setIsGettingNamespaceInfo(false);
+            return;
+        }
+        try {
+            await web3wallet.pair({ uri });
+            setNamespaceInfoError();
+        } catch (e) {
+            if (e.message.includes("Missing or invalid. pair() uri:")) {
+                setNamespaceInfoError("Please enter valid URI.");
+            }
+            setIsGettingNamespaceInfo(false);
+        }
     };
 
     const disconnectAll = async () => {
@@ -203,6 +257,18 @@ function WalletConnect({ children }) {
         () => ({
             createWeb3Wallet,
             pair,
+            getNamespaceInfo,
+            requiredNamespaces,
+            isGettingNamespaceInfoRef,
+            isPairingLoading,
+            isApprovingSession,
+            setNamespaceInfoError,
+            setRequiredNamespaces,
+            handleApproveConnection,
+            setSessionProposal,
+            resetConnectionStatus,
+            sessionProposal,
+            namespaceInfoError,
             ConnectionModal: (
                 <WCModal
                     isOpen={isOpen}
@@ -221,7 +287,23 @@ function WalletConnect({ children }) {
             selectedSafes,
             setSelectedSafes,
         }),
-        [pairings, sessions, sessionProposal, transactionRequest, modalType, isOpen, selectedSafes, setSelectedSafes],
+        [
+            pairings,
+            sessions,
+            requiredNamespaces,
+            namespaceInfoError,
+            sessionProposal,
+            transactionRequest,
+            isPairingLoading,
+            isApprovingSession,
+            modalType,
+            isOpen,
+            selectedSafes,
+            setIsPairingLoading,
+            resetConnectionStatus,
+            setSelectedSafes,
+            handleApproveTransaction,
+        ],
     );
     return <WalletConnectProvider value={values}>{children}</WalletConnectProvider>;
 }

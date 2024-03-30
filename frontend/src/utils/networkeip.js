@@ -1,6 +1,7 @@
 export const NETWORK_EIP = {
     mainnet: "eip155:1",
     polygon: "eip155:137",
+    base: "eip155:8453",
     arbitrum: "eip155:42161",
     optimism: "eip155:10",
 };

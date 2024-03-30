@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
 import {
     Box,
+    Button,
     Card,
     CardBody,
-    Flex,
-    Spinner,
     Center,
+    Flex,
     Heading,
-    Stack,
+    IconButton,
     Input,
     InputGroup,
     InputRightElement,
+    Spinner,
+    Stack,
     Tooltip,
-    Button,
-    IconButton,
     useColorModeValue,
     useColorMode,
 } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { useUser } from "../providers/User";
-import useAuth from "../hooks/useAuth";
+import { Navigate } from "react-router-dom";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import useAuth from "../hooks/useAuth";
 import ReactLogo from "../img/ReactLogo";
+import { useUser } from "../providers/User";
 import theme from "../theme";
 
 function Signin() {
@@ -214,7 +214,12 @@ function Signin() {
                         )}
                         <Center paddingTop="70px">
                             {noAccount ? "Already a member?" : "Not a member?"}
-                            <Button colorScheme="blue" paddingLeft="10px" variant="link" onClick={handleNoAccount}>
+                            <Button
+                                colorScheme="blueSwatch"
+                                paddingLeft="10px"
+                                variant="link"
+                                onClick={handleNoAccount}
+                            >
                                 {noAccount ? "Sign in" : "Create account"}
                             </Button>
                         </Center>

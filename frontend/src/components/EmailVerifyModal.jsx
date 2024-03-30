@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import { Box, Button, Modal, ModalBody, ModalContent, ModalHeader, Text } from "@chakra-ui/react";
 import { PropTypes } from "prop-types";
-import { Button, Box, Text, Modal, ModalContent, ModalHeader, ModalBody } from "@chakra-ui/react";
+import React, { useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 
 export default function EmailVerifyModal({ user }) {
@@ -37,14 +37,14 @@ export default function EmailVerifyModal({ user }) {
                     <Box>
                         A verification email has been sent to your inbox. Please verify your email by clicking the link
                         provided. Once done, please{" "}
-                        <Button variant="link" colorScheme="blue" onClick={() => window.location.reload()}>
+                        <Button variant="link" colorScheme="blueSwatch" onClick={() => window.location.reload()}>
                             refresh
                         </Button>{" "}
                         this page.
                     </Box>
                     <Box padding="20px 0">
                         Haven&apos;t received the email yet? Check your Spam folder or click
-                        <Button variant="link" colorScheme="blue" onClick={resendVerificationEmail}>
+                        <Button variant="link" colorScheme="blueSwatch" onClick={resendVerificationEmail}>
                             here
                         </Button>
                         to resend the verification email.
@@ -53,7 +53,7 @@ export default function EmailVerifyModal({ user }) {
                         If you&apos;re encountering difficulties, feel free to sign out and try again later. Click
                         <Button
                             variant="link"
-                            colorScheme="blue"
+                            colorScheme="blueSwatch"
                             onClick={() => {
                                 signOutUser(user.email);
                                 clearInterval(intervalId);
