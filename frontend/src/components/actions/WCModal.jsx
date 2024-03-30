@@ -1,19 +1,19 @@
 /* eslint-disable react/forbid-prop-types */
-import React from "react";
-import PropTypes from "prop-types";
 import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
-    Button,
-    Text,
     Box,
+    Button,
     Image,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Text,
 } from "@chakra-ui/react";
+import PropTypes from "prop-types";
+import React from "react";
 
 function WCModal({
     isOpen,
@@ -85,7 +85,7 @@ function WCModal({
                     />
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="blue" onClick={onApproveConnection}>
+                    <Button colorScheme="blueSwatch" onClick={onApproveConnection}>
                         Approve
                     </Button>
                 </ModalFooter>

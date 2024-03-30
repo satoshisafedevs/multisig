@@ -1,12 +1,12 @@
+import { useToast } from "@chakra-ui/react";
 import SafeApiKit from "@safe-global/api-kit";
 import Safe, { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
 import { ethers } from "ethers";
-import { useToast } from "@chakra-ui/react";
-import networks from "../utils/networks.json";
-import checkNetwork from "../utils/checkNetwork";
-import { convertToISOString, filterOutKeyObject } from "../utils";
-import { db, doc, setDoc, Timestamp, transactions } from "../firebase";
+import { Timestamp, db, doc, setDoc, transactions } from "../firebase";
 import { useUser } from "../providers/User";
+import { convertToISOString, filterOutKeyObject } from "../utils";
+import checkNetwork from "../utils/checkNetwork";
+import networks from "../utils/networks.json";
 
 const useGnosisSafe = () => {
     const toast = useToast();
@@ -548,6 +548,7 @@ const useGnosisSafe = () => {
                                 safeAddress,
                                 owners: safeInfo.owners,
                                 threshold: safeInfo.threshold,
+                                eip: networks[key].eip,
                             };
                         }),
                     );

@@ -1,29 +1,29 @@
 /* eslint-disable react/forbid-prop-types */
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import styled from "@emotion/styled";
 import {
-    ModalHeader,
-    ModalBody,
-    TableContainer,
-    Table,
-    Thead,
-    Tr,
-    Th,
-    Td,
-    Tbody,
     Alert,
-    Stack,
-    ModalFooter,
-    Button,
     AlertIcon,
-    ModalCloseButton,
-    useColorModeValue,
-    Tooltip,
+    Button,
     Checkbox,
+    ModalBody,
+    ModalCloseButton,
+    ModalFooter,
+    ModalHeader,
     Spinner,
+    Stack,
+    Table,
+    TableContainer,
+    Tbody,
+    Td,
+    Th,
+    Thead,
+    Tooltip,
+    Tr,
+    useColorModeValue,
     useToast,
 } from "@chakra-ui/react";
+import styled from "@emotion/styled";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
 import { IoChevronBackOutline } from "react-icons/io5";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 
@@ -124,7 +124,7 @@ function ImportSafeModal({
                         </Alert>
                         {/* <Button
                             marginTop="20px"
-                            colorScheme="blue"
+                            colorScheme="blueSwatch"
                             onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}
                         >
                             Refresh list
