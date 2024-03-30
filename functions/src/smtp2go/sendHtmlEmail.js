@@ -16,7 +16,7 @@ async function sendHtmlEmail(toEmail, userMessage, username, userEmail, teamName
         const htmlBody = generateEmailContent(username, userEmail, teamName, userMessage, inviteLink);
 
         const mailOptions = {
-            from: '"Satoshi Safe" <noreply@satoshisafe.io>', // sender address
+            from: '"Satoshi Safe" <noreply@getsatoshisafe.com>', // sender address
             to: toEmail, // list of receivers
             subject: "Invitation to Join Satoshi Safe Team", // Subject line
             html: htmlBody, // generated html body

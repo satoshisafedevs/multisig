@@ -35,9 +35,9 @@ function Invite() {
     const UserNameAndPasswordFields = (
         <>
             <FormControl id="displayName">
-                <FormLabel>displayName</FormLabel>
+                <FormLabel>Display Name</FormLabel>
                 <Input
-                    placeholder="Enter your username"
+                    placeholder="Enter your name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     description="This is what people on the team will see."

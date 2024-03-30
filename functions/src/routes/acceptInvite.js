@@ -18,15 +18,18 @@ exports.acceptInvite = onCall(async (req, res) => {
         }
 
         // Conditionally prepare the user data for update
-        const userData = {
-            userWalletAddress: walletAddress,
-        };
+        const userData = {};
         if (displayName !== null && displayName !== "") {
             userData.displayName = displayName;
         }
 
         // Update user document with displayName (if not null) and wallet address
         await db.collection("users").doc(userId).set(userData, { merge: true });
+
+        // Update teams collection for the user
+        await db.collection("users").doc(userId).collection("teams").doc(teamId).set({
+            userWalletAddress: walletAddress,
+        });
 
         // Add user to team
         const teamUsersRef = db.collection("teams").doc(teamId);
