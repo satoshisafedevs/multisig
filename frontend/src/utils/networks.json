@@ -63,7 +63,7 @@
         }
     },
     "base": {
-        "url": "https://rpc.baseledger.com",
+        "url": "https://mainnet.base.org",
         "svg": "/networks/base.svg",
         "safeTransactionService": "https://safe-transaction-base.safe.global",
         "id": 8453,

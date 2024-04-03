@@ -16,31 +16,52 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
-    Spinner,
+    Tooltip,
+    Skeleton,
     useColorModeValue,
     useToast,
 } from "@chakra-ui/react";
+import { FixedSizeList as List } from "react-window";
 import { IoSearchOutline } from "react-icons/io5";
 import { formatNumber, toHumanReadable } from "../../utils";
 import networks from "../../utils/networks.json";
 import { getWalletTokenBalances } from "../../firebase";
 
-function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData, network, unsupportedNetwork }) {
+function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteData, network }) {
     const [searchString, setSearchString] = useState("");
     const descriptionColor = useColorModeValue("blackAlpha.600", "whiteAlpha.600");
     const searchTokenRef = useRef();
     const [availableTokens, setAvailableTokens] = useState("");
     const [tokenError, setTokenError] = useState(false);
+    const [listHeight, setListHeight] = useState(400);
     const toast = useToast();
+
+    useEffect(() => {
+        const updateSize = () => {
+            // Example: Set the list height to be 50% of the viewport height
+            setListHeight(window.innerHeight * 0.5);
+        };
+
+        window.addEventListener("resize", updateSize);
+        updateSize(); // Initialize size on mount
+
+        return () => window.removeEventListener("resize", updateSize);
+    }, []);
 
     const getTokenBalance = async () => {
         if (safe && network) {
             try {
-                const targetChainID = networks[network].id;
+                const targetChainID = networks[network]?.id;
                 const response = await getWalletTokenBalances({ chainId: targetChainID, safeAddress: safe });
-                const sanitizedData = response.data.data.items.filter(
-                    (el) => el.type === "cryptocurrency" && el.quote_rate,
+                let sanitizedData = response?.data?.data?.items?.filter(
+                    (el) => el?.type === "cryptocurrency" && el?.quote_rate,
                 );
+                sanitizedData = sanitizedData.map((token) => {
+                    if (token?.contract_address?.toLowerCase() === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
+                        return { ...token, contract_address: "0x0000000000000000000000000000000000000000" };
+                    }
+                    return token;
+                });
                 setAvailableTokens(sanitizedData);
             } catch (error) {
                 setTokenError(true);
@@ -58,7 +79,7 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
     useEffect(() => {
         if (isOpen) {
             setTimeout(() => {
-                searchTokenRef.current?.focus();
+                searchTokenRef?.current?.focus();
             }, 0);
             getTokenBalance();
         }
@@ -79,21 +100,118 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
         if (tokens && searchString) {
             return tokens.filter(
                 (token) =>
-                    token.symbol.toLowerCase().includes(searchString.toLowerCase()) ||
-                    token.name.toLowerCase().includes(searchString.toLowerCase()),
+                    token.symbol?.toLowerCase().includes(searchString.toLowerCase()) ||
+                    token.name?.toLowerCase().includes(searchString.toLowerCase()) ||
+                    token.address?.toLowerCase().includes(searchString.toLowerCase()),
             );
         }
         return tokens;
     }, [tokens, searchString]);
 
+    // eslint-disable-next-line react/no-unstable-nested-components
+    function TokenRow({ index, style }) {
+        const token = searchTokens[index];
+        return (
+            <Box display="flex" flexDirection="row" style={style} key={token?.address}>
+                <Button
+                    height="50px"
+                    fontWeight="normal"
+                    flexGrow="1"
+                    justifyContent="start"
+                    paddingLeft="5px"
+                    paddingRight="10px"
+                    margin="5px"
+                    variant="ghost"
+                    leftIcon={
+                        // eslint-disable-next-line react/jsx-wrap-multilines
+                        <Image
+                            display="flex"
+                            alignItems="center"
+                            boxSize="2rem"
+                            borderRadius="full"
+                            src={token?.logoURI}
+                            alt={token?.symbol?.substring(0, 3)}
+                            mr="12px"
+                            loading="lazy"
+                        />
+                    }
+                    onClick={() => {
+                        setToken({
+                            symbol: token?.symbol,
+                            logoURI: token?.logoURI,
+                            address: token?.address,
+                            decimals: token?.decimals,
+                            usdPrice: Number(token?.priceUSD),
+                        });
+                        onClose();
+                    }}
+                >
+                    <Tooltip label={token?.address} placement="top-start" fontWeight="normal">
+                        <Box display="flex" flexDirection="column" alignItems="start">
+                            {token?.symbol}
+                            <br />
+                            <Box
+                                fontSize="smaller"
+                                color={descriptionColor}
+                                textAlign="initial"
+                                overflow="hidden"
+                                whiteSpace="nowrap"
+                                textOverflow="ellipsis"
+                                maxWidth="350px"
+                            >
+                                {token?.name}
+                            </Box>
+                        </Box>
+                    </Tooltip>
+                    {!tokenError && (
+                        <Box display="flex" flex="1" justifyContent="flex-end">
+                            {availableTokens ? (
+                                availableTokens
+                                    .filter(
+                                        (el) => el.contract_address?.toLowerCase() === token?.address?.toLowerCase(),
+                                    )
+                                    .map((filteredToken) => (
+                                        <Box
+                                            key={filteredToken?.contract_address}
+                                            display="flex"
+                                            flexDirection="column"
+                                            alignItems="end"
+                                        >
+                                            {formatNumber(
+                                                toHumanReadable(
+                                                    filteredToken?.balance,
+                                                    filteredToken?.contract_decimals,
+                                                ),
+                                            )}
+                                            <Box fontSize="smaller" color={descriptionColor}>
+                                                {filteredToken?.pretty_quote}
+                                            </Box>
+                                        </Box>
+                                    ))
+                            ) : (
+                                <Skeleton height="25px" width="80px" speed={0.9} />
+                            )}
+                        </Box>
+                    )}
+                </Button>
+            </Box>
+        );
+    }
+
+    TokenRow.propTypes = {
+        index: PropTypes.number.isRequired,
+        // eslint-disable-next-line react/forbid-prop-types
+        style: PropTypes.object.isRequired,
+    };
+
     const sortTokensByAvailability = (a, b) => {
         // Check if token A is in availableTokens
         const isATokenAvailable = availableTokens?.some(
-            (el) => el.contract_address.toLowerCase() === a.address.toLowerCase(),
+            (el) => el.contract_address?.toLowerCase() === a.address?.toLowerCase(),
         );
         // Check if token B is in availableTokens
         const isBTokenAvailable = availableTokens?.some(
-            (el) => el.contract_address.toLowerCase() === b.address.toLowerCase(),
+            (el) => el.contract_address?.toLowerCase() === b.address?.toLowerCase(),
         );
 
         // Order tokens that are available before those that aren't
@@ -131,100 +249,29 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                     <Box fontSize="small" padding="5px 5px 0 5px" color={descriptionColor}>
                         {searchTokens.length} Tokens
                     </Box>
-                    {tokens.length === 0 && !unsupportedNetwork && (
+                    {tokens.length === 0 && (
                         <Alert status="warning" marginTop="5px">
                             <AlertIcon />
                             Ensure a safe is chosen before selecting a token
                         </Alert>
                     )}
-                    {unsupportedNetwork && (
-                        <Alert status="warning" marginTop="5px">
-                            <AlertIcon />
-                            Network is not supported.
-                        </Alert>
-                    )}
-                    {tokens.length > 0 && searchTokens.length === 0 ? (
+                    {tokens.length > 0 && searchTokens.length === 0 && (
                         <Alert status="warning" marginTop="5px">
                             <AlertIcon />
                             No results found
                         </Alert>
-                    ) : (
+                    )}
+                    {tokens.length > 0 && searchTokens.length > 0 && (
                         <Box maxHeight="50vh" overflow="auto" margin="0 -5px">
-                            {searchTokens.map((token) => (
-                                <Box display="flex" flexDirection="row" key={token.name + token.symbol}>
-                                    <Button
-                                        height="50px"
-                                        fontWeight="normal"
-                                        flexGrow="1"
-                                        justifyContent="start"
-                                        paddingLeft="5px"
-                                        paddingRight="10px"
-                                        margin="5px"
-                                        variant="ghost"
-                                        leftIcon={
-                                            // eslint-disable-next-line react/jsx-wrap-multilines
-                                            <Image
-                                                boxSize="2rem"
-                                                borderRadius="full"
-                                                src={token.logoURI}
-                                                alt={token.symbol}
-                                                mr="12px"
-                                                loading="lazy"
-                                            />
-                                        }
-                                        onClick={() => {
-                                            setToken({
-                                                symbol: token.symbol,
-                                                logoURI: token.logoURI,
-                                                address: token.address,
-                                                decimals: token.decimals,
-                                                usdPrice: token.usdPrice,
-                                            });
-                                            onClose();
-                                        }}
-                                    >
-                                        <Box display="flex" flexDirection="column" alignItems="start">
-                                            {token.symbol}
-                                            <br />
-                                            <Box fontSize="smaller" color={descriptionColor}>
-                                                {token.name}
-                                            </Box>
-                                        </Box>
-                                        {!tokenError && (
-                                            <Box display="flex" flex="1" justifyContent="flex-end">
-                                                {availableTokens ? (
-                                                    availableTokens
-                                                        .filter(
-                                                            (el) =>
-                                                                el.contract_address.toLowerCase() ===
-                                                                token.address.toLowerCase(),
-                                                        )
-                                                        .map((filteredToken) => (
-                                                            <Box
-                                                                key={filteredToken.contract_address}
-                                                                display="flex"
-                                                                flexDirection="column"
-                                                                alignItems="end"
-                                                            >
-                                                                {formatNumber(
-                                                                    toHumanReadable(
-                                                                        filteredToken.balance,
-                                                                        filteredToken.contract_decimals,
-                                                                    ),
-                                                                )}
-                                                                <Box fontSize="smaller" color={descriptionColor}>
-                                                                    {filteredToken.pretty_quote}
-                                                                </Box>
-                                                            </Box>
-                                                        ))
-                                                ) : (
-                                                    <Spinner speed="1s" color={descriptionColor} />
-                                                )}
-                                            </Box>
-                                        )}
-                                    </Button>
-                                </Box>
-                            ))}
+                            <List
+                                height={listHeight} // Adjust based on your needs
+                                width="100%"
+                                itemCount={searchTokens.length}
+                                itemSize={50} // Adjust based on your row height
+                                itemData={searchTokens}
+                            >
+                                {TokenRow}
+                            </List>
                         </Box>
                     )}
                 </ModalBody>
@@ -242,6 +289,5 @@ SelectTokenModal.propTypes = {
     safe: PropTypes.string,
     network: PropTypes.string,
     setRouteData: PropTypes.func,
-    unsupportedNetwork: PropTypes.bool,
 };
 export default SelectTokenModal;

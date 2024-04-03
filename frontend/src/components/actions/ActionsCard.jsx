@@ -8,7 +8,7 @@ import Swap from "./Swap";
 import WalletConnect from "./WalletConnect";
 
 export default function ActionsCard() {
-    const [activeTab, setActiveTab] = useState("swap");
+    const [activeTab, setActiveTab] = useState(import.meta.env.MODE === "development" ? "swap" : "send");
     const { metaMaskInstalled } = useWagmi();
     return (
         <Card height="100%">
@@ -16,12 +16,14 @@ export default function ActionsCard() {
                 <Stack spacing="24px" display="flex" direction="row" align="baseline">
                     <Heading size="md">Actions</Heading>
                     <>
-                        <HeaderTab
-                            isActive={activeTab === "swap"}
-                            onClick={() => metaMaskInstalled && setActiveTab("swap")}
-                        >
-                            Swap
-                        </HeaderTab>
+                        {import.meta.env.MODE === "development" && (
+                            <HeaderTab
+                                isActive={activeTab === "swap"}
+                                onClick={() => metaMaskInstalled && setActiveTab("swap")}
+                            >
+                                Swap
+                            </HeaderTab>
+                        )}
                         <HeaderTab
                             isActive={activeTab === "send"}
                             onClick={() => metaMaskInstalled && setActiveTab("send")}
