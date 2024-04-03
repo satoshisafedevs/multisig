@@ -20,7 +20,7 @@ const deleteTransactionsOfSafeInTeam = async (teamid, safe) => {
         await Promise.all(deletePromises);
         log(`Deleted all transactions for safe ${safe} in team ${teamid}`);
     } catch (err) {
-        error("Error deleting transactions:", err);
+        error(`Error deleting transactions for safe: ${safe} in team ${teamid}`, err);
         // throw error;
     }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo, useEffect } from "react";
+import React, { useState, memo, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
     Box,
@@ -22,10 +22,9 @@ import networks from "../../utils/networks.json";
 import SelectTokenModal from "./SelectTokenModal";
 
 function Swapper({
-    squid,
+    lifi,
     safe,
     setSafe,
-    chain,
     setChain,
     token,
     setToken,
@@ -42,58 +41,60 @@ function Swapper({
     const [isTokenModalOpen, setTokenModalOpen] = useState(false);
     const [networkName, setNetworkName] = useState("");
     const [tokenBalance, setTokenBalance] = useState("");
-    const [unsupportedNetwork, setUnsupportedNetwork] = useState(false);
+    const [lifiChainTokens, setLifiChainTokens] = useState([]);
+    const [loadingTokens, setLoadingTokens] = useState(false);
     const { colorMode } = useColorMode();
     const grayColor = useColorModeValue("blackAlpha.700", "whiteAlpha.700");
 
-    const chainTokens = useMemo(() => {
-        // Ensure that squid and squid.tokens are defined
-        const tokens = squid?.tokens;
+    // const chainTokens = useMemo(() => {
+    //     // Ensure that squid and squid.tokens are defined
+    //     const tokens = squid?.tokens;
 
-        // If tokens are available and chain is found, filter the tokens
-        if (tokens && chain) {
-            const val = tokens.filter((t) => t.chainId === chain);
-            if (val.length === 0) {
-                setUnsupportedNetwork(true);
-            }
-            return val;
-        }
+    //     // If tokens are available and chain is found, filter the tokens
+    //     if (tokens && chain) {
+    //         const val = tokens.filter((t) => t.chainId === chain);
+    //         if (val.length === 0) {
+    //             setUnsupportedNetwork(true);
+    //         }
+    //         return val;
+    //     }
 
-        // If any of the conditions are not met, return an empty array
-        return [];
-    }, [squid, chain]);
+    //     // If any of the conditions are not met, return an empty array
+    //     return [];
+    // }, [squid, chain]);
 
-    const handleSafe = (safeConfig) => {
+    const handleSafe = async (safeConfig) => {
+        setLoadingTokens(true);
         const { safeAddress, network } = safeConfig;
         setSafe(safeAddress);
         setNetworkName(network);
         setFromNetwork(network);
-        const targetChainId = squid?.chains.find((c) => {
-            if (network === "mainnet") {
-                // need special handling here as
-                // https://v2.api.squidrouter.com/v2/sdk-info returns mainnet as ethereum
-                // while we established baseline as mainnet across the app accodring to gnosis safe data
-                return c.networkName.toLowerCase() === "ethereum";
-            }
-            return c.networkName.toLowerCase() === network.toLowerCase();
-        })?.chainId;
+        const targetChainId = networks[network.toLowerCase()]?.id;
+        const lifiTokens = await lifi.getTokens({ chains: [targetChainId] });
+        // console.log("ilia", network, targetChainId, lifiChainTokens);
+        setLifiChainTokens(lifiTokens?.tokens[targetChainId]);
         setChain(targetChainId);
         setToken({});
         setRouteData();
         setTokenBalance();
         if (!destinationSafe) setAmount("");
+        setLoadingTokens(false);
     };
 
-    const latestTokenPrice = useMemo(
-        () => chainTokens.find((chainToken) => chainToken.symbol === token.symbol),
-        [squid, token],
-    );
+    // console.log("lifiChainTokens", lifiChainTokens);
+
+    // const latestTokenPrice = useMemo(
+    //     () => chainTokens && chainTokens.find((chainToken) => chainToken.symbol === token.symbol),
+    //     [squid, token],
+    // );
+
+    // console.log("token", token);
 
     const calculateUSDValue = (value, usdPrice) => (value * usdPrice).toFixed(2);
 
     const totalUSDValue = () => {
-        if (amount && latestTokenPrice?.usdPrice) {
-            const data = calculateUSDValue(amount, latestTokenPrice.usdPrice);
+        if (amount && token?.usdPrice) {
+            const data = calculateUSDValue(amount, token.usdPrice);
             if (totalUSDFrom) {
                 const diff = ((data - totalUSDFrom) / totalUSDFrom) * 100;
                 return `${usdFormatter.format(data)} (${diff.toFixed(2)}%)`;
@@ -104,11 +105,11 @@ function Swapper({
     };
 
     useEffect(() => {
-        if (amount && latestTokenPrice?.usdPrice && !totalUSDFrom) {
-            const initialUSDValue = calculateUSDValue(amount, latestTokenPrice.usdPrice);
+        if (amount && token?.usdPrice && !totalUSDFrom) {
+            const initialUSDValue = calculateUSDValue(amount, token.usdPrice);
             setTotalUSDFrom(initialUSDValue);
         }
-    }, [amount, latestTokenPrice?.usdPrice, totalUSDFrom]);
+    }, [amount, token?.usdPrice, totalUSDFrom]);
 
     const getBalances = async () => {
         const rpcUrl = networks[networkName].url;
@@ -119,7 +120,7 @@ function Swapper({
         const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
         const ethBalance = await provider.getBalance(safe);
         const convertedEthBalance = ethers.utils.formatEther(ethBalance);
-        if (token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+        if (token.address !== "0x0000000000000000000000000000000000000000") {
             const tokenContract = new ethers.Contract(token.address, erc20Abi, provider);
             const balance = await tokenContract.balanceOf(safe);
             const decimals = await tokenContract.decimals();
@@ -177,12 +178,11 @@ function Swapper({
             <SelectTokenModal
                 isOpen={isTokenModalOpen}
                 setIsOpen={setTokenModalOpen}
-                tokens={chainTokens}
+                tokens={lifiChainTokens}
                 setToken={setToken}
                 safe={safe}
                 network={networkName}
                 setRouteData={setRouteData}
-                unsupportedNetwork={unsupportedNetwork}
             />
             <Box display="flex" flexDirection="row">
                 <Menu>
@@ -198,7 +198,7 @@ function Swapper({
                                 fontWeight="normal"
                                 fontSize="15px"
                                 minWidth="30%"
-                                isDisabled={!squid}
+                                isDisabled={!lifi}
                             >
                                 {safe.length > 0 ? (
                                     <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center">
@@ -250,18 +250,20 @@ function Swapper({
                     fontWeight="normal"
                     fontSize="15px"
                     onClick={() => setTokenModalOpen(true)}
-                    isDisabled={!squid}
+                    isDisabled={loadingTokens || !lifi}
                 >
-                    {isTokenModalOpen ? (
+                    {isTokenModalOpen || loadingTokens ? (
                         <Spinner speed="1s" />
                     ) : (
                         (!isEmpty(token) && (
                             <Box display="flex" flexDirection="row" alignItems="center">
                                 <Image
+                                    display="flex"
+                                    alignItems="center"
                                     boxSize="1.5rem"
                                     borderRadius="full"
                                     src={token.logoURI}
-                                    alt={token.symbol}
+                                    alt={token.symbol.substring(0, 3)}
                                     mr="12px"
                                 />
                                 {token.symbol}
@@ -289,7 +291,7 @@ function Swapper({
                         setAmount(validValue);
                         setRouteData();
                     }}
-                    isDisabled={destinationSafe || !squid}
+                    isDisabled={destinationSafe || !lifi}
                     _disabled={{
                         opacity: "unset",
                         cursor: "not-allowed",
@@ -309,13 +311,11 @@ function Swapper({
 }
 
 Swapper.propTypes = {
-    squid: PropTypes.shape({
-        chains: PropTypes.arrayOf(PropTypes.shape({})),
-        tokens: PropTypes.arrayOf(PropTypes.shape({})),
+    lifi: PropTypes.shape({
+        getTokens: PropTypes.func,
     }),
     safe: PropTypes.string,
     setSafe: PropTypes.func,
-    chain: PropTypes.string,
     setChain: PropTypes.func,
     token: PropTypes.shape({
         symbol: PropTypes.string,
