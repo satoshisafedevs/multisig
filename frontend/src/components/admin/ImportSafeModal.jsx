@@ -34,7 +34,6 @@ function ImportSafeModal({
     checkedSafes,
     handleCheckboxChange,
     importSafes,
-    loading,
     onClose,
     renderTd,
 }) {
@@ -46,6 +45,7 @@ function ImportSafeModal({
     `;
     const { refreshSafeList } = useGnosisSafe();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [loading, setLoading] = useState(false);
     const toast = useToast();
 
     // Updated function to handle asynchronous refresh list
@@ -65,6 +65,31 @@ function ImportSafeModal({
 
         setIsRefreshing(false);
     };
+
+    const handleImportSafes = async () => {
+        try {
+            setLoading(true);
+            await importSafes({ checkedSafes });
+            onClose();
+            toast({
+                description: "Safe(s) have been successfully imported. Transactions are being populated.",
+                position: "top",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+            setLoading(false);
+        } catch (error) {
+            toast({
+                description: `Failed to import team safe: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     return (
         <>
             <ModalHeader>Import Gnosis Safe</ModalHeader>
@@ -149,7 +174,7 @@ function ImportSafeModal({
                     </Button>
                     <Button
                         colorScheme="blueSwatch"
-                        onClick={importSafes}
+                        onClick={() => handleImportSafes()}
                         isLoading={loading}
                         isDisabled={
                             userTeamData?.userSafes?.length === 0 ||
@@ -171,7 +196,6 @@ ImportSafeModal.propTypes = {
     checkedSafes: PropTypes.object.isRequired,
     handleCheckboxChange: PropTypes.func.isRequired,
     importSafes: PropTypes.func.isRequired,
-    loading: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     renderTd: PropTypes.func.isRequired,
 };

@@ -1,8 +1,9 @@
 import { useToast } from "@chakra-ui/react";
 import SafeApiKit from "@safe-global/api-kit";
 import Safe, { EthersAdapter, SafeFactory } from "@safe-global/protocol-kit";
+import _ from "lodash";
 import { ethers } from "ethers";
-import { Timestamp, db, doc, setDoc, transactions } from "../firebase";
+import { Timestamp, db, doc, setDoc, transactions, updateDoc, getDoc } from "../firebase";
 import { useUser } from "../providers/User";
 import { convertToISOString, filterOutKeyObject } from "../utils";
 import checkNetwork from "../utils/checkNetwork";
@@ -10,11 +11,11 @@ import networks from "../utils/networks.json";
 
 const useGnosisSafe = () => {
     const toast = useToast();
-    const { user, currentTeam, getUserTeamsData } = useUser();
+    const { user, currentTeam, getUserTeamsData, setCurrentTeam, userTeamData } = useUser();
 
     const postNewTransactionToDb = async (network, safe, safeTxHash, satoshiData) => {
         try {
-            const response = await transactions({
+            await transactions({
                 method: "POST",
                 teamid: currentTeam.id,
                 transactions: [
@@ -27,9 +28,6 @@ const useGnosisSafe = () => {
                     },
                 ],
             });
-            const { data } = response;
-            // eslint-disable-next-line no-console
-            console.log("postNewTransaction response:", data);
         } catch (error) {
             toast({
                 description: `Failed to post new transaction: ${error}`,
@@ -487,22 +485,24 @@ const useGnosisSafe = () => {
             // Generate a unique saltNonce using a timestamp
             const saltNonce = new Date().getTime().toString();
             const safe = await SafeFactory.create({ ethAdapter });
-            let txInfo;
-            const newSafe = await safe.deploySafe({
+            await safe.deploySafe({
                 safeAccountConfig: {
                     owners,
                     threshold,
                 },
                 saltNonce,
                 callback: (txHash) => {
-                    txInfo = txHash;
-                    console.log(`Safe creation transaction sent: ${txHash}`);
+                    postNewTransactionToDb(network, "pending", txHash, {
+                        type: "CreateSafe",
+                        transactionHash: txHash,
+                        owners,
+                        threshold,
+                    });
                     if (onTransactionSent) {
                         onTransactionSent(txHash);
                     }
                 },
             });
-            console.log("newSafe and txInfo", newSafe, txInfo);
             // what is in newSafe? is anything in newSafe returned? does it have safeAddress?
             // is txInfo a safeTxHash?
             // await postNewTransactionToDb(network, newSafe, txInfo, satoshiData);
@@ -540,28 +540,38 @@ const useGnosisSafe = () => {
                     if (!safes || safes.length === 0) {
                         return []; // Skip if no safes found
                     }
-                    const safeDetails = await Promise.all(
-                        safes.map(async (safeAddress) => {
-                            const safeInfo = await getSafeInfo(safeService, safeAddress);
-                            return {
-                                network: key,
-                                safeAddress,
-                                owners: safeInfo.owners,
-                                threshold: safeInfo.threshold,
-                                eip: networks[key].eip,
-                            };
-                        }),
-                    );
+                    const safeDetails = [];
+                    // eslint-disable-next-line no-restricted-syntax
+                    for (const safeAddress of safes) {
+                        // eslint-disable-next-line no-await-in-loop
+                        const safeInfo = await getSafeInfo(safeService, safeAddress);
+                        safeDetails.push({
+                            network: key,
+                            safeAddress,
+                            owners: safeInfo.owners,
+                            threshold: safeInfo.threshold,
+                            eip: networks[key].eip,
+                        });
+                    }
                     return safeDetails;
                 });
 
                 const allSafesNested = await Promise.all(allSafesPromises);
                 const allSafes = allSafesNested.flat(); // Flatten the nested arrays
+                // Remove undefined fields from each safe object using _.omit
+                // Use _.omit to remove undefined values
+                const cleanedSafes = allSafes.map((safe) => _.omitBy(safe, _.isUndefined));
+                console.log("cleanedSafes", cleanedSafes);
+
                 // Process the fetched safes as needed, e.g., update state, store in database, etc.
                 const safesRef = doc(db, "users", user.uid, "teams", currentTeam.id);
-                await setDoc(safesRef, { safes: allSafes }, { merge: true });
-                getUserTeamsData();
-                return allSafes;
+                const teamSnapshot = await getDoc(safesRef);
+                const teamData = teamSnapshot.data();
+                if (teamData && teamData.safes && cleanedSafes.length > teamData.safes.length) {
+                    await setDoc(safesRef, { safes: cleanedSafes }, { merge: true });
+                    getUserTeamsData();
+                }
+                return cleanedSafes;
             }
         } catch (error) {
             console.error(error);
@@ -572,6 +582,44 @@ const useGnosisSafe = () => {
                 duration: 5000,
                 isClosable: true,
             });
+        }
+    };
+
+    const importSafes = async ({ checkedSafes }) => {
+        const entries = Object.entries(checkedSafes);
+        const newSafes = entries
+            .filter(([, value]) => value)
+            .map(([key]) => {
+                const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
+                return { ...safeData, addedAt: Timestamp.now() };
+            });
+
+        if (newSafes.length > 0) {
+            try {
+                const teamRef = doc(db, "teams", currentTeam.id);
+                const teamSnap = await getDoc(teamRef);
+                const teamData = teamSnap.data();
+
+                const existingSafes = teamData?.safes || [];
+                const safesToAdd = newSafes.filter(
+                    (newSafe) =>
+                        !existingSafes.some((existingSafe) => existingSafe.safeAddress === newSafe.safeAddress),
+                );
+
+                if (safesToAdd.length > 0) {
+                    await updateDoc(teamRef, {
+                        safes: [...existingSafes, ...safesToAdd],
+                    });
+
+                    setCurrentTeam((prevState) => ({
+                        ...prevState,
+                        safes: [...(prevState?.safes || []), ...safesToAdd],
+                    }));
+                }
+            } catch (error) {
+                console.error("Error importing safes:", error);
+                throw new Error("Error importing safes");
+            }
         }
     };
 
@@ -592,6 +640,7 @@ const useGnosisSafe = () => {
         loadSafe,
         createSafe,
         refreshSafeList,
+        importSafes,
     };
 };
 

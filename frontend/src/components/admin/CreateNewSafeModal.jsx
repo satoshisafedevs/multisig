@@ -10,7 +10,6 @@ import {
     Stack,
     FormControl,
     FormLabel,
-    Input,
     Tooltip,
     IconButton,
     useToast,
@@ -28,6 +27,7 @@ import {
     MenuItem,
 } from "@chakra-ui/react";
 import { IoChevronBackOutline, IoChevronDown, IoPersonRemove } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../../providers/User";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import networks from "../../utils/networks.json";
@@ -40,10 +40,10 @@ if (import.meta.env.MODE !== "development") {
 }
 
 function CreateNewSafeModal({ onClose, setModalState }) {
-    const { teamUsersInfo } = useUser();
+    const { teamUsersInfo, currentTeam } = useUser();
     const { createSafe } = useGnosisSafe();
     const toast = useToast();
-    const [safeName, setSafeName] = useState("");
+    const navigate = useNavigate();
     const [network, setNetwork] = useState("");
     const [threshold, setThreshold] = useState(1);
     const [selectedOwners, setSelectedOwners] = useState([]);
@@ -65,7 +65,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
     };
 
     const handleCreateSafe = async () => {
-        if (!safeName || !network) {
+        if (!network) {
             toast({
                 title: "Required Fields Missing",
                 description: "Please fill in all required fields.",
@@ -95,12 +95,19 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                     setIsLoading(false);
                     toast({
                         title: "Transaction Sent",
-                        description: `Transaction has been sent.
-                        View on [block explorer](${networks[network].scanUrl}/tx/${txHash})`,
+                        render: () => (
+                            <Box>
+                                Transaction has been sent. View on{" "}
+                                <Link href={`${networks[network].scanUrl}/tx/${txHash}`} isExternal>
+                                    block explorer
+                                </Link>
+                            </Box>
+                        ),
                         status: "info",
                         duration: 9000,
                         isClosable: true,
                     });
+                    navigate(`/team/${currentTeam.slug}`);
                 },
                 // satoshiData,
             });
@@ -113,7 +120,6 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                 isClosable: true,
             });
         }
-        console.log({ safeName, network, ownerAddresses });
         onClose();
     };
 
@@ -149,10 +155,6 @@ function CreateNewSafeModal({ onClose, setModalState }) {
             <ModalHeader>Create new Safe</ModalHeader>
             <ModalCloseButton top="var(--chakra-space-3)" />
             <ModalBody paddingTop="0">
-                <FormControl>
-                    <FormLabel>Name</FormLabel>
-                    <Input value={safeName} onChange={(e) => setSafeName(e.target.value)} isDisabled={isLoading} />
-                </FormControl>
                 <FormControl mt={4}>
                     <FormLabel>Network</FormLabel>
                     <Menu>
@@ -250,7 +252,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                     <Button
                         colorScheme="blueSwatch"
                         onClick={handleCreateSafe}
-                        isDisabled={!safeName || !network || threshold === 0 || isEmpty(selectedOwners) || isLoading}
+                        isDisabled={!network || threshold === 0 || isEmpty(selectedOwners) || isLoading}
                         isLoading={isLoading}
                         loadingText="Creating your safe..."
                     >

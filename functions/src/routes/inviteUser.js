@@ -6,7 +6,6 @@ exports.inviteUser = onCall(
     async (req, res) => {
         try {
             // Get the email, teamId, and userMessage from the request body
-            console.log(req.body);
             const email = req.data.email;
             const teamId = req.data.teamid;
             const userMessage = req.data.message;

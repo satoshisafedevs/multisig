@@ -4,6 +4,7 @@ const { acceptInvite } = require("./acceptInvite");
 const { createNewSatoshiBot } = require("./createNewSatoshiBot");
 const { getWalletTokenBalances } = require("./getWalletTokenBalances");
 const { transactions } = require("./transactions");
+const { getTransactionDetails } = require("./getTransactionDetails");
 
 module.exports = {
     onSatoshiBotMessageReceived,
@@ -12,4 +13,5 @@ module.exports = {
     createNewSatoshiBot,
     getWalletTokenBalances,
     transactions,
+    getTransactionDetails,
 };

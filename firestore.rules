@@ -23,7 +23,7 @@ service cloud.firestore {
                 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['safes', 'users']);
 
             match /transactions/{transactionID} {
-                allow read, create: if request.auth != null
+                allow read, create, update: if request.auth != null
                     && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamID)).data.users;
             }
 

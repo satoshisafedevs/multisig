@@ -205,3 +205,19 @@ deploy-firestore-rules-production:
         - echo "Deploying firestore rules..."
         - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only firestore:rules --project production
         - echo "Firestore rules successfully deployed."
+
+publish_to_github:
+  stage: deploy
+  only:
+    - production 
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - 'git remote remove github || true'  # Ensures no conflict if the remote already exists
+    - git remote add github git@github.com:Satoshi-Safe/wallet.git
+    - git push -u github main  # Adjust if your current branch differs
+
