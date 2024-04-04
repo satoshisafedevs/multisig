@@ -89,15 +89,21 @@ function InFlightTransaction({ transaction }) {
                                                 Safe:
                                             </Text>
                                             <Box display="flex" alignItems="center" gap="1px">
-                                                <Text textAlign="left">
-                                                    {transaction.safe.slice(0, 5)}...
-                                                    {transaction.safe.slice(-4)}
-                                                </Text>
-                                                <CopyToClipboard
-                                                    copy={transaction.safe}
-                                                    tooltipSuffix="address"
-                                                    size="21px"
-                                                />
+                                                {transaction.safe === "pending" ? (
+                                                    <Text color="gray.500">Pending...</Text>
+                                                ) : (
+                                                    <>
+                                                        <Text textAlign="left">
+                                                            {transaction.safe.slice(0, 5)}...
+                                                            {transaction.safe.slice(-4)}
+                                                        </Text>
+                                                        <CopyToClipboard
+                                                            copy={transaction.safe}
+                                                            tooltipSuffix="address"
+                                                            size="21px"
+                                                        />
+                                                    </>
+                                                )}
                                             </Box>
                                         </Flex>
                                     </Stack>
@@ -174,7 +180,7 @@ function InFlightTransaction({ transaction }) {
 
 InFlightTransaction.propTypes = {
     transaction: PropTypes.shape({
-        network: PropTypes.oneOf(["mainnet", "arbitrum", "optimism"]).isRequired,
+        network: PropTypes.string.isRequired,
         safe: PropTypes.string.isRequired,
         txHash: PropTypes.string,
         transactionHash: PropTypes.string,

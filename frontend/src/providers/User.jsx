@@ -182,7 +182,6 @@ function User({ children }) {
                         const teamRef = doc(db, "teams", currentTeam.id);
                         await updateDoc(teamRef, { safes: updatedSafesData });
                         setCurrentTeam((prevState) => ({ ...prevState, safes: updatedSafesData }));
-                        console.log("Updated safes data");
                     }
                 }
             } catch (error) {

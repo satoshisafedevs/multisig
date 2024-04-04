@@ -9,25 +9,21 @@ import {
     ModalOverlay,
     Td,
     useColorModeValue,
-    useToast,
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { IoAddCircleOutline, IoEnterOutline } from "react-icons/io5";
-import { Timestamp, db, doc, getDoc, updateDoc } from "../../firebase";
-import { useTransactions } from "../../providers/Transactions";
 import { useUser } from "../../providers/User";
 import CreateNewSafeModal from "./CreateNewSafeModal";
 import ImportSafeModal from "./ImportSafeModal";
+import useGnosisSafe from "../../hooks/useGnosisSafe";
 
 function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
     const tableBorderColor = useColorModeValue("gray.100", "gray.600");
-    const toast = useToast();
-    const { currentTeam, setCurrentTeam, userTeamData } = useUser();
-    const { fetchAndPostTransactions, setGettingData } = useTransactions();
+    const { currentTeam, userTeamData } = useUser();
     const [modalState, setModalState] = useState("welcome");
     const [checkedSafes, setCheckedSafes] = useState({});
-    const [loading, setLoading] = useState(false);
+    const { importSafes } = useGnosisSafe();
 
     const onClose = () => {
         setIsOpen(false);
@@ -52,92 +48,6 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
             ...prevState,
             [safeAddress]: !prevState[safeAddress],
         }));
-    };
-
-    const importSafes = async () => {
-        setLoading(true);
-
-        const entries = Object.entries(checkedSafes);
-
-        const newSafes = entries
-            .filter(([, value]) => value === true)
-            .map(([key]) => {
-                const safeData = userTeamData.userSafes.find((safe) => safe.safeAddress === key);
-                return { ...safeData, addedAt: Timestamp.now() };
-            });
-
-        if (newSafes.length > 0) {
-            try {
-                const teamRef = doc(db, "teams", currentTeam.id);
-                const teamSnap = await getDoc(teamRef);
-                const teamData = teamSnap.data();
-
-                await updateDoc(teamRef, {
-                    safes: [...(teamData?.safes || []), ...newSafes],
-                });
-
-                setCurrentTeam((prevState) => ({
-                    ...prevState,
-                    safes: [...(prevState?.safes || []), ...newSafes],
-                }));
-            } catch (error) {
-                toast({
-                    description: `Failed to update team safe: ${error.message}`,
-                    position: "top",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
-            } finally {
-                onClose();
-                setLoading(false);
-            }
-
-            try {
-                setGettingData(true);
-                // Create an array of functions returning promises
-                const transactionPromises = newSafes.map((teamSafe) => () => fetchAndPostTransactions(teamSafe, 5));
-                // this is so werid: gnosis occasionally returns wrong results with limit more than 10
-
-                // Function to execute promises sequentially
-                const executeSequentially = (promises) =>
-                    promises.reduce((prevPromise, nextPromise) => prevPromise.then(nextPromise), Promise.resolve());
-
-                // Execute promises sequentially and wait for completion
-                const allTransactionsComplete = executeSequentially(transactionPromises);
-
-                // Use toast.promise with the promise
-                toast.promise(
-                    allTransactionsComplete, // Execute promises sequentially
-                    {
-                        loading: {
-                            title: "Fetching Transactions",
-                            description: "Task in progress... Please keep this tab open and wait for updates.",
-                            position: "top",
-                        },
-                        success: {
-                            title: "Transactions Fetched",
-                            description: "Finished getting transactions for selected safe(s).",
-                            position: "top",
-                            isClosable: true,
-                        },
-                        error: {
-                            title: "Error",
-                            description: "Error getting transactions.",
-                            position: "top",
-                            isClosable: true,
-                        },
-                    },
-                );
-
-                // Await the completion of all transactions
-                await allTransactionsComplete;
-            } catch (error) {
-                //
-            } finally {
-                setGettingData(false);
-            }
-        }
     };
 
     const importSafeContent = () => {
@@ -181,7 +91,6 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                     checkedSafes={checkedSafes}
                     handleCheckboxChange={handleCheckboxChange}
                     importSafes={importSafes}
-                    loading={loading}
                     onClose={onClose}
                     renderTd={renderTd}
                 />

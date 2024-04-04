@@ -87,7 +87,7 @@ function Profile() {
             }, "image/jpeg");
         } catch (error) {
             setIsSaving(false);
-            console.log(error);
+            console.error(error);
         }
     };
 

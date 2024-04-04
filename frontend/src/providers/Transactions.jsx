@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useUser } from "./User";
+import fetchPendingSafeDetails from "./utils/fetchPendingSafeDetails";
+import getPendingSafes from "./utils/getPendingSafes";
+import updatePendingSafes from "./utils/updatePendingSafes";
 import networks from "../utils/networks.json";
 import {
     db,
@@ -13,6 +16,7 @@ import {
     getCountFromServer,
     transactions,
 } from "../firebase";
+import useGnosisSafe from "../hooks/useGnosisSafe";
 
 const TransactionsContext = createContext();
 const TransactionsProvider = TransactionsContext.Provider;
@@ -22,7 +26,7 @@ export function useTransactions() {
 }
 
 function Transactions({ children }) {
-    const { currentTeam } = useUser();
+    const { currentTeam, userTeamData } = useUser();
     const [firestoreTransactions, setFirestoreTransactions] = useState();
     const [gettingData, setGettingData] = useState(false);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -34,6 +38,7 @@ function Transactions({ children }) {
     const [limitTransactionsValue, setLimitTransactionsValue] = useState(25);
     const [allTransactionsCount, setAllTransactionsCount] = useState(0);
     const [filteredSafes, setFilteredSafes] = useState([]);
+    const { refreshSafeList, importSafes } = useGnosisSafe();
 
     const getAllTransactionCount = async () => {
         const transactionsRef = collection(db, "teams", currentTeam.id, "transactions");
@@ -161,26 +166,47 @@ function Transactions({ children }) {
                 setGettingData(false);
             }
         }
+        if (currentTeam && currentTeam.id && userTeamData && userTeamData.userWalletAddress) {
+            const pendingSafes = await getPendingSafes({ currentTeam });
+            if (pendingSafes && pendingSafes.length > 0) {
+                try {
+                    const { safesToImport, safesToTxHash } = await fetchPendingSafeDetails({
+                        safeTransactions: pendingSafes,
+                    });
+                    const safesToImportLowercase = safesToImport.map((address) => address.toLowerCase());
+                    await refreshSafeList({ walletAddress: userTeamData.userWalletAddress });
+                    const filteredUserSafes = userTeamData.userSafes.filter((safe) =>
+                        safesToImportLowercase.includes(safe.safeAddress.toLowerCase()),
+                    );
+                    const importSafesObj = {};
+                    if (filteredUserSafes.length > 0) {
+                        filteredUserSafes.forEach((safe) => {
+                            importSafesObj[safe.safeAddress] = true;
+                        });
+                        await importSafes({ checkedSafes: importSafesObj });
+                        await updatePendingSafes({ filteredUserSafes, pendingSafes, safesToTxHash, currentTeam });
+                    }
+                } catch (error) {
+                    console.error("Error in fetchAndUpdateData function:", error);
+                }
+            }
+            console.log("pendings safes: ", pendingSafes);
+        }
     };
 
     useEffect(() => {
         // handle first page open
         if (!isDataLoaded && currentTeam) {
-            if (currentTeam.safes?.length > 0) {
-                // console.log("1");
-                fetchAndUpdateData();
-                setIsDataLoaded(true);
-            } else {
-                // console.log("2");
-                setIsDataLoaded(true);
-            }
+            // console.log("1");
+            fetchAndUpdateData();
+            setIsDataLoaded(true);
         }
     }, [isDataLoaded, currentTeam]);
 
     useEffect(() => {
         let intervalId;
         // Set up the interval only if gettingData is false and currentTeam has safes
-        if (!gettingData && isBrowserTabActive && isUserActive && currentTeam?.safes?.length > 0) {
+        if (!gettingData && isBrowserTabActive && isUserActive) {
             intervalId = setInterval(fetchAndUpdateData, 15000);
         }
         // Clean up the interval on component unmount or when gettingData changes
