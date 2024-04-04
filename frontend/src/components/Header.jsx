@@ -162,6 +162,7 @@ export default function Header({ withTeam }) {
                                     variant="link"
                                     size="sm"
                                     color={colorMode === "light" && "var(--chakra-colors-gray-600)"}
+                                    onClick={() => window.open("https://docs.getsatoshisafe.com/wallet", "_blank")}
                                 >
                                     Docs
                                 </Button>
