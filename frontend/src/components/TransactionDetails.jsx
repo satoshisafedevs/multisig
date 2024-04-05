@@ -10,6 +10,20 @@ function TransactionDetails({ transaction, isNested = false, isList = false }) {
             {sortedEntries.map(([key, value], index) => {
                 const displayKey = isList ? index + 1 : key; // If it's a list, start keys from 1
 
+                if (key === "data") {
+                    return (
+                        <Accordion key={key} allowMultiple>
+                            <AccordionItem border="none">
+                                <AccordionButton padding="0" fontSize="var(--chakra-fontSizes-sm)">
+                                    data:
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <AccordionPanel padding="0 0 0 25px">{value}</AccordionPanel>
+                            </AccordionItem>
+                        </Accordion>
+                    );
+                }
+
                 if (Array.isArray(value) && value.length === 0) {
                     return <div key={key}>{displayKey}: []</div>;
                 }
