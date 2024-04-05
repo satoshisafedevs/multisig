@@ -439,6 +439,6 @@ export default function WalletConnectIntegrationModal({ isOpen, onClose }) {
 }
 
 WalletConnectIntegrationModal.propTypes = {
-    isOpen: PropTypes.func.isRequired,
+    isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
 };
