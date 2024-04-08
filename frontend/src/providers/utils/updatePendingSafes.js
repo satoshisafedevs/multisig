@@ -24,7 +24,6 @@ const updatePendingSafes = async ({ filteredUserSafes, pendingSafes, safesToTxHa
             }
             return pendingSafe; // Return the safe unmodified if no update is needed
         });
-        console.log("current filtered new safes", updatedPendingSafes);
         // Iterate over updatedPendingSafes and merge new data into the database
         updatedPendingSafes.forEach(async (pendingSafe) => {
             try {

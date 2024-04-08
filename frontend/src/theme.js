@@ -32,6 +32,12 @@ const styles = {
     }),
 };
 
+const fonts = {
+    body: "MontrealBook, 'Adamina', serif", // Assuming you want to use 'Adamina' for body text as a fallback
+    heading: "'Adamina', MontrealMedium, serif", // 'Adamina' is now the primary font for headings
+    // Add other font family assignments as needed
+};
+
 // use generator https://supercolorpalette.com/ to create new custom color scheme of any hex for 10 colors
 const colors = {
     blue1: "#0F2143",
@@ -81,6 +87,6 @@ const components = {
     },
 };
 
-const theme = extendTheme({ config, styles, colors, components });
+const theme = extendTheme({ config, styles, colors, components, fonts });
 
 export default theme;

@@ -10,8 +10,8 @@ import {
     Button,
     Code,
     Image,
-    Link,
     Flex,
+    Link,
     Text,
     Stack,
     useColorModeValue,
@@ -19,7 +19,7 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { upperFirst } from "lodash";
-import { IoCheckmarkOutline, IoCloseOutline, IoOpenOutline, IoPlayOutline } from "react-icons/io5";
+import { IoCheckmarkOutline, IoCloseOutline, IoPlayOutline, IoOpenOutline } from "react-icons/io5";
 import { useWagmi } from "../providers/Wagmi";
 import useGnosisSafe from "../hooks/useGnosisSafe";
 import networks from "../utils/networks.json";
@@ -37,7 +37,6 @@ function Transaction({ transaction }) {
     const [approving, setApproving] = useState(false);
     const backgroundColor = useColorModeValue("gray.100", "whiteAlpha.200");
     const codeBackground = useColorModeValue("gray.100", "none");
-    const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
     const accordionStyles = useStyleConfig("Accordion");
     const toast = useToast();
 
@@ -109,9 +108,7 @@ function Transaction({ transaction }) {
         if (transaction.txHash || transaction.transactionHash || executed) {
             return null;
         }
-
         const isExecuteDisabled = walletMismatch || !address || !metaMaskInstalled || executed;
-
         const isApproveRejectDisabled =
             walletMismatch ||
             !address ||
@@ -127,39 +124,15 @@ function Transaction({ transaction }) {
             transaction.confirmations.some((c) => c.owner === address);
 
         return (
-            <Stack
-                spacing={["4", "4", "4", "4", "4", "3"]}
-                padding={["0", "0", "0", "0", "0", "2px 0"]}
-                direction="column"
-                flex="1"
+            <Flex
+                direction="row"
                 justifyContent="center"
-                alignSelf="center"
-                maxWidth="35%"
+                alignItems="center"
+                gap="2"
+                wrap="wrap"
+                pr="26px"
+                height="46px"
             >
-                <Button
-                    as={Text}
-                    variant="outline"
-                    colorScheme={networkMismatch ? "orange" : "red"}
-                    size="sm"
-                    isLoading={rejecting}
-                    loadingText="Rejecting..."
-                    rightIcon={<IoCloseOutline />}
-                    isDisabled={isApproveRejectDisabled}
-                    onClick={(event) => {
-                        event.preventDefault();
-                        if (networkMismatch) {
-                            switchNetwork(correctChain.id);
-                        } else if (!isApproveRejectDisabled) {
-                            reject(transaction.network, transaction.safe, transaction.nonce, address);
-                        }
-                    }}
-                >
-                    <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
-                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
-                            (rejected && "Rejected") ||
-                            "Reject"}
-                    </Text>
-                </Button>
                 {transaction &&
                 transaction.confirmations &&
                 transaction.confirmationsRequired === transaction.confirmations.length ? (
@@ -214,7 +187,32 @@ function Transaction({ transaction }) {
                         </Text>
                     </Button>
                 )}
-            </Stack>
+
+                <Button
+                    as={Text}
+                    variant="outline"
+                    colorScheme={networkMismatch ? "orange" : "red"}
+                    size="sm"
+                    isLoading={rejecting}
+                    loadingText="Rejecting..."
+                    rightIcon={<IoCloseOutline />}
+                    isDisabled={isApproveRejectDisabled}
+                    onClick={(event) => {
+                        event.preventDefault();
+                        if (networkMismatch) {
+                            switchNetwork(correctChain.id);
+                        } else if (!isApproveRejectDisabled) {
+                            reject(transaction.network, transaction.safe, transaction.nonce, address);
+                        }
+                    }}
+                >
+                    <Text as="span" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">
+                        {(networkMismatch && `Switch to ${upperFirst(transaction.network)}`) ||
+                            (rejected && "Rejected") ||
+                            "Reject"}
+                    </Text>
+                </Button>
+            </Flex>
         );
     };
 
@@ -237,112 +235,101 @@ function Transaction({ transaction }) {
                                     borderRadius: isExpanded ? "5px 5px 0 0" : "5px",
                                 }}
                             >
+                                <Stack direction="column" minWidth="280px">
+                                    <Stack direction="row" p="5px" alignItems="center">
+                                        <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].svg} />
+                                        <Text fontSize="sm" fontWeight="bold">
+                                            {transaction.network}
+                                        </Text>
+                                        <Text
+                                            textAlign="left"
+                                            whiteSpace="nowrap"
+                                            width="100%"
+                                            fontSize="xs"
+                                            ml="5px"
+                                            mt="2px"
+                                        >
+                                            {new Date(transaction.executionDate).toLocaleString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                hour12: true,
+                                            })}
+                                        </Text>
+                                    </Stack>
+                                    <Stack direction="row" p="5px" alignItems="center">
+                                        <Text fontSize="sm" pl="3px" fontWeight="bold">
+                                            Safe:
+                                        </Text>
+                                        <Box display="flex" alignItems="center" gap="1px">
+                                            <Text textAlign="left" fontSize="sm">
+                                                {transaction.safe.slice(0, 5)}...
+                                                {transaction.safe.slice(-4)}
+                                            </Text>
+                                            <CopyToClipboard
+                                                copy={transaction.safe}
+                                                tooltipSuffix="address"
+                                                size="21px"
+                                            />
+                                        </Box>
+                                    </Stack>
+                                </Stack>
                                 <Stack
-                                    direction="row"
+                                    direction="column"
                                     spacing="4"
                                     fontSize="sm"
                                     width="100%"
                                     justifyContent="space-between"
                                 >
-                                    <Flex direction="column" align="center" justify="space-evenly">
-                                        <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].svg} />
-                                        <Text fontSize="xs" fontWeight="bold">
-                                            {transaction.network}
+                                    <Flex direction="row" height="25px" alignItems="center">
+                                        <Text fontWeight="bold" paddingRight="5px">
+                                            Status:
+                                        </Text>
+                                        <Text textAlign="left">
+                                            {transaction.txHash || transaction.transactionHash ? (
+                                                <Link
+                                                    href={`${networks[transaction.network.toLowerCase()].scanUrl}/tx/${
+                                                        transaction.txHash || transaction.transactionHash
+                                                    }`}
+                                                    color="blue3"
+                                                    isExternal
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        window.open(event.target.href, "_blank", "noopener,noreferrer");
+                                                    }}
+                                                >
+                                                    Executed <IoOpenOutline style={{ paddingLeft: "3px" }} />
+                                                </Link>
+                                            ) : (
+                                                "Pending"
+                                            )}
                                         </Text>
                                     </Flex>
-                                    <Stack spacing="2" alignSelf="center" flex="1">
-                                        <Flex direction={responsiveStyles} alignItems="baseline">
-                                            <Text fontWeight="bold" paddingRight="5px">
-                                                Safe:
-                                            </Text>
-                                            <Box display="flex" alignItems="center" gap="1px">
-                                                <Text textAlign="left">
-                                                    {transaction.safe.slice(0, 5)}...
-                                                    {transaction.safe.slice(-4)}
-                                                </Text>
-                                                <CopyToClipboard
-                                                    copy={transaction.safe}
-                                                    tooltipSuffix="address"
-                                                    size="21px"
-                                                />
-                                            </Box>
-                                        </Flex>
-                                        {(transaction.nonce || transaction.nonce === 0) && (
-                                            <Flex direction={responsiveStyles} alignItems="baseline">
-                                                {(transaction.nonce || transaction.nonce === 0) && (
-                                                    <>
-                                                        <Text fontWeight="bold" paddingRight="5px">
-                                                            Nonce:
-                                                        </Text>
-                                                        <Text textAlign="left">
-                                                            {JSON.stringify(transaction.nonce)}
-                                                        </Text>
-                                                    </>
-                                                )}
-                                            </Flex>
-                                        )}
-                                    </Stack>
-                                    <Stack
-                                        spacing="2"
-                                        flex="1.2"
-                                        alignSelf="center"
-                                        textOverflow="ellipsis"
-                                        whiteSpace="nowrap"
-                                        overflow="hidden"
-                                    >
-                                        <Flex direction={responsiveStyles} alignItems="baseline">
-                                            <Text fontWeight="bold" paddingRight="5px">
-                                                Status:
-                                            </Text>
-                                            <Text textAlign="left">
-                                                {transaction.txHash || transaction.transactionHash ? (
-                                                    <Link
-                                                        href={`${
-                                                            networks[transaction.network.toLowerCase()].scanUrl
-                                                        }/tx/${transaction.txHash || transaction.transactionHash}`}
-                                                        color="blue3"
-                                                        isExternal
-                                                        display="flex"
-                                                        alignItems="center"
-                                                        onClick={(event) => {
-                                                            event.preventDefault();
-                                                            window.open(
-                                                                event.target.href,
-                                                                "_blank",
-                                                                "noopener,noreferrer",
-                                                            );
-                                                        }}
-                                                    >
-                                                        Executed <IoOpenOutline style={{ paddingLeft: "3px" }} />
-                                                    </Link>
-                                                ) : (
-                                                    "Pending"
-                                                )}
-                                            </Text>
-                                        </Flex>
-                                        <Flex direction={responsiveStyles} alignItems="baseline">
-                                            <Text fontWeight="bold" paddingRight="5px">
-                                                Action:
-                                            </Text>
-                                            <Text
-                                                textAlign="left"
-                                                alignSelf="center"
-                                                textOverflow="ellipsis"
-                                                whiteSpace="nowrap"
-                                                overflow="hidden"
-                                                width="100%"
-                                                paddingRight="10px"
-                                            >
-                                                {(transaction.dataDecoded?.method &&
-                                                    upperFirst(transaction.dataDecoded?.method)) ||
-                                                    (transaction.from && "Receive") ||
-                                                    (transaction.to && Number(transaction.value) > 0 && "Send") ||
-                                                    upperFirst(transaction?.satoshiData?.type) ||
-                                                    "Unspecified"}
-                                            </Text>
-                                        </Flex>
-                                    </Stack>
-                                    {showButtons()}
+                                    <Flex direction="row">
+                                        <Text fontWeight="bold" paddingRight="5px">
+                                            Action:
+                                        </Text>
+                                        <Text
+                                            textAlign="left"
+                                            alignSelf="center"
+                                            textOverflow="ellipsis"
+                                            whiteSpace="nowrap"
+                                            overflow="hidden"
+                                            width="100%"
+                                            paddingRight="10px"
+                                        >
+                                            {(transaction.dataDecoded?.method &&
+                                                upperFirst(transaction.dataDecoded?.method)) ||
+                                                (transaction.from && "Receive") ||
+                                                (transaction.to && Number(transaction.value) > 0 && "Send") ||
+                                                upperFirst(transaction?.satoshiData?.type) ||
+                                                "Unspecified"}
+                                        </Text>
+                                    </Flex>
                                 </Stack>
                                 <AccordionIcon margin="10px" />
                             </AccordionButton>
@@ -352,6 +339,7 @@ function Transaction({ transaction }) {
                                 <TransactionDetails transaction={transaction} />
                             </Code>
                         </AccordionPanel>
+                        {showButtons()}
                     </>
                 )}
             </AccordionItem>

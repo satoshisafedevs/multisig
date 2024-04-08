@@ -190,7 +190,6 @@ function Transactions({ children }) {
                     console.error("Error in fetchAndUpdateData function:", error);
                 }
             }
-            console.log("pendings safes: ", pendingSafes);
         }
     };
 
