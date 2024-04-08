@@ -69,7 +69,7 @@
         "id": 8453,
         "currency": "ETH",
         "title": "Base",
-        "scanUrl": "https://base.basescan.org/",
+        "scanUrl": "https://basescan.org/",
         "eip": "eip155:8453",
         "metamaskSettings": {
             "chainId": "0x2105",

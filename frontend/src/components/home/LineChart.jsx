@@ -46,8 +46,9 @@ function LineChart({ xData, yData }) {
             },
             title: {
                 display: true,
-                text: xData || yData ? "" : "Ethereum prediction",
+                text: xData || yData ? "" : "Sample Data",
                 color: legendColor,
+                font: 10,
             },
             tooltip: {
                 cornerRadius: 1,

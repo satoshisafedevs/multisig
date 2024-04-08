@@ -543,31 +543,39 @@ const useGnosisSafe = () => {
                     const safeDetails = [];
                     // eslint-disable-next-line no-restricted-syntax
                     for (const safeAddress of safes) {
-                        // eslint-disable-next-line no-await-in-loop
-                        const safeInfo = await getSafeInfo(safeService, safeAddress);
-                        safeDetails.push({
-                            network: key,
-                            safeAddress,
-                            owners: safeInfo.owners,
-                            threshold: safeInfo.threshold,
-                            eip: networks[key].eip,
-                        });
+                        try {
+                            // eslint-disable-next-line no-await-in-loop
+                            const safeInfo = await getSafeInfo(safeService, safeAddress);
+                            safeDetails.push({
+                                network: key,
+                                safeAddress,
+                                owners: safeInfo.owners,
+                                threshold: safeInfo.threshold,
+                                eip: networks[key].eip,
+                            });
+                        } catch (error) {
+                            console.error(
+                                `Failed to fetch details for safe ${safeAddress} in network ${key}: ${error}`,
+                            );
+                            // Optionally handle the error, e.g., logging or tracking failed safeAddresses
+                            // Continue to the next safe without stopping the loop
+                        }
                     }
                     return safeDetails;
                 });
-
                 const allSafesNested = await Promise.all(allSafesPromises);
                 const allSafes = allSafesNested.flat(); // Flatten the nested arrays
-                // Remove undefined fields from each safe object using _.omit
-                // Use _.omit to remove undefined values
                 const cleanedSafes = allSafes.map((safe) => _.omitBy(safe, _.isUndefined));
-                console.log("cleanedSafes", cleanedSafes);
 
                 // Process the fetched safes as needed, e.g., update state, store in database, etc.
                 const safesRef = doc(db, "users", user.uid, "teams", currentTeam.id);
                 const teamSnapshot = await getDoc(safesRef);
                 const teamData = teamSnapshot.data();
-                if (teamData && teamData.safes && cleanedSafes.length > teamData.safes.length) {
+                // Determine the previous length, treating null as an empty array
+                const previousSafesLength = teamData && teamData.safes ? teamData.safes.length : 0;
+
+                // Perform updates only if there's a change in the number of safes
+                if (cleanedSafes.length !== previousSafesLength) {
                     await setDoc(safesRef, { safes: cleanedSafes }, { merge: true });
                     getUserTeamsData();
                 }

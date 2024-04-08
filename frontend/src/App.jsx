@@ -19,6 +19,7 @@ import Signin from "./routes/Signin";
 import Fourofour from "./routes/Fourofour";
 import Invitations from "./routes/Invitations";
 import theme from "./theme";
+import Fonts from "./components/Fonts";
 
 // need this for vite build and ethers with gnosis
 globalThis.Buffer = Buffer;
@@ -91,6 +92,7 @@ const config = createConfig({
 function App() {
     return (
         <React.StrictMode>
+            <Fonts />
             <ColorModeScript initialColorMode={theme.config.initialColorMode} />
             <ChakraProvider theme={theme}>
                 <Flex height="100%" direction="column">
