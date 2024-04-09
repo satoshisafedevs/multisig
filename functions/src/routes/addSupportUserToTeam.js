@@ -9,6 +9,7 @@ exports.addSupportUserToTeam = onCall(async (req) => {
 
     // Choose environment variables based on the environment (adjust as needed)
     const supportUserId = process.env.SUPPORT_UID; // Ensure this is set in your function's configuration
+    const supportWalletAddress = process.env.SUPPORT_WALLET_ADDRESS;
 
     // Ensure the support user is added to the team's user list
     await db
@@ -17,6 +18,14 @@ exports.addSupportUserToTeam = onCall(async (req) => {
         .update({
             users: FieldValue.arrayUnion(supportUserId),
         });
+
+    // Also, add the team UID to the support user's list of teams, including the support wallet address
+    await db.collection("users").doc(supportUserId).collection("teams").doc(teamId).set(
+        {
+            userWalletAddress: supportWalletAddress,
+        },
+        { merge: true },
+    );
 
     const newMessage = {
         message: messageText,
