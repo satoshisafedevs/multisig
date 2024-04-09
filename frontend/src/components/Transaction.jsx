@@ -249,7 +249,11 @@ function Transaction({ transaction }) {
                                             ml="5px"
                                             mt="2px"
                                         >
-                                            {new Date(transaction.executionDate).toLocaleString("en-US", {
+                                            {new Date(
+                                                transaction.unifiedDate ||
+                                                    transaction.executionDate ||
+                                                    transaction.submissionDate,
+                                            ).toLocaleString("en-US", {
                                                 year: "numeric",
                                                 month: "long",
                                                 day: "numeric",
