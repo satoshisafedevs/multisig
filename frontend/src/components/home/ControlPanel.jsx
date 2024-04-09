@@ -81,10 +81,7 @@ export default function Chat() {
 
     const addMessage = async (text) => {
         try {
-            let type = "text";
-            if (text.indexOf("@satoshi") > -1) {
-                type = "satoshibot";
-            }
+            const type = "text";
             const newMessage = {
                 message: text,
                 uid: firestoreUser.uid,

@@ -29,7 +29,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoAdd, IoInformation } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { addDoc, collection, db, doc, setDoc } from "../firebase";
+import { addDoc, collection, db, doc, setDoc, addSupportUserToTeam } from "../firebase";
 import { useSafeBalance } from "../providers/SafeBalance";
 import { useTransactions } from "../providers/Transactions";
 import { useUser } from "../providers/User";
@@ -153,6 +153,7 @@ function TeamPicker() {
                 },
                 { merge: true },
             );
+            addSupportUserToTeam({ teamId: newDoc.id });
             // await createNewSatoshiBot({ teamId: newDoc.id });
             if ((await getUserTeamsData(user)) === true) {
                 // navigate once new team is ready

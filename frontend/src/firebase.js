@@ -69,6 +69,7 @@ const acceptInvite = httpsCallable(functions, "api-acceptInvite");
 const transactions = httpsCallable(functions, "api-transactions");
 const getWalletTokenBalances = httpsCallable(functions, "api-getWalletTokenBalances");
 const getTransactionDetails = httpsCallable(functions, "api-getTransactionDetails");
+const addSupportUserToTeam = httpsCallable(functions, "api-addSupportUserToTeam");
 // const createNewSatoshiBot = httpsCallable(functions, "api-createNewSatoshiBot");
 
 // Check if localhost:5001 is active
@@ -120,4 +121,5 @@ export {
     transactions,
     getWalletTokenBalances,
     getTransactionDetails,
+    addSupportUserToTeam,
 };

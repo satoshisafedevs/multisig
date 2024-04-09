@@ -17,6 +17,7 @@ module.exports = {
         "quotes": ["error", "double", { avoidEscape: true }],
         "indent": ["error", 4],
         "object-curly-newline": "off",
+        "operator-linebreak": "off",
         "object-curly-spacing": ["error", "always"],
         "max-len": ["error", { code: 120 }],
         "require-jsdoc": 0,
