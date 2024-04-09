@@ -1,223 +1,227 @@
 image: node:lts-alpine3.16
 
 cache:
-    key: ${CI_COMMIT_REF_SLUG} # this sets the key to the branch name
-    paths:
-        - frontend/node_modules
-        - frontend/yarn.lock
-        - functions/node_modules
-        - functions/yarn.lock
+  key: ${CI_COMMIT_REF_SLUG} # this sets the key to the branch name
+  paths:
+    - frontend/node_modules
+    - frontend/yarn.lock
+    - functions/node_modules
+    - functions/yarn.lock
 
 stages:
-    - test
-    - preview
-    - build
-    - deploy
+  - test
+  - preview
+  - build
+  - deploy
 
 .unit-test:
-    stage: test
-    script:
-        - echo "Running unit tests... This will take about 60 seconds."
-        - sleep 60
-        - echo "Code coverage is 90%"
+  stage: test
+  script:
+    - echo "Running unit tests... This will take about 60 seconds."
+    - sleep 60
+    - echo "Code coverage is 90%"
 
 lint-test-frontend:
-    stage: test
-    before_script:
-        - apk update && apk add git python3 make g++
-        - cd $CI_PROJECT_DIR/frontend && yarn install
-    script:
-        - echo "Linting code... This will take about 10 seconds."
-        - yarn eslint:verify
-        - echo "No lint issues found."
+  stage: test
+  before_script:
+    - apk update && apk add git python3 make g++
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - yarn eslint:verify
+    - echo "No lint issues found."
 
 lint-test-functions:
-    stage: test
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/functions && yarn install
-    script:
-        - echo "Linting code... This will take about 10 seconds."
-        - yarn eslint:verify
-        - echo "No lint issues found."
+  stage: test
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/functions && yarn install
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - yarn eslint:verify
+    - echo "No lint issues found."
 
 unit-test-functions:
-    stage: test
-    before_script:
-        - apk update && apk add python3 make g++ git openjdk11
-        - cd $CI_PROJECT_DIR/functions && yarn install
-        - cp $GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND ./serviceAccountKey.json
-        - yarn global add firebase-tools
-    script:
-        - echo "Testing code... This will take about 10 seconds."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && yarn serve:test --project playground
-        - echo "No test issues found."
-    after_script:
-        - cd $CI_PROJECT_DIR/functions
-        - rm -f serviceAccountKey.json
+  stage: test
+  before_script:
+    - apk update && apk add python3 make g++ git openjdk11
+    - cd $CI_PROJECT_DIR/functions && yarn install
+    - cp $GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND ./serviceAccountKey.json
+    - yarn global add firebase-tools
+  script:
+    - echo "Testing code... This will take about 10 seconds."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && yarn serve:test --project playground
+    - echo "No test issues found."
+  after_script:
+    - cd $CI_PROJECT_DIR/functions
+    - rm -f serviceAccountKey.json
 
 format-test-frontend:
-    stage: test
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/frontend && yarn install
-    script:
-        - echo "Formatting code... This will take about 10 seconds."
-        - yarn format:verify
-        - echo "No format issues found."
+  stage: test
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+  script:
+    - echo "Formatting code... This will take about 10 seconds."
+    - yarn format:verify
+    - echo "No format issues found."
 
 deploy-preview:
-    stage: preview
-    before_script:
-        - cd $CI_PROJECT_DIR/frontend && yarn install
-        - yarn global add firebase-tools
-    script:
-        - yarn build:development
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase hosting:channel:deploy $CI_COMMIT_BRANCH --project playground
-    only:
-        - branches
-    except:
-        - main
-        - production
+  stage: preview
+  before_script:
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+    - yarn global add firebase-tools
+  script:
+    - yarn build:development
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase hosting:channel:deploy $CI_COMMIT_BRANCH --project playground
+  only:
+    - branches
+  except:
+    - main
+    - production
 
 build-frontend:
-    stage: build
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/frontend && yarn install
-    script:
-        - echo "Compiling the code..."
-        - yarn build:playground
-        - echo "Compile complete."
-    only:
-        - main
-    artifacts:
-        paths:
-            - $CI_PROJECT_DIR/frontend/dist
-        expire_in: 1 week
+  stage: build
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+  script:
+    - echo "Compiling the code..."
+    - yarn build:playground
+    - echo "Compile complete."
+  only:
+    - main
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/frontend/dist
+    expire_in: 1 week
 
 deploy-hosting-playground:
-    stage: deploy
-    only:
-        - main
-    dependencies:
-        - build-frontend
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/frontend && yarn install
-        - yarn global add firebase-tools
-    script:
-        - cd $CI_PROJECT_DIR/frontend
-        - echo "Deploying application..."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only hosting --project playground
-        - echo "Application successfully deployed."
+  stage: deploy
+  only:
+    - main
+  dependencies:
+    - build-frontend
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+    - yarn global add firebase-tools
+  script:
+    - cd $CI_PROJECT_DIR/frontend
+    - echo "Deploying application..."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only hosting --project playground
+    - echo "Application successfully deployed."
 
 deploy-functions-playground:
-    stage: deploy
-    only:
-        - main
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/functions && yarn install
-        - yarn global add firebase-tools@12.4.8
-    script:
-        - echo OPENAI_KEY=$OPENAI_KEY >> .env
-        - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
-        - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
-        - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
-        - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
-        - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
-        - echo PRIVATE_EVM_KEY=$PRIVATE_EVM_KEY >> .env
-        - echo SMTP2GO_USERNAME=$SMTP2GO_USERNAME >> .env
-        - echo SMTP2GO_PASSWORD=$SMTP2GO_PASSWORD >> .env
-        - echo BASE_URL=$BASE_URL_PLAYGROUND >> .env
-        - echo COVALENTHQ_KEY=$COVALENTHQ_KEY >> .env
-        - echo "Deploying firebase functions..."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
-        - echo "Firebase functions successfully deployed."
-    after_script:
-        - cd $CI_PROJECT_DIR/functions
-        - rm -f .env
+  stage: deploy
+  only:
+    - main
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/functions && yarn install
+    - yarn global add firebase-tools@12.4.8
+  script:
+    - echo OPENAI_KEY=$OPENAI_KEY >> .env
+    - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
+    - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
+    - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
+    - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
+    - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
+    - echo PRIVATE_EVM_KEY=$PRIVATE_EVM_KEY >> .env
+    - echo SMTP2GO_USERNAME=$SMTP2GO_USERNAME >> .env
+    - echo SMTP2GO_PASSWORD=$SMTP2GO_PASSWORD >> .env
+    - echo BASE_URL=$BASE_URL_PLAYGROUND >> .env
+    - echo COVALENTHQ_KEY=$COVALENTHQ_KEY >> .env
+    - echo SUPPORT_UID=$SUPPORT_UID_PLAYGROUND >> .env
+    - echo SUPPORT_WALLET_ADDRESS=$SUPPORT_WALLET_ADDRESS >> .env
+    - echo "Deploying firebase functions..."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only functions --project playground
+    - echo "Firebase functions successfully deployed."
+  after_script:
+    - cd $CI_PROJECT_DIR/functions
+    - rm -f .env
 
 deploy-firestore-rules-playground:
-    stage: deploy
-    only:
-        - main
-    before_script:
-        - yarn install
-        - yarn global add firebase-tools
-    script:
-        - echo "Deploying firestore rules..."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only firestore:rules --project playground
-        - echo "Firestore rules successfully deployed."
+  stage: deploy
+  only:
+    - main
+  before_script:
+    - yarn install
+    - yarn global add firebase-tools
+  script:
+    - echo "Deploying firestore rules..."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PLAYGROUND && firebase deploy --only firestore:rules --project playground
+    - echo "Firestore rules successfully deployed."
 
 deploy-hosting-production:
-    stage: deploy
-    only:
-        - production
-    dependencies:
-        - build-frontend
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/frontend && yarn install
-        - yarn global add firebase-tools
-    script:
-        - cd $CI_PROJECT_DIR/frontend
-        - echo "Deploying application..."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only hosting --project production
-        - echo "Application successfully deployed."
+  stage: deploy
+  only:
+    - production
+  dependencies:
+    - build-frontend
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+    - yarn global add firebase-tools
+  script:
+    - cd $CI_PROJECT_DIR/frontend
+    - echo "Deploying application..."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only hosting --project production
+    - echo "Application successfully deployed."
 
 deploy-functions-production:
-    stage: deploy
-    only:
-        - production
-    before_script:
-        - apk update && apk add python3 make g++ git
-        - cd $CI_PROJECT_DIR/functions && yarn install
-        - yarn global add firebase-tools@12.4.8
-    script:
-        - echo OPENAI_KEY=$OPENAI_KEY >> .env
-        - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
-        - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
-        - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
-        - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
-        - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
-        - echo PRIVATE_EVM_KEY=$PRIVATE_EVM_KEY >> .env
-        - echo SMTP2GO_USERNAME=$SMTP2GO_USERNAME >> .env
-        - echo SMTP2GO_PASSWORD=$SMTP2GO_PASSWORD >> .env
-        - echo BASE_URL=$BASE_URL_PRODUCTION >> .env
-        - echo COVALENTHQ_KEY=$COVALENTHQ_KEY >> .env
-        - echo "Deploying firebase functions..."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only functions --project production
-        - echo "Firebase functions successfully deployed."
-    after_script:
-        - cd $CI_PROJECT_DIR/functions
-        - rm -f .env
+  stage: deploy
+  only:
+    - production
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/functions && yarn install
+    - yarn global add firebase-tools@12.4.8
+  script:
+    - echo OPENAI_KEY=$OPENAI_KEY >> .env
+    - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
+    - echo TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN >> .env
+    - echo TWILIO_NUMBER=$TWILIO_NUMBER_PLAYGROUND >> .env
+    - echo TYPEFORM_SECRET=$TYPEFORM_SECRET_PLAYGROUND >> .env
+    - echo ALCHEMY_KEY=$ALCHEMY_KEY >> .env
+    - echo PRIVATE_EVM_KEY=$PRIVATE_EVM_KEY >> .env
+    - echo SMTP2GO_USERNAME=$SMTP2GO_USERNAME >> .env
+    - echo SMTP2GO_PASSWORD=$SMTP2GO_PASSWORD >> .env
+    - echo BASE_URL=$BASE_URL_PRODUCTION >> .env
+    - echo COVALENTHQ_KEY=$COVALENTHQ_KEY >> .env
+    - echo SUPPORT_UID=$SUPPORT_UID_PRODUCTION >> .env
+    - echo SUPPORT_WALLET_ADDRESS=$SUPPORT_WALLET_ADDRESS >> .env
+    - echo "Deploying firebase functions..."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only functions --project production
+    - echo "Firebase functions successfully deployed."
+  after_script:
+    - cd $CI_PROJECT_DIR/functions
+    - rm -f .env
 
 deploy-firestore-rules-production:
-    stage: deploy
-    only:
-        - production
-    before_script:
-        - yarn install
-        - yarn global add firebase-tools
-    script:
-        - echo "Deploying firestore rules..."
-        - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only firestore:rules --project production
-        - echo "Firestore rules successfully deployed."
+  stage: deploy
+  only:
+    - production
+  before_script:
+    - yarn install
+    - yarn global add firebase-tools
+  script:
+    - echo "Deploying firestore rules..."
+    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only firestore:rules --project production
+    - echo "Firestore rules successfully deployed."
 
 publish_to_github:
   stage: deploy
   only:
-    - production 
+    - production
   before_script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - 'git remote remove github || true'  # Ensures no conflict if the remote already exists
+    - "git remote remove github || true" # Ensures no conflict if the remote already exists
     - git remote add github git@github.com:Satoshi-Safe/wallet.git
-    - git push -u github main  # Adjust if your current branch differs
+    - git push -u github main # Adjust if your current branch differs
 
