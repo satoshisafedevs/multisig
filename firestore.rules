@@ -65,5 +65,12 @@ service cloud.firestore {
         	allow read: if true;
         }
 
+        match /subscriptions/{documentId} {
+        	allow read: if request.auth.uid == resource.data.ownerId;
+        }
+
+        match /invoiceSettings/{documentId} {
+        	allow read, create, update: if request.auth.uid == documentId;
+        }
     }
 }

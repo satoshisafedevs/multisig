@@ -1,10 +1,12 @@
+import { Box, Card, Tab, TabList, TabPanel, TabPanels, Tabs, Text, useColorModeValue } from "@chakra-ui/react";
 import React from "react";
-import { Tabs, TabList, Tab, TabPanels, TabPanel, Text, Box, Card, useColorModeValue } from "@chakra-ui/react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import Billing from "./Billing";
+import Plans from "./Plans";
 import Profile from "./Profile";
 import Safes from "./Safes";
-import Users from "./Users";
 import Teams from "./Teams";
+import Users from "./Users";
 
 function PreferenceTabs() {
     const navigate = useNavigate();
@@ -15,7 +17,7 @@ function PreferenceTabs() {
     const tab = searchParams.get("tab") || "Profile";
 
     const handleTabsChange = (index) => {
-        const tabName = ["Profile", "Safes", "Teams", "Users"][index];
+        const tabName = ["Profile", "Safes", "Teams", "Users", "Plans", "Billing"][index];
         navigate(`?tab=${tabName}`);
     };
 
@@ -24,6 +26,8 @@ function PreferenceTabs() {
         Safes: 1,
         Teams: 2,
         Users: 3,
+        Plans: 4,
+        Billing: 5,
     }[tab];
 
     return (
@@ -67,6 +71,20 @@ function PreferenceTabs() {
                         >
                             Users
                         </Tab>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
+                            Plans
+                        </Tab>
+                        <Tab
+                            borderRadius="0 5px 5px 0"
+                            color={colorValue}
+                            _selected={{ bg: selectedBG, color: selectedColor }}
+                        >
+                            Billing
+                        </Tab>
                     </TabList>
                 </Card>
                 <Card width="75%" minWidth="560px" marginLeft="10px">
@@ -82,6 +100,12 @@ function PreferenceTabs() {
                         </TabPanel>
                         <TabPanel>
                             <Users />
+                        </TabPanel>
+                        <TabPanel>
+                            <Plans />
+                        </TabPanel>
+                        <TabPanel>
+                            <Billing />
                         </TabPanel>
                         <TabPanel>
                             <Text as="i">Work in progress...</Text>

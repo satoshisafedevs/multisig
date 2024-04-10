@@ -1,12 +1,16 @@
 const { createUser, deleteUser } = require("./manageUsers");
 const { onUserWalletChange } = require("./onUserWalletChange");
 const { onNewTeamCreated } = require("./onNewTeamCreated");
+const { onTeamEdited } = require("./onTeamEdited");
+const { onSubscriptionTypeEdited } = require("./onSubscriptionTypeEdited");
 
 module.exports = {
     createUser,
     deleteUser,
     onUserWalletChange,
     onNewTeamCreated,
+    onTeamEdited,
+    onSubscriptionTypeEdited,
 };
 
 // exports.createUserProfile = onDocumentCreated(
