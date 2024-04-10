@@ -31,6 +31,9 @@ import ReactLogo from "../img/ReactLogo";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 import FreeTrialExpiredModal from "./FreeTrialExpiredModal";
+import SubscribeModal from "./SubscribeModal";
+import NoSubscriptionModal from "./NoSubscriptionModal";
+import { useSubscriptions } from "../providers/Subscriptions";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("bronzeSwatch.500", "bronzeSwatch.300");
@@ -38,7 +41,8 @@ export default function Header({ withTeam }) {
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { firestoreUser, currentTeam, userTeamData, activeSubscriptions } = useUser();
+    const { firestoreUser, currentTeam, userTeamData } = useUser();
+    const { activeSubscriptions } = useSubscriptions();
     const { signOutUser, isSigningOut } = useAuth();
     const {
         preflightCheck,
@@ -132,6 +136,9 @@ export default function Header({ withTeam }) {
         : null;
     const renderTrialExpiration = (subscription) => {
         if (subscription) {
+            if (activeSubscription.status === "ACTIVE") {
+                return;
+            }
             if (activeSubscription.trialEndDate) {
                 const trialEndMoment = moment(activeSubscription.trialEndDate);
                 const daysUntillEnd = trialEndMoment.diff(moment(), "days");
@@ -328,7 +335,16 @@ export default function Header({ withTeam }) {
                 )}
             </Card>
             <FreeTrialExpiredModal
-                isOpen={activeSubscription && moment(activeSubscription.trialEndDate).isBefore(moment())}
+                isOpen={
+                    currentTeam?.ownerId === firestoreUser?.uid &&
+                    activeSubscription &&
+                    moment(activeSubscription.trialEndDate).isBefore(moment()) === true &&
+                    activeSubscription.status !== "ACTIVE"
+                }
+            />
+            <SubscribeModal isOpen={!activeSubscription && currentTeam && currentTeam.ownerId === firestoreUser?.uid} />
+            <NoSubscriptionModal
+                isOpen={currentTeam && currentTeam.ownerId !== firestoreUser?.uid && !activeSubscription}
             />
         </Flex>
     );

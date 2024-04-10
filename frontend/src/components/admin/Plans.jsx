@@ -19,9 +19,11 @@ import {
 import React, { useEffect } from "react";
 import { MdCheckCircle } from "react-icons/md";
 import { useUser } from "../../providers/User";
+import { useSubscriptions } from "../../providers/Subscriptions";
 
 function Plans() {
-    const { subscriptionTypes, activeSubscriptions, currentTeam, getSubscriptionTypes } = useUser();
+    const { currentTeam } = useUser();
+    const { subscriptionTypes, activeSubscriptions, getSubscriptionTypes } = useSubscriptions();
     const selectedColor = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     const selectedBG = useColorModeValue("var(--chakra-colors-blueSwatch-200)", "var(--chakra-colors-blueSwatch-100)");
     useEffect(() => {
@@ -48,6 +50,7 @@ function Plans() {
                     <Card
                         bg={activeSubscription?.subscription?.id === sub.id ? selectedBG : null}
                         color={activeSubscription?.subscription?.id === sub.id ? selectedColor : null}
+                        key={sub.id}
                     >
                         <CardHeader>
                             <Heading size="md" textAlign="center">
@@ -55,7 +58,7 @@ function Plans() {
                             </Heading>
                             <br />
                             <Heading size="md" textAlign="center">
-                                ${sub.price.toFixed(2)} / month per seat
+                                ${sub.price.toFixed(2)} / {sub.billingType}
                             </Heading>
                         </CardHeader>
                         <CardBody>
@@ -63,9 +66,13 @@ function Plans() {
                             <VStack textAlign="left" mt="20px">
                                 <List spacing={3}>
                                     {sub.features.map((feature) => (
-                                        <Tooltip label={feature.description} fontSize="md">
+                                        <Tooltip
+                                            label={feature.description}
+                                            fontSize="md"
+                                            key={`${feature.description}`}
+                                        >
                                             <ListItem>
-                                                <ListIcon as={MdCheckCircle} colorScheme="blueSwatch" />
+                                                <ListIcon as={MdCheckCircle} />
                                                 {feature.name}
                                             </ListItem>
                                         </Tooltip>

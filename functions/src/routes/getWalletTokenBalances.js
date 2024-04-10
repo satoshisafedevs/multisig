@@ -1,6 +1,6 @@
 const { onCall, HttpsError } = require("../firebase");
 
-exports.getWalletTokenBalances = onCall(async (req) => {
+exports.getWalletTokenBalances = onCall(async (req, res) => {
     if (!req.auth) {
         throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
     }

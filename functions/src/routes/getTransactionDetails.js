@@ -1,9 +1,10 @@
 const { onCall, HttpsError } = require("../firebase");
 
-exports.getTransactionDetails = onCall(async (req) => {
+exports.getTransactionDetails = onCall(async (req, res) => {
     if (!req.auth) {
         throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
     }
+
     const { chainId, txHash } = req.data;
     if (chainId && txHash) {
         try {

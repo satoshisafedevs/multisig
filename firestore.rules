@@ -66,11 +66,11 @@ service cloud.firestore {
         }
 
         match /subscriptions/{documentId} {
-        	allow read: if request.auth.uid == resource.data.ownerId;
+        	allow read: if request.auth.uid == resource.data.team.ownerId;
         }
 
-        match /invoiceSettings/{documentId} {
-        	allow read, create, update: if request.auth.uid == documentId;
+        match /invoices/{documentId} {
+        	allow read: if request.auth.uid == resource.data.ownerId;
         }
     }
 }

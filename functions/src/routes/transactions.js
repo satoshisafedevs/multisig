@@ -2,11 +2,12 @@ const { onCall, db, error, HttpsError } = require("../firebase");
 const { deleteTransactionsOfSafeInTeam } = require("../utils/deleteTransactionsOfSafeInTeam");
 const { checkDbForTxs } = require("../gnosis");
 
-exports.transactions = onCall(async (req) => {
+exports.transactions = onCall(async (req, res) => {
     // Security check to ensure the request is from an authenticated user.
     if (!req.auth) {
         throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
     }
+
     const uid = req.auth.uid;
     const { transactions, teamid, safe, method } = req.data;
     // No need for CORS configuration as onCall functions handle CORS automatically.

@@ -1,8 +1,21 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
+import { getPaymentLink } from "../firebase";
+import { useUser } from "../providers/User";
 
 export default function FreeTrialExpiredModal({ isOpen }) {
+    const [loading, setLoading] = useState(null);
+    const { currentTeam } = useUser();
+    const goToPayment = async () => {
+        setLoading(true);
+        const response = await getPaymentLink({
+            // Note: for now we just use one subscription type.
+            lookupKey: "PREMIUM",
+            teamId: currentTeam.id,
+        });
+        window.open(response.data, "_blank").focus();
+    };
     return (
         <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={() => console.log("closing")}>
             <ModalOverlay />
@@ -24,7 +37,7 @@ export default function FreeTrialExpiredModal({ isOpen }) {
                 </ModalBody>
 
                 <ModalFooter>
-                    <Button colorScheme="blue" mr={3}>
+                    <Button colorScheme="blue" mr={3} onClick={goToPayment} isLoading={loading}>
                         Subscribe
                     </Button>
                 </ModalFooter>
@@ -33,5 +46,5 @@ export default function FreeTrialExpiredModal({ isOpen }) {
     );
 }
 FreeTrialExpiredModal.propTypes = {
-    isOpen: PropTypes.bool.isRequired,
+    isOpen: PropTypes.bool,
 };

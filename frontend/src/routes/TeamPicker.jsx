@@ -35,21 +35,14 @@ import { useTransactions } from "../providers/Transactions";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 import { useWalletConnect } from "../providers/WalletConnect";
+import { useSubscriptions } from "../providers/Subscriptions";
 
 const MAX_TEAM_NAME_LENGTH = 50;
 
 function TeamPicker() {
     const toast = useToast();
-    const {
-        user,
-        firestoreUser,
-        teamsData,
-        setCurrentTeam,
-        setTeamUsersInfo,
-        getUserTeamsData,
-        getSubscriptionTypes,
-        subscriptionTypes,
-    } = useUser();
+    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
+    const { getSubscriptionTypes, subscriptionTypes } = useSubscriptions();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const {
