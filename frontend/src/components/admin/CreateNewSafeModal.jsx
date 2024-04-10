@@ -40,7 +40,7 @@ if (import.meta.env.MODE !== "development") {
 }
 
 function CreateNewSafeModal({ onClose, setModalState }) {
-    const { teamUsersInfo, currentTeam } = useUser();
+    const { filteredTeamUsersInfo, currentTeam } = useUser();
     const { createSafe } = useGnosisSafe();
     const toast = useToast();
     const navigate = useNavigate();
@@ -52,9 +52,9 @@ function CreateNewSafeModal({ onClose, setModalState }) {
 
     // Initialize selectedOwners with all team members
     useEffect(() => {
-        setSelectedOwners(Object.keys(teamUsersInfo));
-        setThreshold(Object.keys(teamUsersInfo).length);
-    }, [teamUsersInfo]);
+        setSelectedOwners(Object.keys(filteredTeamUsersInfo));
+        setThreshold(Object.keys(filteredTeamUsersInfo).length);
+    }, [filteredTeamUsersInfo]);
 
     const removeOwner = (index) => {
         const newOwners = selectedOwners.filter((_, i) => i !== index).filter((owner) => owner !== "");
@@ -76,7 +76,7 @@ function CreateNewSafeModal({ onClose, setModalState }) {
             return;
         }
         setIsLoading(true);
-        const ownerAddresses = selectedOwners.map((ownerId) => teamUsersInfo[ownerId].walletAddress);
+        const ownerAddresses = selectedOwners.map((ownerId) => filteredTeamUsersInfo[ownerId].walletAddress);
 
         // const satoshiData = {
         //     type: "createSafe",
@@ -176,7 +176,10 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                         {selectedOwners.length > 0 &&
                             selectedOwners.map((ownerId, index) => (
                                 <Box display="flex" flexDirection="row" alignItems="center" key={ownerId}>
-                                    <Box>{teamUsersInfo[ownerId].displayName || teamUsersInfo[ownerId].email}</Box>
+                                    <Box>
+                                        {filteredTeamUsersInfo[ownerId].displayName ||
+                                            filteredTeamUsersInfo[ownerId].email}
+                                    </Box>
                                     <Box>
                                         <Tooltip label="Remove owner">
                                             <IconButton
@@ -196,12 +199,12 @@ function CreateNewSafeModal({ onClose, setModalState }) {
                         <MenuButton
                             as={Button}
                             rightIcon={<IoChevronDown />}
-                            isDisabled={selectedOwners.length >= Object.keys(teamUsersInfo).length || isLoading}
+                            isDisabled={selectedOwners.length >= Object.keys(filteredTeamUsersInfo).length || isLoading}
                         >
                             Add owner
                         </MenuButton>
                         <MenuList>
-                            {Object.entries(teamUsersInfo)
+                            {Object.entries(filteredTeamUsersInfo)
                                 .filter(([key]) => !selectedOwners.includes(key))
                                 .map(([id, { displayName, email }]) => (
                                     <MenuItem

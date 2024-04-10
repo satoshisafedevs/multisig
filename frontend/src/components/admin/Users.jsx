@@ -5,14 +5,14 @@ import { useUser } from "../../providers/User";
 import InviteUserModal from "./InviteUserModal";
 
 function Users() {
-    const { teamUsersInfo } = useUser();
+    const { filteredTeamUsersInfo } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
     const [sortAscending, setSortAscending] = useState(true);
     const hoverColor = useColorModeValue("blackAlpha.900", "whiteAlpha.900");
     const iconStyle = { display: "inline", marginLeft: "5px", verticalAlign: "sub" };
 
-    const sortedUsers = teamUsersInfo
-        ? Object.entries(teamUsersInfo).sort(([, a], [, b]) => {
+    const sortedUsers = filteredTeamUsersInfo
+        ? Object.entries(filteredTeamUsersInfo).sort(([, a], [, b]) => {
               if (sortAscending) {
                   return a.displayName.localeCompare(b.displayName);
               }

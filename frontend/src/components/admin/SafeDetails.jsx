@@ -34,7 +34,6 @@ import { useUser } from "../../providers/User";
 import { useTransactions } from "../../providers/Transactions";
 import { formatTimestamp } from "../../utils";
 import CopyToClipboard from "../CopyToClipboard";
-import SafeStatus from "./SafeStatus";
 import RemoveSafeOwnerModal from "./RemoveSafeOwnerModal";
 import AddSafeOwnerModal from "./AddSafeOwnerModal";
 import EditSafeThresholdModal from "./EditSafeThresholdModal";
@@ -42,7 +41,7 @@ import EditSafeThresholdModal from "./EditSafeThresholdModal";
 function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { currentTeam, setCurrentTeam, teamUsersInfo } = useUser();
+    const { currentTeam, setCurrentTeam } = useUser();
     const { setGettingData, gettingData } = useTransactions();
     const [isEditingName, setIsEditingName] = useState(false);
     const [safeName, setSafeName] = useState(data.name || "");
@@ -225,11 +224,14 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                             <Flex width="100%" justify="space-between" align="center" gap="10px">
                                 <Flex align="center" gap="20px">
                                     <AccordionIcon />
-                                    <SafeStatus safe={data} teamUsersInfo={teamUsersInfo} />
                                 </Flex>
-                                <Flex flex="1" justify="center" align="center" gap="10px">
-                                    <BsSafe size="25px" />
-                                    <Heading size="xs">{data.name || data.safeAddress}</Heading>
+                                <Flex flex="1" gap="10px" align="center" justifyContent="center">
+                                    <Flex justifyContent="flex-start" alignItems="center" width="400px">
+                                        <BsSafe size="25px" />
+                                        <Heading ml="20px" size="xs">
+                                            {data.name || data.safeAddress}
+                                        </Heading>
+                                    </Flex>
                                 </Flex>
                             </Flex>
                         </AccordionButton>
