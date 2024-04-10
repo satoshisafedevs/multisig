@@ -1,41 +1,41 @@
-import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { initializeApp } from "firebase/app";
 import {
+    RecaptchaVerifier,
+    connectAuthEmulator,
     createUserWithEmailAndPassword,
     getAuth,
     onAuthStateChanged,
-    RecaptchaVerifier,
     sendEmailVerification,
     sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signInWithPhoneNumber,
     signOut,
-    updateProfile,
-    connectAuthEmulator,
     updatePassword,
+    updateProfile,
 } from "firebase/auth";
 import {
+    Timestamp,
     addDoc,
     collection,
-    doc,
-    getDoc,
-    getDocs,
+    connectFirestoreEmulator,
     deleteDoc,
     deleteField,
+    doc,
+    getCountFromServer,
+    getDoc,
+    getDocs,
     getFirestore,
+    limit,
     onSnapshot,
     orderBy,
     query,
-    limit,
-    where,
     serverTimestamp,
     setDoc,
-    Timestamp,
     updateDoc,
-    getCountFromServer,
-    connectFirestoreEmulator,
+    where,
 } from "firebase/firestore";
-import { getFunctions, connectFunctionsEmulator, httpsCallable } from "firebase/functions";
+import { connectFunctionsEmulator, getFunctions, httpsCallable } from "firebase/functions";
 
 const isServerActive = async (url) => {
     try {
@@ -66,9 +66,12 @@ const functions = getFunctions(app);
 const inviteUser = httpsCallable(functions, "api-inviteUser");
 const acceptInvite = httpsCallable(functions, "api-acceptInvite");
 const transactions = httpsCallable(functions, "api-transactions");
+const getPaymentLink = httpsCallable(functions, "api-getPaymentLink");
 const getWalletTokenBalances = httpsCallable(functions, "api-getWalletTokenBalances");
 const getTransactionDetails = httpsCallable(functions, "api-getTransactionDetails");
+const selectSubscriptionForTeam = httpsCallable(functions, "api-selectSubscriptionForTeam");
 const addSupportUserToTeam = httpsCallable(functions, "api-addSupportUserToTeam");
+
 // const createNewSatoshiBot = httpsCallable(functions, "api-createNewSatoshiBot");
 
 // Check if localhost:5001 is active
@@ -81,6 +84,9 @@ isServerActive("http://localhost:4000").then((isActive) => {
 });
 
 export {
+    RecaptchaVerifier,
+    Timestamp,
+    acceptInvite,
     addDoc,
     analytics,
     app,
@@ -88,22 +94,22 @@ export {
     collection,
     createUserWithEmailAndPassword,
     db,
-    functions,
-    inviteUser,
-    acceptInvite,
-    // createNewSatoshiBot,
-    doc,
-    getDoc,
-    getDocs,
     deleteDoc,
     deleteField,
+    // createNewSatoshiBot,
+    doc,
+    functions,
+    getCountFromServer,
+    getDoc,
+    getDocs,
+    getPaymentLink,
+    getWalletTokenBalances,
+    inviteUser,
+    limit,
     onAuthStateChanged,
     onSnapshot,
     orderBy,
     query,
-    limit,
-    where,
-    RecaptchaVerifier,
     sendEmailVerification,
     sendPasswordResetEmail,
     serverTimestamp,
@@ -111,13 +117,12 @@ export {
     signInWithEmailAndPassword,
     signInWithPhoneNumber,
     signOut,
-    Timestamp,
     updateDoc,
     updateProfile,
     updatePassword,
-    getCountFromServer,
     transactions,
-    getWalletTokenBalances,
+    where,
     getTransactionDetails,
+    selectSubscriptionForTeam,
     addSupportUserToTeam,
 };
