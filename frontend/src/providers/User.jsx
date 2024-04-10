@@ -21,6 +21,12 @@ function User({ children }) {
     const [userTeamData, setUserTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
     const [teamUsersInfo, setTeamUsersInfo] = useState(null);
+    let filteredTeamUsersInfo = null;
+    if (teamUsersInfo) {
+        filteredTeamUsersInfo = Object.fromEntries(
+            Object.entries(teamUsersInfo).filter(([, value]) => value.email !== "support@getsatoshisafe.com"),
+        );
+    }
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (userAuth) => {
@@ -217,6 +223,7 @@ function User({ children }) {
             setUserTeamWallet,
             leaveTeam,
             fetchAndUpdateLatestSafesData,
+            filteredTeamUsersInfo,
         }),
         [
             user,
@@ -237,6 +244,7 @@ function User({ children }) {
             getFirestoreUserData,
             setUserTeamWallet,
             leaveTeam,
+            filteredTeamUsersInfo,
         ],
     );
 
