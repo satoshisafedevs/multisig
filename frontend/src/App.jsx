@@ -1,23 +1,24 @@
-import React from "react";
-import { Buffer } from "buffer";
 import { ChakraProvider, ColorModeScript, Flex } from "@chakra-ui/react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Buffer } from "buffer";
+import React from "react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { mainnet, arbitrum, optimism, aurora, avalanche, base, bsc, polygon, sepolia } from "wagmi/chains";
-import { publicProvider } from "wagmi/providers/public";
+import { arbitrum, aurora, avalanche, base, bsc, mainnet, optimism, polygon, sepolia } from "wagmi/chains";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+import { publicProvider } from "wagmi/providers/public";
+import AuthenticatedRoute from "./components/AuthenticatedRoute";
+import SafeBalance from "./providers/SafeBalance";
+import Subscriptions from "./providers/Subscriptions";
+import Transactions from "./providers/Transactions";
 import User from "./providers/User";
 import Wagmi from "./providers/Wagmi";
-import Transactions from "./providers/Transactions";
-import SafeBalance from "./providers/SafeBalance";
 import WalletConnect from "./providers/WalletConnect";
-import TeamPicker from "./routes/TeamPicker";
-import AuthenticatedRoute from "./components/AuthenticatedRoute";
-import Home from "./routes/Home";
 import Admin from "./routes/Admin";
-import Signin from "./routes/Signin";
 import Fourofour from "./routes/Fourofour";
+import Home from "./routes/Home";
 import Invitations from "./routes/Invitations";
+import Signin from "./routes/Signin";
+import TeamPicker from "./routes/TeamPicker";
 import theme from "./theme";
 import Fonts from "./components/Fonts";
 
@@ -98,15 +99,17 @@ function App() {
                 <Flex height="100%" direction="column">
                     <WagmiConfig config={config}>
                         <User>
-                            <Wagmi>
-                                <SafeBalance>
-                                    <Transactions>
-                                        <WalletConnect>
-                                            <RouterProvider router={router} />
-                                        </WalletConnect>
-                                    </Transactions>
-                                </SafeBalance>
-                            </Wagmi>
+                            <Subscriptions>
+                                <Wagmi>
+                                    <SafeBalance>
+                                        <Transactions>
+                                            <WalletConnect>
+                                                <RouterProvider router={router} />
+                                            </WalletConnect>
+                                        </Transactions>
+                                    </SafeBalance>
+                                </Wagmi>
+                            </Subscriptions>
                         </User>
                     </WagmiConfig>
                 </Flex>

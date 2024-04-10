@@ -21,14 +21,16 @@ import {
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { isEmpty } from "lodash";
+import moment from "moment";
 import { PropTypes } from "prop-types";
 import React, { useState } from "react";
-import { IoPeopleOutline, IoWalletOutline } from "react-icons/io5";
+import { IoInformationCircleOutline, IoPeopleOutline, IoWalletOutline, IoWarning } from "react-icons/io5";
 import { useNavigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import ReactLogo from "../img/ReactLogo";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
+import FreeTrialExpiredModal from "./FreeTrialExpiredModal";
 
 export default function Header({ withTeam }) {
     const bgValue = useColorModeValue("bronzeSwatch.500", "bronzeSwatch.300");
@@ -36,7 +38,7 @@ export default function Header({ withTeam }) {
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { firestoreUser, currentTeam, userTeamData } = useUser();
+    const { firestoreUser, currentTeam, userTeamData, activeSubscriptions } = useUser();
     const { signOutUser, isSigningOut } = useAuth();
     const {
         preflightCheck,
@@ -125,6 +127,43 @@ export default function Header({ withTeam }) {
         currentTeam.safes.some((s) => !s.owners.includes(userTeamData.userWalletAddress));
 
     const notSafeOwnerText = "The wallet address in your Profile does not belong to the owners of one or more Safes.";
+    const activeSubscription = currentTeam
+        ? (activeSubscriptions || []).find((s) => s.team?.id === currentTeam.id)
+        : null;
+    const renderTrialExpiration = (subscription) => {
+        if (subscription) {
+            if (activeSubscription.trialEndDate) {
+                const trialEndMoment = moment(activeSubscription.trialEndDate);
+                const daysUntillEnd = trialEndMoment.diff(moment(), "days");
+                const label = trialEndMoment.isBefore(moment())
+                    ? "Free trial expired."
+                    : `Free trial expires ${moment().to(trialEndMoment)}.`;
+                let backgroundColor;
+                let icon;
+                if (daysUntillEnd <= 7) {
+                    backgroundColor = "red";
+                    icon = <IoWarning />;
+                } else if (daysUntillEnd > 7 && daysUntillEnd <= 14) {
+                    backgroundColor = "orange";
+                    icon = <IoInformationCircleOutline />;
+                } else {
+                    // backgroundColor = "grey";
+                    icon = <IoInformationCircleOutline />;
+                }
+
+                return (
+                    <Button
+                        size="sm"
+                        onClick={() => navigate(`/team/${slug}/admin?tab=Billing`)}
+                        rightIcon={icon}
+                        colorScheme={backgroundColor}
+                    >
+                        {label}
+                    </Button>
+                );
+            }
+        }
+    };
 
     return (
         <Flex margin="10px 10px 0 10px">
@@ -170,6 +209,7 @@ export default function Header({ withTeam }) {
                         )}
                     </Stack>
                     <Stack direction="row" spacing={4} align="center">
+                        {renderTrialExpiration(activeSubscription)}
                         {currentTeam && currentTeam.name && (
                             <Tooltip label="Switch team">
                                 <Button
@@ -287,6 +327,9 @@ export default function Header({ withTeam }) {
                     </Flex>
                 )}
             </Card>
+            <FreeTrialExpiredModal
+                isOpen={activeSubscription && moment(activeSubscription.trialEndDate).isBefore(moment())}
+            />
         </Flex>
     );
 }

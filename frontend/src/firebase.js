@@ -32,7 +32,6 @@ import {
     setDoc,
     Timestamp,
     updateDoc,
-    writeBatch,
     getCountFromServer,
     connectFirestoreEmulator,
 } from "firebase/firestore";
@@ -115,7 +114,6 @@ export {
     Timestamp,
     updateDoc,
     updateProfile,
-    writeBatch,
     updatePassword,
     getCountFromServer,
     transactions,

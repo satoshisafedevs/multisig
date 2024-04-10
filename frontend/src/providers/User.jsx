@@ -21,7 +21,6 @@ function User({ children }) {
     const [userTeamData, setUserTeamData] = useState(null);
     const [currentTeam, setCurrentTeam] = useState(null);
     const [teamUsersInfo, setTeamUsersInfo] = useState(null);
-    const [subscriptionTypes, setSubscriptionTypes] = useState([]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (userAuth) => {
@@ -197,32 +196,6 @@ function User({ children }) {
         }
     };
 
-    const getSubscriptionTypes = async () => {
-        try {
-            const subscriptionTypesRef = collection(db, "subscriptionTypes");
-            const subscriptionTypesSnap = await getDocs(subscriptionTypesRef);
-            const subscriptionTypesData = [];
-            if (!subscriptionTypesSnap.empty) {
-                subscriptionTypesSnap.docs.forEach((d) => {
-                    subscriptionTypesData.push({
-                        id: d.id,
-                        ...d.data(),
-                    });
-                });
-            }
-            subscriptionTypesData.sort((a, b) => a.price - b.price);
-            setSubscriptionTypes(subscriptionTypesData);
-        } catch (error) {
-            toast({
-                description: `Failed to get subscription types: ${error.message}`,
-                position: "top",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-        }
-    };
-
     const values = useMemo(
         () => ({
             user,
@@ -240,8 +213,6 @@ function User({ children }) {
             teamUsersInfo,
             setTeamUsersInfo,
             getUserTeamsData,
-            subscriptionTypes,
-            getSubscriptionTypes,
             getFirestoreUserData,
             setUserTeamWallet,
             leaveTeam,

@@ -1,14 +1,14 @@
-import { useState } from "react";
 import { useToast } from "@chakra-ui/react";
+import { useState } from "react";
 import {
     auth,
-    signOut,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    sendPasswordResetEmail,
-    sendEmailVerification,
     db,
     doc,
+    sendEmailVerification,
+    sendPasswordResetEmail,
+    signInWithEmailAndPassword,
+    signOut,
     updateDoc,
     updateProfile,
 } from "../firebase";
