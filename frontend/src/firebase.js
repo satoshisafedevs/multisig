@@ -71,6 +71,7 @@ const getWalletTokenBalances = httpsCallable(functions, "api-getWalletTokenBalan
 const getTransactionDetails = httpsCallable(functions, "api-getTransactionDetails");
 const selectSubscriptionForTeam = httpsCallable(functions, "api-selectSubscriptionForTeam");
 const addSupportUserToTeam = httpsCallable(functions, "api-addSupportUserToTeam");
+const updateSafeBalances = httpsCallable(functions, "api-updateSafeBalances");
 
 // const createNewSatoshiBot = httpsCallable(functions, "api-createNewSatoshiBot");
 
@@ -125,4 +126,5 @@ export {
     getTransactionDetails,
     selectSubscriptionForTeam,
     addSupportUserToTeam,
+    updateSafeBalances,
 };

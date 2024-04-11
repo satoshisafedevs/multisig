@@ -36,11 +36,13 @@ export default function Chat() {
     const [hoverID, setHoverID] = useState();
     const [filter, setFilter] = useState(["all"]);
     const lastMessage = useRef();
+    const chatContainerRef = useRef(); // Ref for the chat container
     const loadingMoreTransactions = useRef(false);
 
     useEffect(() => {
-        if (messages && lastMessage.current && !loadingMoreTransactions.current) {
-            lastMessage.current.scrollIntoView();
+        if (messages && lastMessage.current && !loadingMoreTransactions.current && chatContainerRef.current) {
+            const container = chatContainerRef.current;
+            container.scrollTop = container.scrollHeight; // Scroll to the bottom
         }
         loadingMoreTransactions.current = false;
     }, [messages, firestoreTransactions]);
@@ -248,7 +250,7 @@ export default function Chat() {
                     )}
                 </Stack>
             </CardHeader>
-            <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px">
+            <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px" ref={chatContainerRef}>
                 <Stack spacing="2">
                     {getFilteredData().map((el) => {
                         if (el.id === "loadMore") {

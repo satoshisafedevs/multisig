@@ -144,14 +144,24 @@ function Message({ message, hoverID, setHoverID }) {
             >
                 <Avatar
                     size="sm"
-                    alt={teamUsersInfo ? teamUsersInfo[message.uid].displayName : null}
+                    alt={
+                        teamUsersInfo && teamUsersInfo[message.uid].displayName
+                            ? teamUsersInfo[message.uid].displayName
+                            : null
+                    }
                     src={teamUsersInfo ? teamUsersInfo[message.uid].photoUrl : null}
-                    name={teamUsersInfo ? teamUsersInfo[message.uid].displayName : null}
+                    name={
+                        teamUsersInfo && teamUsersInfo[message.uid].displayName
+                            ? teamUsersInfo[message.uid].displayName
+                            : null
+                    }
                 />
                 <Box flexGrow="1" paddingLeft="6px">
                     <Stack direction="row" spacing="5px">
                         <Text fontSize="xs" fontWeight="bold">
-                            {teamUsersInfo ? teamUsersInfo[message.uid].displayName : "No name"}
+                            {teamUsersInfo && teamUsersInfo[message.uid].displayName
+                                ? teamUsersInfo[message.uid].displayName
+                                : "No name"}
                         </Text>
                         <Text fontSize="xs">{messageTimeFormat(message.createdAt)}</Text>
                     </Stack>
