@@ -197,3 +197,19 @@ export const isValidEmail = (email) => {
     return regex.test(String(email).toLowerCase());
 };
 /* eslint-enable */
+
+export const addMissingDate = (data) => {
+    const dates = Object.keys(data);
+    if (dates.length === 1) {
+        const currentDate = dates[0];
+        const prevDate = new Date(currentDate);
+        prevDate.setDate(prevDate.getDate() - 1);
+        const prevDateString = prevDate.toISOString().split("T")[0];
+        const newData = {
+            [prevDateString]: 0,
+            ...data,
+        };
+        return newData;
+    }
+    return data;
+};
