@@ -8,6 +8,7 @@ const { transactions } = require("./transactions");
 const { getTransactionDetails } = require("./getTransactionDetails");
 const { selectSubscriptionForTeam } = require("./selectSubscriptionForTeam");
 const { addSupportUserToTeam } = require("./addSupportUserToTeam");
+const { updateSafeBalances } = require("./updateSafeBalances");
 
 module.exports = {
     onSatoshiBotMessageReceived,
@@ -22,4 +23,5 @@ module.exports = {
     getTransactionDetails,
     selectSubscriptionForTeam,
     addSupportUserToTeam,
+    updateSafeBalances,
 };

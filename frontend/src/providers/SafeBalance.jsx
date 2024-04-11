@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import { useToast } from "@chakra-ui/react";
-import { db, collection, query, orderBy, limit, where, getDocs } from "../firebase";
+import { db, collection, query, orderBy, limit, where, getDocs, updateSafeBalances } from "../firebase";
 import { useUser } from "./User";
 
 const BalanceContext = createContext();
@@ -56,14 +55,7 @@ const fetchAndProcessSafeData = async (safe) => {
 
         return { portfolio, historicalBalances, walletAssets, stakedAssets };
     } catch (error) {
-        const toast = useToast();
-        toast({
-            description: `Failed to fetch and process safe data: ${error.message}`,
-            position: "top",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-        });
+        console.error(`Failed to fetch and process data for ${safe.safeAddress}: ${error.message}`);
         return null;
     }
 };
@@ -83,33 +75,37 @@ function SafeBalance({ children }) {
     useEffect(() => {
         const fetchAndProcessData = async () => {
             if (currentTeam && currentTeam.safes && !gettingData) {
-                setGettingData(true);
-                const results = await Promise.all(currentTeam.safes.map((safe) => fetchAndProcessSafeData(safe)));
+                try {
+                    setGettingData(true);
+                    const results = await Promise.all(currentTeam.safes.map((safe) => fetchAndProcessSafeData(safe)));
 
-                let portfolios = {};
-                let allWalletAssets = {};
-                let allStakedAssets = {};
-                const balance = {};
+                    let portfolios = {};
+                    let allWalletAssets = {};
+                    let allStakedAssets = {};
+                    const balance = {};
 
-                results.forEach((result) => {
-                    portfolios = { ...portfolios, ...result.portfolio[0] };
-                    allWalletAssets = { ...allWalletAssets, ...result.walletAssets[0] };
-                    allStakedAssets = { ...allStakedAssets, ...result.stakedAssets[0] };
-                    Object.keys(result.historicalBalances).forEach((dateStr) => {
-                        if (!balance[dateStr]) {
-                            balance[dateStr] = result.historicalBalances[dateStr];
-                        } else {
-                            balance[dateStr] += result.historicalBalances[dateStr];
-                        }
+                    results.forEach((result) => {
+                        portfolios = { ...portfolios, ...result.portfolio[0] };
+                        allWalletAssets = { ...allWalletAssets, ...result.walletAssets[0] };
+                        allStakedAssets = { ...allStakedAssets, ...result.stakedAssets[0] };
+                        Object.keys(result.historicalBalances).forEach((dateStr) => {
+                            if (!balance[dateStr]) {
+                                balance[dateStr] = result.historicalBalances[dateStr];
+                            } else {
+                                balance[dateStr] += result.historicalBalances[dateStr];
+                            }
+                        });
                     });
-                });
 
-                setSafesPortfolio(portfolios);
-                setSafesWalletAssets(allWalletAssets);
-                setSafesStackedAssets(allStakedAssets);
-                setHistoricalTotalBalance(balance);
-                setGettingData(false);
-                setInitialLoading(false);
+                    setSafesPortfolio(portfolios);
+                    setSafesWalletAssets(allWalletAssets);
+                    setSafesStackedAssets(allStakedAssets);
+                    setHistoricalTotalBalance(balance);
+                    setGettingData(false);
+                    setInitialLoading(false);
+                } catch (error) {
+                    console.error(`Failed to fetch and process data: ${error.message}`);
+                }
             } else {
                 setInitialLoading(false);
             }
@@ -189,6 +185,12 @@ function SafeBalance({ children }) {
         }
     }, [safesWalletAssets, calculateTodaysWalletAssets]);
 
+    const callUpdateSafeBalances = async () => {
+        if (currentTeam && currentTeam.safes) {
+            updateSafeBalances({ safes: currentTeam.safes });
+        }
+    };
+
     const calculateTodaysStackedAssets = useCallback(() => {
         const balances = [];
         let totalUSDValue = 0;
@@ -256,6 +258,7 @@ function SafeBalance({ children }) {
             historicalTotalBalance,
             resetBalanceData,
             initialLoading,
+            callUpdateSafeBalances,
         }),
         [
             safesPortfolio,
@@ -265,6 +268,7 @@ function SafeBalance({ children }) {
             historicalTotalBalance,
             resetBalanceData,
             initialLoading,
+            callUpdateSafeBalances,
         ],
     );
 

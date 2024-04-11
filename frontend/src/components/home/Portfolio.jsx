@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { isEmpty } from "lodash";
 import { Spinner, Box, Stack, Button, Card, CardHeader, CardBody, Heading, Flex, IconButton } from "@chakra-ui/react";
-import { IoExpandOutline, IoContractOutline } from "react-icons/io5";
+import { IoExpandOutline, IoContractOutline, IoRefresh } from "react-icons/io5";
 import { useSafeBalance } from "../../providers/SafeBalance";
 import LineChart from "./LineChart";
 import WalletAssetsTable from "./WalletAssetsTable";
@@ -16,6 +16,7 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
         todaysAggregatedSafesStakedAssets,
         historicalTotalBalance,
         initialLoading,
+        callUpdateSafeBalances,
     } = useSafeBalance();
 
     const convertedDates = (data) => {
@@ -102,6 +103,16 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
                         </>
                     )}
                 </Stack>
+                <IconButton
+                    icon={<IoRefresh />}
+                    onClick={() => {
+                        callUpdateSafeBalances();
+                    }}
+                    position="absolute"
+                    top="0"
+                    right={{ base: "40px", md: "40px" }} // Adjust this value based on the existing layout
+                    background="none"
+                />
                 <IconButton
                     icon={expandPortfolio ? <IoContractOutline /> : <IoExpandOutline />}
                     onClick={expandAction}
