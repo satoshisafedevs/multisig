@@ -45,14 +45,13 @@ export default function WalletConnect() {
                         </Button>
                     </>
                 )}
+                {sessions && !isEmpty(sessions) && (
+                    <Button onClick={onOpen} mt="40px" colorScheme="blueSwatch" w="250px">
+                        <IoAddCircleOutline size="30px" color="gray.300" />
+                        Add Connection
+                    </Button>
+                )}
             </VStack>
-            {/* Button at the bottom */}
-            {sessions && !isEmpty(sessions) && (
-                <Button onClick={onOpen} colorScheme="blueSwatch" w="100%">
-                    Add Connection
-                </Button>
-            )}
-
             <WalletConnectIntegrationModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </Flex>
     );
