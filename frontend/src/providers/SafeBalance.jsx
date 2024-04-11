@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useMemo, useEffect, useCall
 import PropTypes from "prop-types";
 import { db, collection, query, orderBy, limit, where, getDocs, updateSafeBalances } from "../firebase";
 import { useUser } from "./User";
+import { addMissingDate } from "../utils";
 
 const BalanceContext = createContext();
 const BalanceProvider = BalanceContext.Provider;
@@ -78,12 +79,10 @@ function SafeBalance({ children }) {
                 try {
                     setGettingData(true);
                     const results = await Promise.all(currentTeam.safes.map((safe) => fetchAndProcessSafeData(safe)));
-
                     let portfolios = {};
                     let allWalletAssets = {};
                     let allStakedAssets = {};
-                    const balance = {};
-
+                    let balance = {};
                     results.forEach((result) => {
                         portfolios = { ...portfolios, ...result.portfolio[0] };
                         allWalletAssets = { ...allWalletAssets, ...result.walletAssets[0] };
@@ -96,7 +95,7 @@ function SafeBalance({ children }) {
                             }
                         });
                     });
-
+                    balance = addMissingDate(balance);
                     setSafesPortfolio(portfolios);
                     setSafesWalletAssets(allWalletAssets);
                     setSafesStackedAssets(allStakedAssets);
