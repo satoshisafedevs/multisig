@@ -6,7 +6,7 @@
         "eslint:verify": "eslint .",
         "serve": "firebase emulators:start --inspect-functions",
         "serve:test": "firebase emulators:exec 'yarn test'",
-        "serve:data": "firebase emulators:start --inspect-functions --import ./data/playground-data-apr-10-2024",
+        "serve:data": "firebase emulators:start --inspect-functions --import ./data/playground-data-apr-11-2024",
         "serve:cred": "GOOGLE_APPLICATION_CREDENTIALS=serviceAccountKey.json firebase emulators:start --inspect-functions",
         "shell": "firebase functions:shell",
         "test": "mocha --reporter spec --recursive './src/**/*.test.js'",
