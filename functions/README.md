@@ -1,4 +1,5 @@
 ## Deploying
+
 To deploy functions manually from cli create a file - `functions/.env` with the following env variables:
 
 ```
@@ -17,7 +18,9 @@ Service key can be found in GitLab CI/CD variables.
 To deploy a particular function provide its name: `functions:functionName`.
 
 ## VS Code
+
 If you want to throw debuggers into the node code and run it locally, use the following launch.json file:
+
 ```
 {
     "version": "0.2.0",
@@ -53,6 +56,18 @@ If you want to throw debuggers into the node code and run it locally, use the fo
             ],
             "internalConsoleOptions": "openOnSessionStart",
             "envFile": "${workspaceFolder}/functions/.env"
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Firebase Functions",
+            "port": 9229,
+            "timeout": 30000,
+            "restart": true,
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/functions/lib/**/*.js"],
+            "cwd": "${workspaceFolder}/functions",
+            "skipFiles": ["<node_internals>/**"]
         }
     ]
 }
