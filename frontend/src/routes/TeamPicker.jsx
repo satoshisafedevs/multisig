@@ -1,13 +1,10 @@
 import {
-    Box,
     Button,
     Card,
     Container,
-    Flex,
     FormControl,
     FormLabel,
     Heading,
-    Icon,
     Input,
     Modal,
     ModalBody,
@@ -18,15 +15,12 @@ import {
     ModalOverlay,
     Spinner,
     Stack,
-    Text,
-    Tooltip,
-    useColorModeValue,
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import React, { useEffect, useRef, useState } from "react";
-import { IoAdd, IoInformation } from "react-icons/io5";
+import { IoAdd } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { addDoc, collection, db, doc, setDoc, addSupportUserToTeam } from "../firebase";
@@ -35,14 +29,12 @@ import { useTransactions } from "../providers/Transactions";
 import { useUser } from "../providers/User";
 import { useWagmi } from "../providers/Wagmi";
 import { useWalletConnect } from "../providers/WalletConnect";
-import { useSubscriptions } from "../providers/Subscriptions";
 
 const MAX_TEAM_NAME_LENGTH = 50;
 
 function TeamPicker() {
     const toast = useToast();
     const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
-    const { getSubscriptionTypes, subscriptionTypes } = useSubscriptions();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const {
@@ -57,11 +49,8 @@ function TeamPicker() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [teamName, setTeamName] = useState("");
     const [walletAddress, setWalletAddress] = useState("");
-    const [selectedSubscription, setSelectedSubscription] = useState("");
     const [loading, setLoading] = useState(false);
     const inputRef = useRef();
-    const selectedBg = useColorModeValue("green.200", "green.700");
-    const bg = useColorModeValue("gray.100", "gray.700");
 
     useEffect(() => {
         document.title = "Select your team - Satoshi Safe";
@@ -70,7 +59,6 @@ function TeamPicker() {
         setWalletMismatch(false);
         resetBalanceData();
         getUserTeamsData(user);
-        getSubscriptionTypes();
         setFirestoreTransactions();
         setIsDataLoaded(false);
         setAllTransactionsCount(0);
@@ -132,7 +120,6 @@ function TeamPicker() {
             const newTeamData = {
                 name: teamName,
                 ownerId: firestoreUser.uid,
-                subscriptionId: selectedSubscription,
                 users: [firestoreUser.uid],
                 // generate a slug from the team name
                 slug: `${teamName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`,
@@ -216,36 +203,6 @@ function TeamPicker() {
                             <FormControl mt={4}>
                                 <FormLabel>Wallet address</FormLabel>
                                 <Input value={walletAddress} onChange={(e) => setWalletAddress(e.target.value)} />
-                            </FormControl>
-                            <FormControl mt={4}>
-                                <FormLabel>Subscription type</FormLabel>
-                                <Flex justifyContent="center">
-                                    <Flex wrap="wrap" justify="space-around" align="center">
-                                        {subscriptionTypes.map((sub) => (
-                                            <Box
-                                                key={sub.id}
-                                                p={4}
-                                                display="flex"
-                                                alignItems="center"
-                                                justifyContent="flex-start" // Align items to the start of the box
-                                                borderWidth="1px"
-                                                borderRadius="lg"
-                                                m={2}
-                                                bg={selectedSubscription === sub.id ? selectedBg : bg}
-                                                cursor="pointer"
-                                                onClick={() => setSelectedSubscription(sub.id)}
-                                                width="180px" // Set a fixed width to accommodate the content
-                                            >
-                                                <Text fontSize="sm" isTruncated>
-                                                    {sub.name} - ${sub.price.toFixed(2).toLocaleString()}
-                                                </Text>
-                                                <Tooltip label={sub.description}>
-                                                    <Icon variant="ghost" icon={<IoInformation />} ml={2} />
-                                                </Tooltip>
-                                            </Box>
-                                        ))}
-                                    </Flex>
-                                </Flex>
                             </FormControl>
                         </ModalBody>
                         <ModalFooter>
