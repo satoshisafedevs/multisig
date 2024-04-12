@@ -207,6 +207,14 @@ export default function Header({ withTeam }) {
                                 <Button
                                     variant="link"
                                     size="sm"
+                                    onClick={() => navigate(`/team/${slug}/admin?tab=Profile`)}
+                                    color={colorMode === "light" && "var(--chakra-colors-gray-600)"}
+                                >
+                                    Settings
+                                </Button>
+                                <Button
+                                    variant="link"
+                                    size="sm"
                                     color={colorMode === "light" && "var(--chakra-colors-gray-600)"}
                                     onClick={() => window.open("https://docs.getsatoshisafe.com/wallet", "_blank")}
                                 >

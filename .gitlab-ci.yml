@@ -96,6 +96,22 @@ build-frontend:
       - $CI_PROJECT_DIR/frontend/dist
     expire_in: 1 week
 
+build-production-frontend:
+  stage: build
+  before_script:
+    - apk update && apk add python3 make g++ git
+    - cd $CI_PROJECT_DIR/frontend && yarn install
+  script:
+    - echo "Compiling the code..."
+    - yarn build
+    - echo "Compile complete."
+  only:
+    - production
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/frontend/dist
+    expire_in: 1 week
+
 deploy-hosting-playground:
   stage: deploy
   only:
@@ -158,16 +174,23 @@ deploy-hosting-production:
   only:
     - production
   dependencies:
-    - build-frontend
+    - build-production-frontend
   before_script:
     - apk update && apk add python3 make g++ git
     - cd $CI_PROJECT_DIR/frontend && yarn install
-    - yarn global add firebase-tools
+    - yarn global add firebase-tools@12.4.8
   script:
     - cd $CI_PROJECT_DIR/frontend
-    - echo "Deploying application..."
-    - export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION && firebase deploy --only hosting --project production
-    - echo "Application successfully deployed."
+    - |
+      if [ -d "dist" ]; then
+        echo "Deploying application..."
+        export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PRODUCTION
+        firebase deploy --only hosting --project production
+        echo "Application successfully deployed."
+      else
+        echo "Error: Distribution directory does not exist."
+        exit 1
+      fi
 
 deploy-functions-production:
   stage: deploy
@@ -215,13 +238,17 @@ publish_to_github:
   only:
     - production
   before_script:
-    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - "which ssh-agent || ( apk update && apk add openssh-client git )"
     - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - cd $CI_PROJECT_DIR # Ensures all operations are performed in the project directory
   script:
-    - "git remote remove github || true" # Ensures no conflict if the remote already exists
+    - git remote remove github || true # Ensures no conflict if the remote already exists
     - git remote add github git@github.com:Satoshi-Safe/wallet.git
-    - git push -u github main # Adjust if your current branch differs
+    - git fetch github
+    - git checkout production || git checkout -b production # Ensures we are on the right branch
+    - git branch -M main # Optionally force rename the branch to 'main'
+    - git push -u github main # Pushes the branch as 'main' to GitHub
 
