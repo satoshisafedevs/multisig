@@ -119,7 +119,7 @@ function Subscriptions({ children }) {
             activeSubscriptions,
             userInvoices,
         }),
-        [user, setUser, activeSubscriptions, userInvoices],
+        [user, setUser, activeSubscriptions, userInvoices, subscriptionTypes],
     );
 
     return <SubscriptionProvider value={values}>{children}</SubscriptionProvider>;
