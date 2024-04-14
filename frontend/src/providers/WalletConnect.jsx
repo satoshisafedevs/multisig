@@ -213,7 +213,10 @@ function WalletConnect({ children }) {
 
         newWallet.on("session_proposal", async (proposal) => {
             if (isGettingNamespaceInfoRef.current.loading) {
-                setRequiredNamespaces(proposal?.params?.requiredNamespaces);
+                setRequiredNamespaces({
+                    ...proposal?.params?.requiredNamespaces,
+                    ...proposal?.params?.optionalNamespaces,
+                });
                 setIsGettingNamespaceInfo(false);
             } else {
                 setSessionProposal(proposal);
