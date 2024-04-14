@@ -156,7 +156,9 @@ export default function WalletConnectIntegrationModal({ isOpen, onClose }) {
                     availableChains.push(NETWORK_SOLANA[chainId]);
                 } else {
                     const network = Object.entries(networks).find(([, value]) => value.eip === chainId);
-                    availableChains.push(network[1]);
+                    if (network) {
+                        availableChains.push(network[1]);
+                    }
                 }
             });
         });
