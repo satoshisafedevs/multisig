@@ -123,64 +123,59 @@ function Message({ message, hoverID, setHoverID }) {
         setMessageID(key);
     };
 
-    return (
-        <>
-            <DeleteMessageModal
-                messageID={messageID}
-                isOpen={deleteModalOpen}
-                setIsOpen={setDeleteModalOpen}
-                setHoverID={setHoverID}
-            />
-            <Stack
-                direction="row"
-                align="center"
-                spacing="0"
-                paddingLeft="3px"
-                paddingTop="2px"
-                paddingBottom="2px"
-                _hover={{ backgroundColor: backgroundHover, borderRadius: "5px" }}
-                onMouseEnter={() => handleMouseEnter(message.id)}
-                onMouseLeave={handleMouseLeave}
-            >
-                <Avatar
-                    size="sm"
-                    alt={
-                        teamUsersInfo && teamUsersInfo[message.uid].displayName
-                            ? teamUsersInfo[message.uid].displayName
-                            : null
-                    }
-                    src={teamUsersInfo ? teamUsersInfo[message.uid].photoUrl : null}
-                    name={
-                        teamUsersInfo && teamUsersInfo[message.uid].displayName
-                            ? teamUsersInfo[message.uid].displayName
-                            : null
-                    }
+    if (teamUsersInfo && teamUsersInfo[message.uid]) {
+        return (
+            <>
+                <DeleteMessageModal
+                    messageID={messageID}
+                    isOpen={deleteModalOpen}
+                    setIsOpen={setDeleteModalOpen}
+                    setHoverID={setHoverID}
                 />
-                <Box flexGrow="1" paddingLeft="6px">
-                    <Stack direction="row" spacing="5px">
-                        <Text fontSize="xs" fontWeight="bold">
-                            {teamUsersInfo && teamUsersInfo[message.uid].displayName
-                                ? teamUsersInfo[message.uid].displayName
-                                : "No name"}
-                        </Text>
-                        <Text fontSize="xs">{messageTimeFormat(message.createdAt)}</Text>
-                    </Stack>
-                    <Text fontSize="xs">{renderMessage(message)}</Text>
-                </Box>
-                {firestoreUser && firestoreUser.uid === message.uid && message.id === hoverID && (
-                    <IconButton
-                        icon={<StyledTrashIcon />}
-                        onClick={() => handleDelete(message.id)}
-                        height="36px"
-                        width="36px"
-                        borderRadius="3px"
-                        background="none"
-                        _hover={{ background: "none", cursor: "default" }}
+                <Stack
+                    direction="row"
+                    align="center"
+                    spacing="0"
+                    paddingLeft="3px"
+                    paddingTop="2px"
+                    paddingBottom="2px"
+                    _hover={{ backgroundColor: backgroundHover, borderRadius: "5px" }}
+                    onMouseEnter={() => handleMouseEnter(message.id)}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <Avatar
+                        size="sm"
+                        alt={teamUsersInfo[message.uid].displayName ? teamUsersInfo[message.uid].displayName : null}
+                        src={teamUsersInfo[message.uid].photoUrl ? teamUsersInfo[message.uid].photoUrl : null}
+                        name={teamUsersInfo[message.uid].displayName ? teamUsersInfo[message.uid].displayName : null}
                     />
-                )}
-            </Stack>
-        </>
-    );
+                    <Box flexGrow="1" paddingLeft="6px">
+                        <Stack direction="row" spacing="5px">
+                            <Text fontSize="xs" fontWeight="bold">
+                                {teamUsersInfo && teamUsersInfo[message.uid] && teamUsersInfo[message.uid].displayName
+                                    ? teamUsersInfo[message.uid].displayName
+                                    : "No name"}
+                            </Text>
+                            <Text fontSize="xs">{messageTimeFormat(message.createdAt)}</Text>
+                        </Stack>
+                        <Text fontSize="xs">{renderMessage(message)}</Text>
+                    </Box>
+                    {firestoreUser && firestoreUser.uid === message.uid && message.id === hoverID && (
+                        <IconButton
+                            icon={<StyledTrashIcon />}
+                            onClick={() => handleDelete(message.id)}
+                            height="36px"
+                            width="36px"
+                            borderRadius="3px"
+                            background="none"
+                            _hover={{ background: "none", cursor: "default" }}
+                        />
+                    )}
+                </Stack>
+            </>
+        );
+    }
+    return null;
 }
 
 Message.propTypes = {

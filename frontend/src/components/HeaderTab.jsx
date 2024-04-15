@@ -6,7 +6,7 @@ function HeaderTab({ isActive, onClick, children }) {
     return (
         <Button
             variant="link"
-            size="xs"
+            size="sm"
             fontWeight={isActive ? "bold" : "normal"}
             minWidth="34px"
             onClick={() => onClick("chart")}
