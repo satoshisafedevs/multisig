@@ -75,7 +75,7 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
                         <>
                             <Button
                                 variant="link"
-                                size="xs"
+                                size="sm"
                                 fontWeight={activeTab === "chart" && "bold"}
                                 minWidth="34px"
                                 onClick={() => setActiveTab("chart")}
@@ -84,7 +84,7 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
                             </Button>
                             <Button
                                 variant="link"
-                                size="xs"
+                                size="sm"
                                 fontWeight={activeTab === "wallet" && "bold"}
                                 minWidth="82px"
                                 onClick={() => setActiveTab("wallet")}
@@ -93,7 +93,7 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
                             </Button>
                             <Button
                                 variant="link"
-                                size="xs"
+                                size="sm"
                                 fontWeight={activeTab === "staked" && "bold"}
                                 minWidth="86px"
                                 onClick={() => setActiveTab("staked")}
