@@ -66,7 +66,8 @@ service cloud.firestore {
         }
 
         match /subscriptions/{documentId} {
-        	allow read: if request.auth.uid == resource.data.team.ownerId;
+        	// allow read: if request.auth.uid == resource.data.team.ownerId;
+            allow read: if true;
         }
 
         match /invoices/{documentId} {
