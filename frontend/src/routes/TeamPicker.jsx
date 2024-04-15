@@ -133,7 +133,7 @@ function TeamPicker() {
                 },
                 { merge: true },
             );
-            addSupportUserToTeam({ teamId: newDoc.id });
+            await addSupportUserToTeam({ teamId: newDoc.id });
             // await createNewSatoshiBot({ teamId: newDoc.id });
             if ((await getUserTeamsData(user)) === true) {
                 // navigate once new team is ready
