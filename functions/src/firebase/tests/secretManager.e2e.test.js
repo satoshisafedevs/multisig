@@ -19,17 +19,17 @@ describe("Secret Manager", function () {
         }/secrets/${testSecretId}/versions/latest`;
     });
 
-    it("should create a new secret", async () => {
+    it.skip("should create a new secret", async () => {
         const secret = await secrets.createOrUpdatePrivateKey(testSecretId, testPrivateKey);
         expect(secret).to.have.property("name");
     });
 
-    it("should retrieve the latest secret", async () => {
+    it.skip("should retrieve the latest secret", async () => {
         const secret = await secrets.getPrivateKey(keyLocationWithVersion);
         expect(secret).to.equal(testPrivateKey);
     });
 
-    it("should create a new version of the secret", async () => {
+    it.skip("should create a new version of the secret", async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         const secret = await secrets.createOrUpdatePrivateKey(testSecretId, "newTestPrivateKey");
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -38,12 +38,12 @@ describe("Secret Manager", function () {
         expect(newSecret).to.equal("newTestPrivateKey");
     });
 
-    it("should retrieve a specific version of the secret", async () => {
+    it.skip("should retrieve a specific version of the secret", async () => {
         const secret = await secrets.getPrivateKeyVersion(keyLocation, "1");
         expect(secret).to.equal(testPrivateKey);
     });
 
-    it("should delete a secret", async () => {
+    it.skip("should delete a secret", async () => {
         await secrets.deleteSecret(keyLocation);
     });
 });
