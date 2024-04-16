@@ -205,7 +205,7 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             toast({
-                description: `Failed to create and approve send transaction: ${error.message}`,
+                description: `Failed to create and sign send transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -249,7 +249,7 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             toast({
-                description: `Failed to create and approve swap transaction: ${error.message}`,
+                description: `Failed to create and sign swap transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -277,7 +277,7 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             toast({
-                description: `Failed to create and approve add safe owner transaction: ${error.message}`,
+                description: `Failed to create and sign add safe owner transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -305,7 +305,7 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             toast({
-                description: `Failed to to create and approve remove safe owner transaction: ${error.message}`,
+                description: `Failed to to create and sign remove safe owner transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -333,7 +333,7 @@ const useGnosisSafe = () => {
             return true;
         } catch (error) {
             toast({
-                description: `Failed to create and approve remove safe owner transaction: ${error.message}`,
+                description: `Failed to create and sign remove safe owner transaction: ${error.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,

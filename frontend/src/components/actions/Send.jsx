@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+    Avatar,
     Box,
     Input,
     Menu,
@@ -143,7 +144,7 @@ export default function Send() {
     return (
         <Stack padding="10px 0" gap="20px">
             <Box display="flex" flexDirection="row">
-                <Box minWidth="35%">
+                <Box minWidth="35%" marginRight="5px">
                     <Text fontSize="xs" color="gray.500">
                         Sender
                     </Text>
@@ -153,7 +154,6 @@ export default function Send() {
                                 <MenuButton
                                     as={Button}
                                     backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
-                                    borderRightRadius="0"
                                     border="1px solid"
                                     borderColor="var(--chakra-colors-chakra-border-color)"
                                     flexShrink="0"
@@ -217,12 +217,9 @@ export default function Send() {
                         Recipient
                     </Text>
                     <Input
-                        borderLeftColor="transparent"
                         _hover={{ borderLeftColor: `${!invalidRecipient} && transparent` }}
                         // eslint-disable-next-line no-underscore-dangle
                         _focusVisible={{ ...inputStyles.field._focusVisible }}
-                        borderLeftRadius="0"
-                        marginLeft="-1px"
                         placeholder="Recipient address or ENS"
                         value={recipient}
                         onChange={(event) => setRecipient(event.target.value)}
@@ -232,7 +229,7 @@ export default function Send() {
                 </Box>
             </Box>
             <Box display="flex" flexDirection="row">
-                <Box minWidth="35%">
+                <Box minWidth="35%" marginRight="5px">
                     <Text
                         fontSize="xs"
                         minWidth="35%"
@@ -249,7 +246,6 @@ export default function Send() {
                                 <MenuButton
                                     as={Button}
                                     backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
-                                    borderRightRadius="0"
                                     border="1px solid"
                                     borderColor="var(--chakra-colors-chakra-border-color)"
                                     flexShrink="0"
@@ -266,14 +262,14 @@ export default function Send() {
                                                 justifyContent="center"
                                                 whiteSpace="normal"
                                             >
-                                                <Image
+                                                <Avatar
                                                     boxSize="1.5rem"
                                                     borderRadius="full"
                                                     src={imageSrc(selectedToken)}
-                                                    alt=" "
+                                                    name={selectedToken?.contract_ticker_symbol}
                                                     mr="12px"
-                                                    fallbackSrc={selectedToken.logo_urls.token_logo_url}
-                                                    fallbackStrategy="onError"
+                                                    // fallbackSrc={selectedToken.logo_urls.token_logo_url}
+                                                    // fallbackStrategy="onError"
                                                 />{" "}
                                                 {formatNumber(
                                                     toHumanReadable(
@@ -294,14 +290,15 @@ export default function Send() {
                                                 key={token.contract_address}
                                                 onClick={() => setSelectedToken(token)}
                                             >
-                                                <Image
+                                                <Avatar
+                                                    key={token.contract_address}
                                                     boxSize="1.5rem"
                                                     borderRadius="full"
                                                     src={imageSrc(token)}
-                                                    alt=" "
+                                                    name={token?.contract_ticker_symbol}
                                                     mr="12px"
-                                                    fallbackSrc={token.logo_urls.token_logo_url}
-                                                    fallbackStrategy="onError"
+                                                    // fallbackSrc={token.logo_urls.token_logo_url}
+                                                    // fallbackStrategy="onError"
                                                 />
                                                 {formatNumber(toHumanReadable(token.balance, token.contract_decimals))}
                                                 <Box color={grayColor} whiteSpace="nowrap">
@@ -340,12 +337,9 @@ export default function Send() {
                     </Text>
                     <InputGroup>
                         <Input
-                            borderLeftColor="transparent"
                             _hover={{ borderLeftColor: `${!exceedingAmount} && transparent` }}
                             // eslint-disable-next-line no-underscore-dangle
                             _focusVisible={{ ...inputStyles.field._focusVisible }}
-                            borderLeftRadius="0"
-                            marginLeft="-1px"
                             paddingRight="4.5rem"
                             placeholder="0.0"
                             value={amount}

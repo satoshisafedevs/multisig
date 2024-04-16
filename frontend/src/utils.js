@@ -119,14 +119,11 @@ export const toHumanReadable = (value, decimals) => {
 };
 
 export const fromHumanReadable = (value, decimals) => {
-    // Convert the value to a string to ensure proper decimal handling
-    let valueStr = value.toString();
+    // Convert the value to a number first to handle any floating point issues
+    const valueNum = Number(value);
 
-    // Check if value is in exponential format and convert it to a fixed decimal string
-    if (valueStr.includes("e")) {
-        const valueNum = Number(valueStr);
-        valueStr = valueNum.toFixed(decimals);
-    }
+    // Convert the number to a string with fixed decimals
+    const valueStr = valueNum.toFixed(decimals);
 
     // Use ethers.js to parse the value string with the specified decimals
     // This effectively multiplies the human-readable value by 10**decimals to get the smallest unit

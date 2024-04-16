@@ -17,7 +17,7 @@ import {
 import { isEmpty } from "lodash";
 import { ethers } from "ethers";
 import { useUser } from "../../providers/User";
-import { usdFormatter } from "../../utils";
+import { usdFormatter, formatNumber } from "../../utils";
 import networks from "../../utils/networks.json";
 import SelectTokenModal from "./SelectTokenModal";
 
@@ -71,7 +71,6 @@ function Swapper({
         setFromNetwork(network);
         const targetChainId = networks[network.toLowerCase()]?.id;
         const lifiTokens = await lifi.getTokens({ chains: [targetChainId] });
-        // console.log("ilia", network, targetChainId, lifiChainTokens);
         setLifiChainTokens(lifiTokens?.tokens[targetChainId]);
         setChain(targetChainId);
         setToken({});
@@ -173,6 +172,14 @@ function Swapper({
         return null;
     };
 
+    const formatAmount = () => {
+        if (destinationSafe) {
+            if (amount === "") return "";
+            return formatNumber(amount);
+        }
+        return amount;
+    };
+
     return (
         <>
             <SelectTokenModal
@@ -212,7 +219,7 @@ function Swapper({
                                         {safe.slice(0, 5)}...{safe.slice(-4)}
                                     </Box>
                                 ) : (
-                                    (destinationSafe && "To Safe") || "From Safe"
+                                    (destinationSafe && "Safe") || "Select Safe"
                                 )}
                             </MenuButton>
                             <MenuList maxHeight="50vh" overflow="auto" display={isOpen ? "block" : "none"}>
@@ -270,14 +277,15 @@ function Swapper({
                             </Box>
                         )) ||
                         (safe && "Select token") ||
-                        "Token"
+                        (destinationSafe && "To Token") ||
+                        "From Token"
                     )}
                 </Button>
                 <Input
                     placeholder="0.0"
                     borderLeftRadius="0"
                     minWidth="35%"
-                    value={amount}
+                    value={formatAmount()}
                     onChange={(e) => {
                         const { value } = e.target;
                         // Remove any characters that aren't digits or a period
