@@ -23,6 +23,7 @@ exports.onNewTeamCreated = onDocumentCreated("/teams/{teamId}", async (event) =>
                     id: event.params.teamId,
                     name: newTeamData.name,
                     ownerId: newTeamData.ownerId,
+                    users: newTeamData.users,
                 },
                 status: "TRIALING",
                 trialStartDate: moment().toDate(),

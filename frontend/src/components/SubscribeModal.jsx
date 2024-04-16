@@ -41,6 +41,14 @@ export default function SubscribeModal({ isOpen }) {
         getSubscriptionTypes();
     }, []);
 
+    useEffect(() => {
+        if (subscriptionTypes.length === 1) {
+            setSelectedSubscription(subscriptionTypes[0]);
+        } else {
+            setSelectedSubscription(null);
+        }
+    }, [subscriptionTypes]);
+
     const selectSubscriptionType = async () => {
         setLoading(true);
         try {
@@ -105,9 +113,11 @@ export default function SubscribeModal({ isOpen }) {
                                         </Tooltip>
                                     ))}
                                 </List>
-                                <Button mt="30px" cursor="pointer" onClick={() => setSelectedSubscription(sub)}>
-                                    Choose
-                                </Button>
+                                {subscriptionTypes.length > 1 && (
+                                    <Button mt="30px" cursor="pointer" onClick={() => setSelectedSubscription(sub)}>
+                                        Choose
+                                    </Button>
+                                )}
                             </VStack>
                         </CardBody>
                         <CardFooter />
