@@ -1,25 +1,50 @@
 [
     {
-        "constant": false,
+        "name": "approve",
         "inputs": [
             {
-                "name": "_spender",
+                "internalType": "address",
+                "name": "spender",
                 "type": "address"
             },
             {
-                "name": "_value",
+                "internalType": "uint256",
+                "name": "amount",
                 "type": "uint256"
             }
         ],
-        "name": "approve",
         "outputs": [
             {
+                "internalType": "bool",
                 "name": "",
                 "type": "bool"
             }
         ],
-        "payable": false,
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "name": "allowance",
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "spender",
+                "type": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     }
 ]

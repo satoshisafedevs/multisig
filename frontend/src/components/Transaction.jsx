@@ -68,7 +68,7 @@ function Transaction({ transaction }) {
         const success = await executeTransaction(safeService, safeAddress, safeTxHash);
         if (success) {
             toast({
-                description: "Transaction executed successfully! Please await status update.",
+                description: "Transaction executed successfully! Please await updates for any pending transactions.",
                 position: "top",
                 status: "success",
                 duration: 5000,
@@ -124,15 +124,7 @@ function Transaction({ transaction }) {
             transaction.confirmations.some((c) => c.owner === address);
 
         return (
-            <Flex
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                gap="2"
-                wrap="wrap"
-                pr="26px"
-                height="46px"
-            >
+            <Flex direction="row" justifyContent="center" alignItems="center" gap="2" wrap="wrap" paddingBottom="5px">
                 {transaction &&
                 transaction.confirmations &&
                 transaction.confirmationsRequired === transaction.confirmations.length ? (
@@ -235,105 +227,124 @@ function Transaction({ transaction }) {
                                     borderRadius: isExpanded ? "5px 5px 0 0" : "5px",
                                 }}
                             >
-                                <Stack direction="column" minWidth="280px">
-                                    <Stack direction="row" p="5px" alignItems="center">
-                                        <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].svg} />
-                                        <Text fontSize="sm" fontWeight="bold">
-                                            {transaction.network}
-                                        </Text>
-                                        <Text
-                                            textAlign="left"
-                                            whiteSpace="nowrap"
-                                            width="100%"
-                                            fontSize="xs"
-                                            ml="5px"
-                                            mt="2px"
-                                        >
-                                            {new Date(
-                                                transaction.unifiedDate ||
-                                                    transaction.executionDate ||
-                                                    transaction.submissionDate,
-                                            ).toLocaleString("en-US", {
-                                                year: "numeric",
-                                                month: "long",
-                                                day: "numeric",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: true,
-                                            })}
-                                        </Text>
-                                    </Stack>
-                                    <Stack direction="row" p="5px" alignItems="center">
-                                        <Text fontSize="sm" pl="3px" fontWeight="bold">
-                                            Safe:
-                                        </Text>
-                                        <Box display="flex" alignItems="center" gap="1px">
-                                            <Text textAlign="left" fontSize="sm">
-                                                {transaction.safe.slice(0, 5)}...
-                                                {transaction.safe.slice(-4)}
-                                            </Text>
-                                            <CopyToClipboard
-                                                copy={transaction.safe}
-                                                tooltipSuffix="address"
-                                                size="21px"
-                                            />
-                                        </Box>
-                                    </Stack>
-                                </Stack>
                                 <Stack
                                     direction="column"
-                                    spacing="4"
-                                    fontSize="sm"
-                                    width="100%"
-                                    justifyContent="space-between"
+                                    flexGrow="1"
+                                    flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
                                 >
-                                    <Flex direction="row" height="25px" alignItems="center">
-                                        <Text fontWeight="bold" paddingRight="5px">
-                                            Status:
-                                        </Text>
-                                        <Text textAlign="left">
-                                            {transaction.txHash || transaction.transactionHash ? (
-                                                <Link
-                                                    href={`${networks[transaction.network.toLowerCase()].scanUrl}/tx/${
-                                                        transaction.txHash || transaction.transactionHash
-                                                    }`}
-                                                    color="blue3"
-                                                    isExternal
-                                                    display="flex"
-                                                    alignItems="center"
-                                                    onClick={(event) => {
-                                                        event.preventDefault();
-                                                        window.open(event.target.href, "_blank", "noopener,noreferrer");
-                                                    }}
+                                    <Stack direction="row">
+                                        <Stack direction="column" minWidth="280px">
+                                            <Stack direction="row" p="5px" alignItems="center">
+                                                <Image
+                                                    boxSize="24px"
+                                                    src={networks[transaction.network.toLowerCase()].svg}
+                                                />
+                                                <Text fontSize="sm" fontWeight="bold">
+                                                    {transaction.network}
+                                                </Text>
+                                                <Text
+                                                    textAlign="left"
+                                                    width="100%"
+                                                    fontSize="xs"
+                                                    ml="5px"
+                                                    mt="2px"
+                                                    textOverflow="ellipsis"
+                                                    whiteSpace="nowrap"
+                                                    overflow="hidden"
                                                 >
-                                                    Executed <IoOpenOutline style={{ paddingLeft: "3px" }} />
-                                                </Link>
-                                            ) : (
-                                                "Pending"
-                                            )}
-                                        </Text>
-                                    </Flex>
-                                    <Flex direction="row">
-                                        <Text fontWeight="bold" paddingRight="5px">
-                                            Action:
-                                        </Text>
-                                        <Text
-                                            textAlign="left"
-                                            alignSelf="center"
-                                            textOverflow="ellipsis"
-                                            whiteSpace="nowrap"
-                                            overflow="hidden"
+                                                    {new Date(
+                                                        transaction.unifiedDate ||
+                                                            transaction.executionDate ||
+                                                            transaction.submissionDate,
+                                                    ).toLocaleString("en-US", {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        hour12: true,
+                                                    })}
+                                                </Text>
+                                            </Stack>
+                                            <Stack direction="row" p="5px" alignItems="center">
+                                                <Text fontSize="sm" pl="3px" fontWeight="bold">
+                                                    Safe:
+                                                </Text>
+                                                <Box display="flex" alignItems="center" gap="1px">
+                                                    <Text textAlign="left" fontSize="sm">
+                                                        {transaction.safe.slice(0, 5)}...
+                                                        {transaction.safe.slice(-4)}
+                                                    </Text>
+                                                    <CopyToClipboard
+                                                        copy={transaction.safe}
+                                                        tooltipSuffix="address"
+                                                        size="21px"
+                                                    />
+                                                </Box>
+                                            </Stack>
+                                        </Stack>
+                                        <Stack
+                                            direction="column"
+                                            spacing="4"
+                                            fontSize="sm"
                                             width="100%"
-                                            paddingRight="10px"
+                                            alignSelf="center"
                                         >
-                                            {(transaction.dataDecoded?.method &&
-                                                upperFirst(transaction.dataDecoded?.method)) ||
-                                                (transaction.from && "Receive") ||
-                                                (transaction.to && Number(transaction.value) > 0 && "Send") ||
-                                                upperFirst(transaction?.satoshiData?.type) ||
-                                                "Unspecified"}
-                                        </Text>
-                                    </Flex>
+                                            <Flex direction="row" height="25px" alignItems="center">
+                                                <Text fontWeight="bold" paddingRight="5px">
+                                                    Status:
+                                                </Text>
+                                                <Text textAlign="left">
+                                                    {transaction.txHash || transaction.transactionHash ? (
+                                                        <Link
+                                                            href={`${
+                                                                networks[transaction.network.toLowerCase()].scanUrl
+                                                            }/tx/${transaction.txHash || transaction.transactionHash}`}
+                                                            color="blue3"
+                                                            isExternal
+                                                            display="flex"
+                                                            alignItems="center"
+                                                            onClick={(event) => {
+                                                                event.preventDefault();
+                                                                window.open(
+                                                                    event.target.href,
+                                                                    "_blank",
+                                                                    "noopener,noreferrer",
+                                                                );
+                                                            }}
+                                                        >
+                                                            Executed <IoOpenOutline style={{ paddingLeft: "3px" }} />
+                                                        </Link>
+                                                    ) : (
+                                                        "Pending"
+                                                    )}
+                                                </Text>
+                                            </Flex>
+                                            <Flex direction="row">
+                                                <Text fontWeight="bold" paddingRight="5px">
+                                                    Action:
+                                                </Text>
+                                                <Text
+                                                    textAlign="left"
+                                                    alignSelf="center"
+                                                    textOverflow="ellipsis"
+                                                    whiteSpace="nowrap"
+                                                    overflow="hidden"
+                                                    width="100%"
+                                                    paddingRight="10px"
+                                                >
+                                                    {(transaction?.satoshiData?.type &&
+                                                        upperFirst(transaction?.satoshiData?.type)) ||
+                                                        (transaction.dataDecoded?.method &&
+                                                            upperFirst(transaction.dataDecoded?.method)) ||
+                                                        (transaction.from && "Receive") ||
+                                                        (transaction.to && Number(transaction.value) > 0 && "Send") ||
+                                                        "Unspecified"}
+                                                </Text>
+                                            </Flex>
+                                        </Stack>
+                                    </Stack>
+                                    {showButtons()}
                                 </Stack>
                                 <AccordionIcon margin="10px" />
                             </AccordionButton>
@@ -343,7 +354,6 @@ function Transaction({ transaction }) {
                                 <TransactionDetails transaction={transaction} />
                             </Code>
                         </AccordionPanel>
-                        {showButtons()}
                     </>
                 )}
             </AccordionItem>

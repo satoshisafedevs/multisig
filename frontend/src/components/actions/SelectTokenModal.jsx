@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import {
     Alert,
     AlertIcon,
+    Avatar,
     Box,
     Button,
     Modal,
@@ -12,7 +13,6 @@ import {
     ModalFooter,
     ModalBody,
     ModalCloseButton,
-    Image,
     Input,
     InputGroup,
     InputLeftElement,
@@ -88,8 +88,6 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
     const onClose = () => {
         setIsOpen(false);
         setSearchString("");
-        setRouteData();
-        setAvailableTokens();
     };
 
     const handleTokenSearch = (e) => {
@@ -124,13 +122,13 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                     variant="ghost"
                     leftIcon={
                         // eslint-disable-next-line react/jsx-wrap-multilines
-                        <Image
+                        <Avatar
                             display="flex"
                             alignItems="center"
                             boxSize="2rem"
                             borderRadius="full"
                             src={token?.logoURI}
-                            alt={token?.symbol?.substring(0, 3)}
+                            name={token?.symbol}
                             mr="12px"
                             loading="lazy"
                         />
@@ -144,6 +142,8 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                             usdPrice: Number(token?.priceUSD),
                         });
                         onClose();
+                        setRouteData();
+                        setAvailableTokens();
                     }}
                 >
                     <Tooltip label={token?.address} placement="top-start" fontWeight="normal">
@@ -205,14 +205,15 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
     };
 
     const sortTokensByAvailability = (a, b) => {
-        // Check if token A is in availableTokens
-        const isATokenAvailable = availableTokens?.some(
-            (el) => el.contract_address?.toLowerCase() === a.address?.toLowerCase(),
-        );
-        // Check if token B is in availableTokens
-        const isBTokenAvailable = availableTokens?.some(
-            (el) => el.contract_address?.toLowerCase() === b.address?.toLowerCase(),
-        );
+        // Check if token A is in availableTokens and get its quote
+        const aToken = availableTokens?.find((el) => el.contract_address?.toLowerCase() === a.address?.toLowerCase());
+        const isATokenAvailable = !!aToken;
+        const aQuote = aToken?.quote || 0;
+
+        // Check if token B is in availableTokens and get its quote
+        const bToken = availableTokens?.find((el) => el.contract_address?.toLowerCase() === b.address?.toLowerCase());
+        const isBTokenAvailable = !!bToken;
+        const bQuote = bToken?.quote || 0;
 
         // Order tokens that are available before those that aren't
         if (isATokenAvailable && !isBTokenAvailable) {
@@ -221,7 +222,8 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
         if (!isATokenAvailable && isBTokenAvailable) {
             return 1; // B comes before A
         }
-        return 0; // No change in order
+        // If both are available or both unavailable, sort by the highest quote
+        return bQuote - aQuote; // Descending order, higher quote comes first
     };
 
     if (availableTokens) {
@@ -252,7 +254,7 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                     {tokens.length === 0 && (
                         <Alert status="warning" marginTop="5px">
                             <AlertIcon />
-                            Ensure a safe is chosen before selecting a token
+                            Ensure a safe is chosen before selecting a token.
                         </Alert>
                     )}
                     {tokens.length > 0 && searchTokens.length === 0 && (

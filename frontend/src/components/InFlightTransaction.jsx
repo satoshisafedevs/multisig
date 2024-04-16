@@ -17,6 +17,7 @@ import {
     useStyleConfig,
     keyframes,
 } from "@chakra-ui/react";
+import { upperFirst } from "lodash";
 import { IoOpenOutline } from "react-icons/io5";
 import networks from "../utils/networks.json";
 import TransactionDetails from "./TransactionDetails";
@@ -158,7 +159,9 @@ function InFlightTransaction({ transaction }) {
                                                 width="100%"
                                                 paddingRight="10px"
                                             >
-                                                {transaction?.satoshiData?.type || "Unspecified"}
+                                                {(transaction?.satoshiData?.type &&
+                                                    upperFirst(transaction?.satoshiData?.type)) ||
+                                                    "Unspecified"}
                                             </Text>
                                         </Flex>
                                     </Stack>

@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Alert, AlertIcon, Box, Button, Stack, Divider, useToast } from "@chakra-ui/react";
+import {
+    Alert,
+    AlertIcon,
+    // Box,
+    Button,
+    Stack,
+    // Divider,
+    useToast,
+} from "@chakra-ui/react";
 import { LiFi } from "@lifi/sdk";
 import { ethers } from "ethers";
 import { upperFirst } from "lodash";
-import { IoShuffleOutline, IoArrowDownCircleOutline, IoPaperPlane } from "react-icons/io5";
+import {
+    // IoShuffleOutline,
+    // IoArrowDownCircleOutline,
+    IoPaperPlane,
+} from "react-icons/io5";
 import { useWagmi } from "../../providers/Wagmi";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import { formatNumber, fromHumanReadable, toHumanReadable } from "../../utils";
-// import erc20Abi from "./erc20Abi.json";
-import Swapper from "./Swapper";
-import SelectSwapRouteModal from "./SelectSwapRouteModal";
+import erc20Abi from "./erc20Abi.json";
+// import Swapper from "./Swapper";
+import networks from "../../utils/networks.json";
+import SwapperOnChain from "./SwapperOnChain";
+import GetSwapEstimateButton from "./GetSwapEstimateButton";
+// import SelectSwapRouteModal from "./SelectSwapRouteModal";
 
 export default function Swap() {
     const { address, isConnected, chain, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
@@ -28,14 +43,17 @@ export default function Swap() {
     const [toToken, setToToken] = useState({});
     const [toNetwork, setToNetwork] = useState("");
     const [loadingRoutes, setLoadingRoutes] = useState(false);
-    const [lifiRoutes, setLifiRoutes] = useState();
+    // const [lifiRoutes, setLifiRoutes] = useState();
     const [routeData, setRouteData] = useState();
-    const [totalUSDFrom, setTotalUSDFrom] = useState();
+    // const [totalUSDFrom, setTotalUSDFrom] = useState();
     // eslint-disable-next-line no-unused-vars
-    const [countdown, setCountdown] = useState(30);
+    // const [resetCountDown, setResetCountDown] = useState(false);
     // eslint-disable-next-line no-unused-vars
-    const [countdownMessage, setCountdownMessage] = useState("");
-    const [swapRouteModalOpen, setSwapRouteModalOpen] = useState(false);
+    // const [countdownMessage, setCountdownMessage] = useState("");
+    // const [swapRouteModalOpen, setSwapRouteModalOpen] = useState(false);
+    const [loadingTokens, setLoadingTokens] = useState(false);
+    const [lifiChainTokens, setLifiChainTokens] = useState([]);
+    const [creatingTransaction, setCreatingTransaction] = useState(false);
 
     const getLiFiSDK = () => {
         const lifiSDK = new LiFi({
@@ -48,22 +66,22 @@ export default function Swap() {
         getLiFiSDK();
     }, []);
 
-    useEffect(() => {
-        let timerId;
-        // Start the countdown only if routeData is present
-        // if (routeData && countdown > 0) {
-        //     setCountdownMessage(`Estimate valid for ${countdown} seconds`); // Set initial countdown message
-        //     timerId = setTimeout(() => {
-        //         setCountdown(countdown - 1); // Decrement countdown
-        //     }, 1000);
-        // } else if (countdown <= 0) {
-        //     // Once countdown reaches 0, call setRouteData
-        //     setRouteData();
-        //     setCountdownMessage("Get swap estimate");
-        // }
-        // Cleanup the timeout on component unmount or when countdown changes
-        return () => clearTimeout(timerId);
-    }, [routeData, countdown]);
+    // useEffect(() => {
+    //     let timerId;
+    //     // Start the countdown only if routeData is present
+    //     if (routeData && countdown > 0) {
+    //         setCountdownMessage(`Swap estimate is valid for ${countdown} seconds`); // Set initial countdown message
+    //         timerId = setTimeout(() => {
+    //             setCountdown(countdown - 1); // Decrement countdown
+    //         }, 1000);
+    //     } else if (countdown <= 0) {
+    //         // Once countdown reaches 0, call setRouteData
+    //         setRouteData();
+    //         setCountdownMessage("Get swap estimate");
+    //     }
+    //     // Cleanup the timeout on component unmount or when countdown changes
+    //     return () => clearTimeout(timerId);
+    // }, [routeData, countdown]);
 
     // const routeOptions = {
     //     integrator?: string // Should contain the identifier of the integrator. Usually, it's dApp/company name.
@@ -80,26 +98,44 @@ export default function Swap() {
     //     exchanges?: AllowDenyPrefer
     //   }
 
-    const routesRequest = {
-        fromChainId: fromChain, // number
-        fromAmount: fromAmount && fromToken.decimals && fromHumanReadable(fromAmount, fromToken.decimals), // string
-        fromTokenAddress: fromToken.address, // string
-        fromAddress: fromSafe, // string
-        toChainId: toChain, // number
-        toTokenAddress: toToken.address, // string
-        toAddress: toSafe, // string
-        // options: routeOptions
+    // const routesRequest = {
+    //     fromChainId: fromChain, // number
+    //     fromAmount: fromAmount && fromToken.decimals && fromHumanReadable(fromAmount, fromToken.decimals), // string
+    //     fromTokenAddress: fromToken.address, // string
+    //     fromAddress: fromSafe, // string
+    //     toChainId: toChain, // number
+    //     toTokenAddress: toToken.address, // string
+    //     toAddress: toSafe, // string
+    //     // options: routeOptions
+    // };
+
+    const params = {
+        fromChain,
+        toChain,
+        fromToken: fromToken?.address,
+        toToken: toToken.address,
+        fromAmount: fromAmount && fromToken?.decimals && fromHumanReadable(fromAmount, fromToken.decimals),
+        fromAddress: fromSafe,
+        order: "RECOMMENDED",
+        // integrator: "???"
     };
 
-    const getLiFiRoutes = async (withModal = false) => {
+    const getLiFiRoutes = async () => {
         try {
             setLoadingRoutes(true);
             setRouteData();
-            const lifiRoutesResponse = await lifi.getRoutes(routesRequest);
-            setLifiRoutes(lifiRoutesResponse);
-            if (withModal) {
-                setSwapRouteModalOpen(true);
+            const response = await fetch(`https://li.quest/v1/quote?${new URLSearchParams(params)}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message);
             }
+            const respData = await response.json();
+            setRouteData(respData);
         } catch (error) {
             toast({
                 description: `Failed to get swap quote: ${error?.message}`,
@@ -113,46 +149,93 @@ export default function Swap() {
         }
     };
 
-    let estimatedSwapFee = 0;
+    const handleSafe = async (safeConfig) => {
+        setLoadingTokens(true);
+        setRouteData();
+        setFromToken({});
+        setToToken({});
+        const { safeAddress, network } = safeConfig;
+        setFromSafe(safeAddress);
+        setToSafe(safeAddress);
+        setFromNetwork(network);
+        setToNetwork(network);
+        const targetChainId = networks[network.toLowerCase()]?.id;
+        const lifiTokens = await lifi.getTokens({ chains: [targetChainId] });
+        setLifiChainTokens(lifiTokens?.tokens[targetChainId]);
+        setFromChain(targetChainId);
+        setToChain(targetChainId);
+        setLoadingTokens(false);
+    };
+
+    // let estimatedSwapFee = 0;
+
+    // if (routeData) {
+    //     const { steps } = routeData;
+
+    //     const sumCosts = (costs) =>
+    //         costs.reduce(
+    //             // eslint-disable-next-line no-confusing-arrow
+    //             (acc, cost) =>
+    //                 cost.amount ? acc + parseFloat(toHumanReadable(cost.amount, cost.token?.decimals)) : acc,
+    //             0,
+    //         );
+    //     steps.forEach((step) => {
+    //         const { estimate } = step;
+    //         if (estimate?.feeCosts?.length > 0) {
+    //             estimatedSwapFee += sumCosts(estimate.feeCosts);
+    //         }
+
+    //         if (estimate?.gasCosts?.length > 0) {
+    //             estimatedSwapFee += sumCosts(estimate.gasCosts);
+    //         }
+    //     });
+    // }
+
+    const contractInterface = new ethers.utils.Interface(erc20Abi);
+
+    const approveEncodeData =
+        routeData &&
+        contractInterface.encodeFunctionData("approve", [
+            routeData?.estimate?.approvalAddress,
+            routeData?.estimate?.fromAmount,
+        ]);
+
+    let gasCosts = 0;
+
+    // eslint-disable-next-line no-unused-vars
+    const calculateGasCost = (gasPriceHex, gasLimitHex) => {
+        // Parse the hexadecimal values
+        const gasPrice = ethers.BigNumber.from(gasPriceHex);
+        const gasLimit = ethers.BigNumber.from(gasLimitHex);
+
+        // Calculate total gas cost in wei
+        const totalGasCostWei = gasPrice.mul(gasLimit);
+
+        // Format wei to ETH
+        const totalGasCostEth = ethers.utils.formatEther(totalGasCostWei);
+
+        return totalGasCostEth;
+    };
 
     if (routeData) {
-        const { steps } = routeData;
-
-        const sumCosts = (costs) =>
-            costs.reduce(
-                // eslint-disable-next-line no-confusing-arrow
-                (acc, cost) =>
-                    cost.amount ? acc + parseFloat(toHumanReadable(cost.amount, cost.token?.decimals)) : acc,
-                0,
-            );
-        steps.forEach((step) => {
-            const { estimate } = step;
-            if (estimate?.feeCosts?.length > 0) {
-                estimatedSwapFee += sumCosts(estimate.feeCosts);
-            }
-
-            if (estimate?.gasCosts?.length > 0) {
-                estimatedSwapFee += sumCosts(estimate.gasCosts);
-            }
-        });
+        gasCosts = parseFloat(
+            toHumanReadable(
+                routeData?.estimate?.gasCosts[0]?.amount,
+                routeData?.estimate?.gasCosts[0]?.amount?.token?.decimals,
+            ),
+        );
+        // gasCosts = parseFloat(
+        //     calculateGasCost(routeData?.transactionRequest?.gasPrice, routeData?.transactionRequest?.gasLimit),
+        // );
     }
 
-    // const contractInterface = new ethers.utils.Interface(erc20Abi);
-
-    // const approveEncodeData =
-    //     routeData &&
-    //     contractInterface.encodeFunctionData("approve", [
-    //         routeData?.transactionRequest?.target,
-    //         routeData?.estimate?.fromAmount,
-    //     ]);
-
     const fromAmoutIsGreaterThanTokenBalance =
-        fromBalances && Number(fromAmount) > Number(fromBalances[fromToken.symbol]);
+        fromBalances && Number(fromAmount) > Number(fromBalances[fromToken?.symbol]);
 
-    const insufficientEthBalance = fromBalances && parseFloat(fromBalances.ETH) < estimatedSwapFee;
+    const insufficientEthBalance = fromBalances && parseFloat(fromBalances.ETH) < gasCosts;
 
     const ethOnlySwapInsufficientBalance =
-        fromBalances && fromToken.symbol === "ETH" && fromBalances.ETH < parseFloat(fromAmount) + estimatedSwapFee;
+        fromBalances && fromToken?.symbol === "ETH" && fromBalances.ETH < parseFloat(fromAmount) + gasCosts;
 
     const networkMismatch = chain && Number(fromChain) !== chain.id;
 
@@ -165,27 +248,46 @@ export default function Swap() {
         to: toSafe && ethers.utils.getAddress(toSafe),
         toNetwork,
         toAmount: `${
-            routeData?.estimate &&
-            routeData?.toToken?.decimals &&
-            toHumanReadable(routeData.toAmount, routeData.toToken.decimals)
+            routeData?.estimate?.toAmount &&
+            routeData?.action?.toToken?.decimals &&
+            toHumanReadable(routeData.estimate.toAmount, routeData.action.toToken.decimals)
         } ${toToken?.symbol}`,
-        estimatedSwapFees: `${estimatedSwapFee} ETH`,
+        gasCosts: `${gasCosts} ETH`,
     };
-
-    // console.log("routeData", routeData);
 
     return (
         <>
-            <SelectSwapRouteModal
+            {/* <SelectSwapRouteModal
                 routes={lifiRoutes?.routes}
                 isOpen={swapRouteModalOpen}
                 setIsOpen={setSwapRouteModalOpen}
                 setRouteData={setRouteData}
                 getLiFiRoutes={getLiFiRoutes}
                 loadingRoutes={loadingRoutes}
-            />
+            /> */}
             <Stack padding="10px 0" gap="0">
-                <Swapper
+                <SwapperOnChain
+                    lifi={lifi}
+                    safe={fromSafe}
+                    networkName={fromNetwork}
+                    loadingTokens={loadingTokens}
+                    handleSafe={handleSafe}
+                    lifiChainTokens={lifiChainTokens}
+                    fromToken={fromToken}
+                    setFromToken={setFromToken}
+                    setRouteData={setRouteData}
+                    toToken={toToken}
+                    setToToken={setToToken}
+                    fromAmount={fromAmount}
+                    setFromAmount={setFromAmount}
+                    toAmount={
+                        routeData?.estimate?.toAmount && routeData?.action?.toToken?.decimals
+                            ? toHumanReadable(routeData.estimate.toAmount, routeData.action.toToken.decimals)
+                            : ""
+                    }
+                    setFromBalances={setFromBalances}
+                />
+                {/* <Swapper
                     lifi={lifi}
                     safe={fromSafe}
                     setSafe={setFromSafe}
@@ -214,36 +316,28 @@ export default function Swap() {
                     token={toToken}
                     setToken={setToToken}
                     amount={
-                        routeData?.toAmount && routeData?.toToken?.decimals
-                            ? toHumanReadable(routeData.toAmount, routeData.toToken.decimals)
+                        routeData?.estimate?.toAmount && routeData?.action?.toToken?.decimals
+                            ? toHumanReadable(routeData.estimate.toAmount, routeData.action.toToken.decimals)
                             : ""
                     }
                     setFromNetwork={setToNetwork}
                     totalUSDFrom={totalUSDFrom}
                     setRouteData={setRouteData}
                     destinationSafe
+                /> */}
+                <GetSwapEstimateButton
+                    loadingRoutes={loadingRoutes}
+                    getLiFiRoutes={getLiFiRoutes}
+                    fromChain={fromChain}
+                    fromToken={fromToken}
+                    fromAmount={fromAmount}
+                    toChain={toChain}
+                    toToken={toToken}
+                    fromSafe={fromSafe}
+                    toSafe={toSafe}
+                    routeData={routeData}
+                    setRouteData={setRouteData}
                 />
-                <Button
-                    marginTop="12px"
-                    colorScheme="blueSwatch"
-                    rightIcon={<IoShuffleOutline size="25px" />}
-                    onClick={() => getLiFiRoutes(true)}
-                    isLoading={loadingRoutes}
-                    loadingText="Getting swap estimate..."
-                    spinnerPlacement="end"
-                    isDisabled={
-                        !fromChain ||
-                        !fromToken.address ||
-                        !fromAmount ||
-                        Number(fromAmount) === 0 ||
-                        !toChain ||
-                        !toToken.address ||
-                        !fromSafe ||
-                        !toSafe
-                    }
-                >
-                    {(routeData && countdownMessage) || "Get swap estimate"}
-                </Button>
                 {routeData && (
                     <Button
                         marginTop="12px"
@@ -256,25 +350,29 @@ export default function Swap() {
                                 : "blueSwatch"
                         }
                         rightIcon={<IoPaperPlane size="25px" />}
-                        onClick={() => {
+                        onClick={async () => {
                             if (networkMismatch) {
                                 switchNetwork(Number(fromChain));
                             } else {
-                                // createAndApproveSwapTransaction(
-                                //     fromNetwork,
-                                //     fromSafe,
-                                //     {
-                                //         to: fromToken.address,
-                                //         // data: approveEncodeData,
-                                //     },
-                                //     {
-                                //         to: routeData?.transactionRequest?.target,  // squid smart contract
-                                //         data: routeData?.transactionRequest?.data,  // data?
-                                //         value: routeData?.transactionRequest?.value, // cross-chain gas fees?
-                                //     },
-                                //     address,
-                                //     satoshiData,
-                                // );
+                                setCreatingTransaction(true);
+                                await createAndApproveSwapTransaction(
+                                    fromNetwork,
+                                    fromSafe,
+                                    {
+                                        to: routeData?.action?.fromToken?.address,
+                                        data: approveEncodeData,
+                                    },
+                                    {
+                                        to: routeData?.transactionRequest?.to, // lifi smart contract
+                                        data: routeData?.transactionRequest?.data,
+                                        value: ethers.BigNumber.from(routeData?.transactionRequest?.value).toString(),
+                                        // converting hexadecimal to BigNumber
+                                    },
+                                    address,
+                                    satoshiData,
+                                );
+                                setCreatingTransaction(false);
+                                setRouteData();
                             }
                         }}
                         isDisabled={
@@ -285,11 +383,13 @@ export default function Swap() {
                             walletMismatch ||
                             fromAmoutIsGreaterThanTokenBalance ||
                             insufficientEthBalance ||
-                            ethOnlySwapInsufficientBalance
+                            ethOnlySwapInsufficientBalance ||
+                            creatingTransaction
                         }
-                        spinnerPlacement="end"
+                        isLoading={creatingTransaction}
+                        loadingText="Creating transaction..."
                     >
-                        {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken.symbol} balance`) ||
+                        {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken?.symbol} balance`) ||
                             ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
                                 "Insufficient safe ETH balance") ||
                             (networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
@@ -300,8 +400,7 @@ export default function Swap() {
                     <>
                         <Alert status="warning" variant="left-accent" marginTop="5px" borderRadius="base">
                             <AlertIcon />
-                            To cover estimated transaction fees, ensure you have at least{" "}
-                            {formatNumber(estimatedSwapFee)}
+                            To cover estimated transaction fees, ensure you have at least {formatNumber(gasCosts)}
                             &nbsp;ETH, in addition to the swap amount, in your safe balance before initiating a
                             transaction.
                         </Alert>

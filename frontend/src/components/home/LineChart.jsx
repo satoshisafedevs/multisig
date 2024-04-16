@@ -8,6 +8,7 @@ import theme from "../../theme";
 function LineChart({ xData, yData }) {
     const legendColor = useColorModeValue(theme.colors.blackAlpha[700], theme.colors.whiteAlpha[900]);
     const axisBorderColor = useColorModeValue(theme.colors.blackAlpha[200], theme.colors.whiteAlpha[700]);
+    const chartColor = useColorModeValue(theme.colors.blueSwatch[500], theme.colors.blueSwatch[400]);
 
     Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend);
 
@@ -110,8 +111,8 @@ function LineChart({ xData, yData }) {
                 label: xData && yData ? "Balance" : "Price",
                 data: yData || [2299, 3438, 4805, 7050, 10244, 15325, 22263, 32035, 45210, 66342],
                 borderWidth: 2,
-                borderColor: theme.colors.blue2,
-                backgroundColor: theme.colors.blue2,
+                borderColor: chartColor,
+                backgroundColor: chartColor,
                 pointRadius: 0,
             },
         ],
