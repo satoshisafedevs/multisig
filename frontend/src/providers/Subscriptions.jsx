@@ -19,18 +19,21 @@ function Subscriptions({ children }) {
     const [userInvoices, setUserInvoices] = useState();
     const [userInvoicesSub, setUserInvoicesSub] = useState();
 
-    const subscribeToUserSubscriptions = async () => {
+    const subscribeToUserSubscriptions = async (userId) => {
         try {
-            return onSnapshot(query(collection(db, "subscriptions")), (querySnapshot) => {
-                const subscriptions = querySnapshot.docs.map((sub) => ({
-                    ...sub.data(),
-                    id: sub.id,
-                    trialEndDate: sub.data().trialEndDate?.toDate(),
-                    trialStartDate: sub.data().trialStartDate?.toDate(),
-                    nextBillingDate: sub.data().nextBillingDate?.toDate(),
-                }));
-                setActiveSubscriptions(subscriptions);
-            });
+            return onSnapshot(
+                query(collection(db, "subscriptions"), where("team.users", "array-contains", userId)),
+                (querySnapshot) => {
+                    const subscriptions = querySnapshot.docs.map((sub) => ({
+                        ...sub.data(),
+                        id: sub.id,
+                        trialEndDate: sub.data().trialEndDate?.toDate(),
+                        trialStartDate: sub.data().trialStartDate?.toDate(),
+                        nextBillingDate: sub.data().nextBillingDate?.toDate(),
+                    }));
+                    setActiveSubscriptions(subscriptions);
+                },
+            );
         } catch (error) {
             toast({
                 description: `Failed to get active subscription: ${error.message}`,

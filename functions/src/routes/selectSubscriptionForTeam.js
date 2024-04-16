@@ -30,16 +30,11 @@ exports.selectSubscriptionForTeam = onCall(async (req, res) => {
     const subscriptionType = subscriptionTypeRef.data();
 
     const subscriptionsRef = db.collection("subscriptions");
-    const teamSubscriptions = await subscriptionsRef
-        .where("team.id", "==", teamId)
-        .get();
+    const teamSubscriptions = await subscriptionsRef.where("team.id", "==", teamId).get();
 
     if (!teamSubscriptions.empty) {
         // Team already has an active or potentially recoverable subscription
-        throw new HttpsError(
-            "already-exists",
-            "This team already has an active or pending subscription.",
-        );
+        throw new HttpsError("already-exists", "This team already has an active or pending subscription.");
     }
 
     await db
@@ -50,29 +45,18 @@ exports.selectSubscriptionForTeam = onCall(async (req, res) => {
                 id: teamId,
                 name: team.name,
                 ownerId: team.ownerId,
+                users: team.users,
             },
             status: "TRIALING",
             trialStartDate: Timestamp.now(),
-            trialEndDate: Timestamp.fromDate(
-                moment()
-                    .add(subscriptionType.freeTrialPeriodDays, "days")
-                    .toDate(),
-            ),
+            trialEndDate: Timestamp.fromDate(moment().add(subscriptionType.freeTrialPeriodDays, "days").toDate()),
             subscription: {
                 id: subscriptionId,
                 name: subscriptionType.name,
                 price: subscriptionType.price,
             },
-            nextBillingDate: Timestamp.fromDate(
-                moment()
-                    .add(subscriptionType.freeTrialPeriodDays, "days")
-                    .toDate(),
-            ),
-            startDate: Timestamp.fromDate(
-                moment()
-                    .add(subscriptionType.freeTrialPeriodDays, "days")
-                    .toDate(),
-            ),
+            nextBillingDate: Timestamp.fromDate(moment().add(subscriptionType.freeTrialPeriodDays, "days").toDate()),
+            startDate: Timestamp.fromDate(moment().add(subscriptionType.freeTrialPeriodDays, "days").toDate()),
             endDate: null,
             lastBillingDate: null,
             stripeSubscriptionId: "",
