@@ -58,10 +58,10 @@ function ImageCropperModal({ isOpen, onClose, isSaving, selectedImage, handleIma
                     <Button
                         isLoading={isSaving}
                         loadingText="Uploading"
-                        colorScheme="green300"
+                        colorScheme="blueSwatch"
                         onClick={() => handleImageSave(cropper)}
                     >
-                        Crop and save
+                        Crop and Save
                     </Button>
                 </ModalFooter>
             </ModalContent>
