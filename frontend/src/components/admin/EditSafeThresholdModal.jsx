@@ -94,7 +94,7 @@ function EditSafeThresholdModal({
                         Cancel
                     </Button>
                     <Button
-                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
+                        colorScheme={networkMismatch ? "bronzeSwatch" : "blueSwatch"}
                         rightIcon={<IoCogOutline />}
                         isDisabled={!newThreshold || !metaMaskInstalled || !address || walletMismatch}
                         isLoading={loading}

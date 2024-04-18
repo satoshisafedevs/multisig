@@ -108,7 +108,7 @@ function AddSafeOwnerModal({
                         Cancel
                     </Button>
                     <Button
-                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
+                        colorScheme={networkMismatch ? "bronzeSwatch" : "blueSwatch"}
                         rightIcon={<IoPersonAdd />}
                         isDisabled={
                             !ethers.utils.isAddress(newOwner) ||

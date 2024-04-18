@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    AlertIcon,
     // Box,
     Button,
     Stack,
@@ -54,6 +52,7 @@ export default function Swap() {
     const [loadingTokens, setLoadingTokens] = useState(false);
     const [lifiChainTokens, setLifiChainTokens] = useState([]);
     const [creatingTransaction, setCreatingTransaction] = useState(false);
+    const toastIdRef = React.useRef();
 
     const getLiFiSDK = () => {
         const lifiSDK = new LiFi({
@@ -255,6 +254,31 @@ export default function Swap() {
         gasCosts: `${gasCosts} ETH`,
     };
 
+    const showToast = () => {
+        // If a toast is already shown, do nothing
+        if (toastIdRef.current) {
+            return;
+        }
+
+        // Show the toast and save the toastId
+        toastIdRef.current = toast({
+            description: `To cover estimated transaction fees, ensure you have at least ${formatNumber(gasCosts)}
+          ETH, in addition to the swap amount, in your safe balance before initiating a transaction.`,
+            position: "top",
+            status: "warning",
+            duration: 60000,
+            isClosable: true,
+            onCloseComplete: () => {
+                // Clear the toastIdRef when the toast is closed
+                toastIdRef.current = undefined;
+            },
+        });
+    };
+
+    if (routeData && (insufficientEthBalance || ethOnlySwapInsufficientBalance)) {
+        showToast();
+    }
+
     return (
         <>
             {/* <SelectSwapRouteModal
@@ -265,7 +289,7 @@ export default function Swap() {
                 getLiFiRoutes={getLiFiRoutes}
                 loadingRoutes={loadingRoutes}
             /> */}
-            <Stack padding="10px 0" gap="0">
+            <Stack padding="30px 0" gap="0">
                 <SwapperOnChain
                     lifi={lifi}
                     safe={fromSafe}
@@ -346,10 +370,10 @@ export default function Swap() {
                             fromAmoutIsGreaterThanTokenBalance ||
                             insufficientEthBalance ||
                             ethOnlySwapInsufficientBalance
-                                ? "orange"
+                                ? "bronzeSwatch"
                                 : "blueSwatch"
                         }
-                        rightIcon={<IoPaperPlane size="25px" />}
+                        rightIcon={<IoPaperPlane size="20px" />}
                         onClick={async () => {
                             if (networkMismatch) {
                                 switchNetwork(Number(fromChain));
@@ -391,27 +415,10 @@ export default function Swap() {
                     >
                         {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken?.symbol} balance`) ||
                             ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
-                                "Insufficient safe ETH balance") ||
+                                "Insufficient ETH balance") ||
                             (networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
                             "Create and sign safe transaction"}
                     </Button>
-                )}
-                {routeData && (insufficientEthBalance || ethOnlySwapInsufficientBalance) && (
-                    <>
-                        <Alert status="warning" variant="left-accent" marginTop="5px" borderRadius="base">
-                            <AlertIcon />
-                            To cover estimated transaction fees, ensure you have at least {formatNumber(gasCosts)}
-                            &nbsp;ETH, in addition to the swap amount, in your safe balance before initiating a
-                            transaction.
-                        </Alert>
-                        {/* <Alert status="info" variant="left-accent" marginTop="5px" borderRadius="base">
-                            <AlertIcon />
-                            Gas refunds - in order to maximise success rates, smart contracts take a deposit to cover
-                            gas costs during the transaction. Once the transaction has completed, the amount left unused
-                            is refunded to the safe automatically on the source chain, in the source chain&lsquo;s
-                            native gas token.
-                        </Alert> */}
-                    </>
                 )}
             </Stack>
         </>

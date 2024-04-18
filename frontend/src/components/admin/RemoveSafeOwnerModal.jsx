@@ -121,7 +121,7 @@ function RemoveSafeOwnerModal({
                         Cancel
                     </Button>
                     <Button
-                        colorScheme={networkMismatch ? "orange" : "red"}
+                        colorScheme={networkMismatch ? "bronzeSwatch" : "red"}
                         rightIcon={<IoPersonRemove />}
                         isDisabled={!newThreshold || !metaMaskInstalled || !address || walletMismatch}
                         isLoading={loading}

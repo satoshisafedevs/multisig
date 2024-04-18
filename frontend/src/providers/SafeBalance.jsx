@@ -186,7 +186,7 @@ function SafeBalance({ children }) {
 
     const callUpdateSafeBalances = async () => {
         if (currentTeam && currentTeam.safes) {
-            updateSafeBalances({ safes: currentTeam.safes });
+            await updateSafeBalances({ safes: currentTeam.safes });
         }
     };
 

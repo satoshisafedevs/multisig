@@ -10,6 +10,7 @@ import StakedAssetsTable from "../StakedAssetsTable";
 
 function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
     const [activeTab, setActiveTab] = useState("chart");
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const {
         safesPortfolio,
         todaysAggregatedSafesWalletAssets,
@@ -18,6 +19,12 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
         initialLoading,
         callUpdateSafeBalances,
     } = useSafeBalance();
+
+    const updateSafeBalances = async () => {
+        setIsRefreshing(true); // Start the spinner when the refresh starts
+        await callUpdateSafeBalances();
+        setIsRefreshing(false);
+    };
 
     const convertedDates = (data) => {
         const converted = {};
@@ -104,14 +111,13 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
                     )}
                 </Stack>
                 <IconButton
-                    icon={<IoRefresh />}
-                    onClick={() => {
-                        callUpdateSafeBalances();
-                    }}
+                    icon={isRefreshing ? <Spinner size="sm" /> : <IoRefresh />}
+                    onClick={updateSafeBalances}
                     position="absolute"
                     top="0"
                     right={{ base: "40px", md: "40px" }} // Adjust this value based on the existing layout
                     background="none"
+                    isLoading={isRefreshing} // Use the loading state to control the spinner
                 />
                 <IconButton
                     icon={expandPortfolio ? <IoContractOutline /> : <IoExpandOutline />}

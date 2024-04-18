@@ -136,7 +136,7 @@ function Message({ message, hoverID, setHoverID }) {
                     direction="row"
                     align="center"
                     spacing="0"
-                    paddingLeft="3px"
+                    paddingLeft="10px"
                     paddingTop="2px"
                     paddingBottom="2px"
                     _hover={{ backgroundColor: backgroundHover, borderRadius: "5px" }}

@@ -12,9 +12,9 @@ import {
     Spinner,
     useColorMode,
     Avatar,
+    Text,
     // useColorModeValue,
 } from "@chakra-ui/react";
-import { IoArrowDownCircleOutline } from "react-icons/io5";
 import { ethers } from "ethers";
 import { isEmpty } from "lodash";
 import { useUser } from "../../providers/User";
@@ -190,49 +190,51 @@ function SwapperOnChain({
                 network={networkName}
                 setRouteData={setRouteData}
             />
-            <Box display="flex" flexDirection="row">
-                <Box width="30%" />
-                <Box display="flex" flexDirection="row" justifyContent="space-between" minWidth="70%">
-                    <Box fontSize="xs" alignSelf="start" height="18px" color="gray.500" marginLeft="5px">
-                        {displayTokenFromBalance()}
-                    </Box>
-                    <Box fontSize="xs" alignSelf="end" height="18px" color="gray.500">
-                        {fromToken?.address && fromAmount && totalFromUSDValue()}
-                    </Box>
-                </Box>
-            </Box>
+
             <Box display="flex" flexDirection="row">
                 <Menu>
                     {({ isOpen }) => (
                         <>
-                            <MenuButton
-                                as={Button}
-                                backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
-                                border="1px solid"
-                                borderColor="var(--chakra-colors-chakra-border-color)"
-                                flexShrink="0"
-                                fontWeight="normal"
-                                fontSize="15px"
-                                width="155px"
-                                minWidth="30%"
-                                height="85px"
-                                isDisabled={!lifi}
-                            >
-                                {safe.length > 0 ? (
-                                    <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center">
-                                        <Image
-                                            boxSize="1.5rem"
-                                            borderRadius="full"
-                                            src={networks[networkName].svg}
-                                            alt={networks[networkName].title}
-                                            mr="12px"
-                                        />
-                                        {safe.slice(0, 5)}...{safe.slice(-4)}
-                                    </Box>
-                                ) : (
-                                    "Select Safe"
-                                )}
-                            </MenuButton>
+                            <Box display="flex" flexDirection="column" alignItems="flex-start" width="100%">
+                                <Text fontSize="xs" color="gray.500">
+                                    Safe
+                                </Text>
+                                <MenuButton
+                                    as={Button}
+                                    backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
+                                    border="1px solid"
+                                    borderColor="var(--chakra-colors-chakra-border-color)"
+                                    flexShrink="0"
+                                    fontWeight="normal"
+                                    fontSize="15px"
+                                    width="100%"
+                                    borderRightRadius={0}
+                                    borderRight={0}
+                                    minWidth="30%"
+                                    height="40px"
+                                    isDisabled={!lifi}
+                                >
+                                    {safe.length > 0 ? (
+                                        <Box
+                                            display="flex"
+                                            flexDirection="row"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                        >
+                                            <Image
+                                                boxSize="1.5rem"
+                                                borderRadius="full"
+                                                src={networks[networkName].svg}
+                                                alt={networks[networkName].title}
+                                                mr="12px"
+                                            />
+                                            {safe.slice(0, 5)}...{safe.slice(-4)}
+                                        </Box>
+                                    ) : (
+                                        "Select Safe"
+                                    )}
+                                </MenuButton>
+                            </Box>
                             <MenuList maxHeight="50vh" overflow="auto" display={isOpen ? "block" : "none"}>
                                 {currentTeam.safes ? (
                                     currentTeam.safes.map((s) => (
@@ -257,15 +259,18 @@ function SwapperOnChain({
                     )}
                 </Menu>
                 <Box display="flex" flexDirection="column" minWidth="30%">
+                    <Text fontSize="xs" ml="4px" color="gray.500">
+                        Sell
+                    </Text>
                     <Button
                         backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
                         border="1px solid"
                         borderColor="var(--chakra-colors-chakra-border-color)"
-                        marginLeft="5px"
                         marginBottom="5px"
-                        marginRight="5px"
+                        borderRadius={0}
                         flexShrink="0"
                         minWidth="25%"
+                        height="40px"
                         fontWeight="normal"
                         fontSize="15px"
                         onClick={() => setFromTokenModalOpen(true)}
@@ -280,7 +285,6 @@ function SwapperOnChain({
                                         display="flex"
                                         alignItems="center"
                                         boxSize="1.5rem"
-                                        borderRadius="full"
                                         src={fromToken.logoURI}
                                         name={fromToken.symbol.substring(0, 3)}
                                         mr="12px"
@@ -291,14 +295,18 @@ function SwapperOnChain({
                             "From Token"
                         )}
                     </Button>
+                    <Text fontSize="xs" ml="4px" mt="20px" color="gray.500">
+                        Buy
+                    </Text>
                     <Button
                         backgroundColor={colorMode === "light" && "var(--chakra-colors-whiteAlpha-900)"}
                         border="1px solid"
                         borderColor="var(--chakra-colors-chakra-border-color)"
-                        marginRight="5px"
-                        marginLeft="5px"
                         flexShrink="0"
                         minWidth="25%"
+                        borderTopRightRadius="0" // Make top right corner non-rounded
+                        borderBottomRightRadius="0" // Make bottom right corner non-rounded
+                        height="40px"
                         fontWeight="normal"
                         fontSize="15px"
                         onClick={() => setToTokenModalOpen(true)}
@@ -330,6 +338,10 @@ function SwapperOnChain({
                         width="auto"
                         placeholder="0.0"
                         marginBottom="5px"
+                        borderTopLeftRadius="0" // Make top right corner non-rounded
+                        borderBottomLeftRadius="0" // Make bottom right corner non-rounded
+                        borderLeft="0"
+                        mt="18px"
                         value={fromAmount}
                         onChange={(e) => {
                             const { value } = e.target;
@@ -350,22 +362,23 @@ function SwapperOnChain({
                             cursor: "not-allowed",
                         }}
                     />
+                    <Box display="flex" flexDirection="row" justifyContent="space-between" minWidth="70%">
+                        <Box fontSize="xs" alignSelf="start" height="18px" color="gray.500" marginLeft="5px">
+                            {displayTokenFromBalance()}
+                        </Box>
+                        <Box fontSize="xs" alignSelf="end" height="18px" color="gray.500">
+                            {fromToken?.address && fromAmount && totalFromUSDValue()}
+                        </Box>
+                    </Box>
                     <Box position="relative">
-                        <IoArrowDownCircleOutline
-                            style={{
-                                position: "absolute",
-                                top: "-16px",
-                                left: "-16px",
-                                minWidth: "27px",
-                                minHeight: "27px",
-                                color: "var(--chakra-colors-bronzeSwatch-400)",
-                                zIndex: "1",
-                            }}
-                        />
                         <Input
                             placeholder="0.0"
                             minWidth="40%"
                             value={formatToAmount()}
+                            borderTopLeftRadius="0" // Make top right corner non-rounded
+                            borderBottomLeftRadius="0" // Make bottom right corner non-rounded
+                            borderLeft="0"
+                            mt="20px"
                             isDisabled
                             _disabled={{
                                 opacity: "unset",
@@ -373,16 +386,13 @@ function SwapperOnChain({
                             }}
                         />
                     </Box>
-                </Box>
-            </Box>
-            <Box display="flex" flexDirection="row">
-                <Box minWidth="30%" />
-                <Box display="flex" flexDirection="row" justifyContent="space-between" minWidth="70%">
-                    <Box fontSize="xs" alignSelf="start" height="18px" color="gray.500" marginLeft="5px">
-                        {displayTokenToBalance()}
-                    </Box>
-                    <Box fontSize="xs" alignSelf="end" height="18px" color="gray.500">
-                        {toAmount && totalToUSDValue()}
+                    <Box display="flex" flexDirection="row" justifyContent="space-between" minWidth="70%">
+                        <Box fontSize="xs" alignSelf="start" height="18px" color="gray.500" marginLeft="5px">
+                            {displayTokenToBalance()}
+                        </Box>
+                        <Box fontSize="xs" alignSelf="end" height="18px" color="gray.500">
+                            {toAmount && totalToUSDValue()}
+                        </Box>
                     </Box>
                 </Box>
             </Box>
