@@ -17,6 +17,15 @@ Service key can be found in GitLab CI/CD variables.
 
 To deploy a particular function provide its name: `functions:functionName`.
 
+Add the following secrets to the environment by running:
+
+firebase functions:secrets:set SECRET_NAME
+
+where SECRET_NAME for now is:
+
+-   STRIPE_ENDPOINT_SECRET
+-   STRIPE_ACCOUNT_KEY
+
 ## VS Code
 
 If you want to throw debuggers into the node code and run it locally, use the following launch.json file:
