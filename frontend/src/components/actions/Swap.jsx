@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-    // Box,
+    Box,
     Button,
     Stack,
     // Divider,
@@ -14,6 +14,7 @@ import {
     // IoArrowDownCircleOutline,
     IoPaperPlane,
 } from "react-icons/io5";
+import { FaGasPump } from "react-icons/fa6";
 import { useWagmi } from "../../providers/Wagmi";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 import { formatNumber, fromHumanReadable, toHumanReadable } from "../../utils";
@@ -289,7 +290,7 @@ export default function Swap() {
                 getLiFiRoutes={getLiFiRoutes}
                 loadingRoutes={loadingRoutes}
             /> */}
-            <Stack padding="30px 0" gap="0">
+            <Stack padding="20px 0" gap="0">
                 <SwapperOnChain
                     lifi={lifi}
                     safe={fromSafe}
@@ -363,62 +364,77 @@ export default function Swap() {
                     setRouteData={setRouteData}
                 />
                 {routeData && (
-                    <Button
-                        marginTop="12px"
-                        colorScheme={
-                            networkMismatch ||
-                            fromAmoutIsGreaterThanTokenBalance ||
-                            insufficientEthBalance ||
-                            ethOnlySwapInsufficientBalance
-                                ? "bronzeSwatch"
-                                : "blueSwatch"
-                        }
-                        rightIcon={<IoPaperPlane size="20px" />}
-                        onClick={async () => {
-                            if (networkMismatch) {
-                                switchNetwork(Number(fromChain));
-                            } else {
-                                setCreatingTransaction(true);
-                                await createAndApproveSwapTransaction(
-                                    fromNetwork,
-                                    fromSafe,
-                                    {
-                                        to: routeData?.action?.fromToken?.address,
-                                        data: approveEncodeData,
-                                    },
-                                    {
-                                        to: routeData?.transactionRequest?.to, // lifi smart contract
-                                        data: routeData?.transactionRequest?.data,
-                                        value: ethers.BigNumber.from(routeData?.transactionRequest?.value).toString(),
-                                        // converting hexadecimal to BigNumber
-                                    },
-                                    address,
-                                    satoshiData,
-                                );
-                                setCreatingTransaction(false);
-                                setRouteData();
+                    <>
+                        <Button
+                            marginTop="12px"
+                            colorScheme={
+                                networkMismatch ||
+                                fromAmoutIsGreaterThanTokenBalance ||
+                                insufficientEthBalance ||
+                                ethOnlySwapInsufficientBalance
+                                    ? "bronzeSwatch"
+                                    : "blueSwatch"
                             }
-                        }}
-                        isDisabled={
-                            !routeData ||
-                            !isConnected ||
-                            !address ||
-                            !metaMaskInstalled ||
-                            walletMismatch ||
-                            fromAmoutIsGreaterThanTokenBalance ||
-                            insufficientEthBalance ||
-                            ethOnlySwapInsufficientBalance ||
-                            creatingTransaction
-                        }
-                        isLoading={creatingTransaction}
-                        loadingText="Creating transaction..."
-                    >
-                        {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken?.symbol} balance`) ||
-                            ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
-                                "Insufficient ETH balance") ||
-                            (networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
-                            "Create and sign safe transaction"}
-                    </Button>
+                            rightIcon={<IoPaperPlane size="20px" />}
+                            onClick={async () => {
+                                if (networkMismatch) {
+                                    switchNetwork(Number(fromChain));
+                                } else {
+                                    setCreatingTransaction(true);
+                                    await createAndApproveSwapTransaction(
+                                        fromNetwork,
+                                        fromSafe,
+                                        {
+                                            to: routeData?.action?.fromToken?.address,
+                                            data: approveEncodeData,
+                                        },
+                                        {
+                                            to: routeData?.transactionRequest?.to, // lifi smart contract
+                                            data: routeData?.transactionRequest?.data,
+                                            value: ethers.BigNumber.from(
+                                                routeData?.transactionRequest?.value,
+                                            ).toString(),
+                                            // converting hexadecimal to BigNumber
+                                        },
+                                        address,
+                                        satoshiData,
+                                    );
+                                    setCreatingTransaction(false);
+                                    setRouteData();
+                                }
+                            }}
+                            isDisabled={
+                                !routeData ||
+                                !isConnected ||
+                                !address ||
+                                !metaMaskInstalled ||
+                                walletMismatch ||
+                                fromAmoutIsGreaterThanTokenBalance ||
+                                insufficientEthBalance ||
+                                ethOnlySwapInsufficientBalance ||
+                                creatingTransaction
+                            }
+                            isLoading={creatingTransaction}
+                            loadingText="Creating transaction..."
+                        >
+                            {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken?.symbol} balance`) ||
+                                ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
+                                    "Insufficient ETH balance") ||
+                                (networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
+                                "Create and sign safe transaction"}
+                        </Button>
+                        <Box
+                            display="flex"
+                            alignItems="center"
+                            paddingTop="5px"
+                            justifyContent="end"
+                            color="gray.500"
+                            fontSize="small"
+                        >
+                            <FaGasPump size="16px" style={{ marginRight: "5px" }} /> $
+                            {routeData?.estimate?.gasCosts[0]?.amountUSD} ({formatNumber(gasCosts)} ETH)
+                        </Box>
+                    </>
                 )}
             </Stack>
         </>

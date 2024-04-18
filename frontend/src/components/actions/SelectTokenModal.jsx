@@ -54,7 +54,7 @@ function SelectTokenModal({ tokens, isOpen, setIsOpen, setToken, safe, setRouteD
                 const targetChainID = networks[network]?.id;
                 const response = await getWalletTokenBalances({ chainId: targetChainID, safeAddress: safe });
                 let sanitizedData = response?.data?.data?.items?.filter(
-                    (el) => el?.type === "cryptocurrency" && el?.quote_rate,
+                    (el) => el?.type === "cryptocurrency" && el?.balance !== "0",
                 );
                 sanitizedData = sanitizedData.map((token) => {
                     if (token?.contract_address?.toLowerCase() === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {

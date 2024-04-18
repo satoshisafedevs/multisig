@@ -4,7 +4,8 @@ const { getAndWriteTotalBalance } = require("./getAndWriteTotalBalance");
 const { getAndWriteComplexProtocolList } = require("./getAndWriteComplexProtocolList");
 const { getAndWriteAllTokenList } = require("./getAndWriteAllTokenList");
 
-exports.getAllBalances = async (safes) => {
+exports.getAllBalances = async (safes, teamName, teamId) => {
+    log(`Updating ${safes?.length} safe(s) balances for team: ${teamName}, ${teamId}`);
     try {
         let ACCESS_KEY;
         if (process.env.FUNCTIONS_EMULATOR === "true") {
@@ -65,6 +66,6 @@ exports.getAllBalances = async (safes) => {
         }
     } catch (error) {
         log("Error getting balance:", error);
-        log("Finished getting daily balances.");
     }
+    log("Finished updating team safe(s) balances.");
 };

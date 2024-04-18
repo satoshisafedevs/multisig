@@ -30,6 +30,7 @@ function StakedAssetsTable({ todaysAggregatedSafesStakedAssets }) {
 
     const StyledTd = styled(Td)`
         border-color: ${tableBorderColor};
+        font-variant-numeric: normal;
     `;
 
     const data = React.useMemo(() => todaysAggregatedSafesStakedAssets.balances, [todaysAggregatedSafesStakedAssets]);

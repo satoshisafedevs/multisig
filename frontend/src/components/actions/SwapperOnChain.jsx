@@ -103,7 +103,7 @@ function SwapperOnChain({
                                 setRouteData();
                             }}
                         >
-                            {fromTokenBalance}
+                            {formatNumber(fromTokenBalance)}
                         </Button>{" "}
                         {fromToken.symbol}
                     </div>
@@ -156,7 +156,7 @@ function SwapperOnChain({
             if (toTokenBalance) {
                 return (
                     <div>
-                        Balance: {toTokenBalance} {toToken.symbol}
+                        Balance: {formatNumber(toTokenBalance)} {toToken.symbol}
                     </div>
                 );
             }
@@ -209,7 +209,6 @@ function SwapperOnChain({
                                     fontSize="15px"
                                     width="100%"
                                     borderRightRadius={0}
-                                    borderRight={0}
                                     minWidth="30%"
                                     height="40px"
                                     isDisabled={!lifi}
@@ -268,6 +267,8 @@ function SwapperOnChain({
                         borderColor="var(--chakra-colors-chakra-border-color)"
                         marginBottom="5px"
                         borderRadius={0}
+                        borderLeftColor="transparent"
+                        borderRightColor="transparent"
                         flexShrink="0"
                         minWidth="25%"
                         height="40px"
@@ -295,7 +296,7 @@ function SwapperOnChain({
                             "From Token"
                         )}
                     </Button>
-                    <Text fontSize="xs" ml="4px" mt="20px" color="gray.500">
+                    <Text fontSize="xs" ml="4px" mt="15px" color="gray.500">
                         Buy
                     </Text>
                     <Button
@@ -306,6 +307,7 @@ function SwapperOnChain({
                         minWidth="25%"
                         borderTopRightRadius="0" // Make top right corner non-rounded
                         borderBottomRightRadius="0" // Make bottom right corner non-rounded
+                        borderRightColor="transparent"
                         height="40px"
                         fontWeight="normal"
                         fontSize="15px"
@@ -337,10 +339,8 @@ function SwapperOnChain({
                     <Input
                         width="auto"
                         placeholder="0.0"
-                        marginBottom="5px"
                         borderTopLeftRadius="0" // Make top right corner non-rounded
                         borderBottomLeftRadius="0" // Make bottom right corner non-rounded
-                        borderLeft="0"
                         mt="18px"
                         value={fromAmount}
                         onChange={(e) => {
@@ -377,7 +377,6 @@ function SwapperOnChain({
                             value={formatToAmount()}
                             borderTopLeftRadius="0" // Make top right corner non-rounded
                             borderBottomLeftRadius="0" // Make bottom right corner non-rounded
-                            borderLeft="0"
                             mt="20px"
                             isDisabled
                             _disabled={{
@@ -390,7 +389,7 @@ function SwapperOnChain({
                         <Box fontSize="xs" alignSelf="start" height="18px" color="gray.500" marginLeft="5px">
                             {displayTokenToBalance()}
                         </Box>
-                        <Box fontSize="xs" alignSelf="end" height="18px" color="gray.500">
+                        <Box fontSize="xs" alignSelf="end" height="18px" color="gray.500" whiteSpace="nowrap">
                             {toAmount && totalToUSDValue()}
                         </Box>
                     </Box>
