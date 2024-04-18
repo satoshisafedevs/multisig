@@ -14,6 +14,7 @@ function WalletAssetsTable({ todaysAggregatedSafesWalletAssets }) {
 
     const StyledTd = styled(Td)`
         border-color: ${tableBorderColor};
+        font-variant-numeric: normal;
     `;
 
     const data = React.useMemo(() => todaysAggregatedSafesWalletAssets.balances, [todaysAggregatedSafesWalletAssets]);

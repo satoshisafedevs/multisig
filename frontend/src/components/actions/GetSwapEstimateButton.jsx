@@ -23,7 +23,7 @@ function GetSwapEstimateButton({
         let timerId;
         // Start the countdown only if routeData is present
         if (routeData && countdown > 0) {
-            setCountdownMessage(`Swap estimate is valid for ${countdown} seconds`); // Set initial countdown message
+            setCountdownMessage(`Estimate is valid for ${countdown} seconds`); // Set initial countdown message
             timerId = setTimeout(() => {
                 setCountdown(countdown - 1); // Decrement countdown
             }, 1000);
@@ -39,7 +39,7 @@ function GetSwapEstimateButton({
 
     return (
         <Button
-            marginTop="24px"
+            marginTop="20px"
             colorScheme="blueSwatch"
             rightIcon={<IoShuffleOutline size="25px" />}
             onClick={async () => {
@@ -47,7 +47,7 @@ function GetSwapEstimateButton({
                 setCountdown(60);
             }}
             isLoading={loadingRoutes}
-            loadingText="Getting swap estimate..."
+            loadingText="Getting Estimate..."
             isDisabled={
                 !fromChain ||
                 !fromToken.address ||

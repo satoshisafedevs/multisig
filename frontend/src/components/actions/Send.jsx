@@ -51,7 +51,7 @@ export default function Send() {
             setLoadingTokens(true);
             const targetChainID = networks[network].id;
             const { data } = await getWalletTokenBalances({ chainId: targetChainID, safeAddress });
-            const sanitizedData = data.data.items.filter((el) => el.type === "cryptocurrency" && el.quote_rate);
+            const sanitizedData = data.data.items.filter((el) => el?.type === "cryptocurrency" && el?.balance !== "0");
             setAvailableTokens(sanitizedData);
         } catch (error) {
             toast({
@@ -142,7 +142,7 @@ export default function Send() {
     };
 
     return (
-        <Stack padding="10px 0" gap="20px" mt="20px">
+        <Stack padding="20px 0" gap="20px">
             <Box display="flex" flexDirection="row">
                 <Box minWidth="35%">
                     <Text fontSize="xs" color="gray.500">
@@ -268,6 +268,7 @@ export default function Send() {
                                                 whiteSpace="normal"
                                             >
                                                 <Avatar
+                                                    size="sm"
                                                     boxSize="1.5rem"
                                                     borderRadius="full"
                                                     src={imageSrc(selectedToken)}
@@ -282,7 +283,7 @@ export default function Send() {
                                                         selectedToken.contract_decimals,
                                                     ),
                                                 )}{" "}
-                                                {selectedToken.contract_ticker_symbol}
+                                                {selectedToken.contract_ticker_symbol.slice(0, 8)}
                                             </Box>
                                         )) ||
                                         (safe && "Select token") ||
@@ -296,6 +297,7 @@ export default function Send() {
                                                 onClick={() => setSelectedToken(token)}
                                             >
                                                 <Avatar
+                                                    size="sm"
                                                     key={token.contract_address}
                                                     boxSize="1.5rem"
                                                     borderRadius="full"
