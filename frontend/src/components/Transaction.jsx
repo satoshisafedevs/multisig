@@ -131,7 +131,7 @@ function Transaction({ transaction }) {
                     <Button
                         as={Text}
                         variant="outline"
-                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
+                        colorScheme={networkMismatch ? "bronzeSwatch" : "blueSwatch"}
                         size="sm"
                         isLoading={executing}
                         loadingText="Executing..."
@@ -156,7 +156,7 @@ function Transaction({ transaction }) {
                     <Button
                         as={Text}
                         variant="outline"
-                        colorScheme={networkMismatch ? "orange" : "blueSwatch"}
+                        colorScheme={networkMismatch ? "bronzeSwatch" : "blueSwatch"}
                         size="sm"
                         isLoading={approving}
                         loadingText="Approving..."
@@ -183,7 +183,7 @@ function Transaction({ transaction }) {
                 <Button
                     as={Text}
                     variant="outline"
-                    colorScheme={networkMismatch ? "orange" : "red"}
+                    colorScheme={networkMismatch ? "bronzeSwatch" : "red"}
                     size="sm"
                     isLoading={rejecting}
                     loadingText="Rejecting..."
@@ -233,7 +233,7 @@ function Transaction({ transaction }) {
                                     flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
                                 >
                                     <Stack direction="row">
-                                        <Stack direction="column" minWidth="280px">
+                                        <Stack direction="column" minWidth="240px">
                                             <Stack direction="row" p="5px" alignItems="center">
                                                 <Image
                                                     boxSize="24px"
@@ -258,7 +258,7 @@ function Transaction({ transaction }) {
                                                             transaction.submissionDate,
                                                     ).toLocaleString("en-US", {
                                                         year: "numeric",
-                                                        month: "long",
+                                                        month: "short",
                                                         day: "numeric",
                                                         hour: "2-digit",
                                                         minute: "2-digit",
@@ -331,7 +331,6 @@ function Transaction({ transaction }) {
                                                     whiteSpace="nowrap"
                                                     overflow="hidden"
                                                     width="100%"
-                                                    paddingRight="10px"
                                                 >
                                                     {(transaction?.satoshiData?.type &&
                                                         upperFirst(transaction?.satoshiData?.type)) ||

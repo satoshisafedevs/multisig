@@ -30,7 +30,7 @@ function GetSwapEstimateButton({
         } else if (countdown <= 0) {
             // Once countdown reaches 0, call setRouteData
             setRouteData();
-            setCountdownMessage("Get swap estimate");
+            setCountdownMessage("Get Estimate");
             setCountdown(60);
         }
         // Cleanup the timeout on component unmount or when countdown changes
@@ -39,7 +39,7 @@ function GetSwapEstimateButton({
 
     return (
         <Button
-            marginTop="12px"
+            marginTop="24px"
             colorScheme="blueSwatch"
             rightIcon={<IoShuffleOutline size="25px" />}
             onClick={async () => {
@@ -59,7 +59,7 @@ function GetSwapEstimateButton({
                 !toSafe
             }
         >
-            {(routeData && countdownMessage) || "Get swap estimate"}
+            {(routeData && countdownMessage) || "Get Estimate"}
         </Button>
     );
 }

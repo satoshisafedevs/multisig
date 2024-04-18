@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { upperFirst } from "lodash";
-import { IoCashOutline, IoRefreshOutline } from "react-icons/io5";
+import { IoPaperPlane, IoRefreshOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import { useWagmi } from "../../providers/Wagmi";
 import { formatNumber, fromHumanReadable, toHumanReadable } from "../../utils";
@@ -142,9 +142,9 @@ export default function Send() {
     };
 
     return (
-        <Stack padding="10px 0" gap="20px">
+        <Stack padding="10px 0" gap="20px" mt="20px">
             <Box display="flex" flexDirection="row">
-                <Box minWidth="35%" marginRight="5px">
+                <Box minWidth="35%">
                     <Text fontSize="xs" color="gray.500">
                         Sender
                     </Text>
@@ -160,6 +160,8 @@ export default function Send() {
                                     fontWeight="normal"
                                     fontSize="15px"
                                     width="100%"
+                                    borderRight="0"
+                                    borderRightRadius={0}
                                 >
                                     {safe.length > 0 ? (
                                         <Box
@@ -225,11 +227,12 @@ export default function Send() {
                         onChange={(event) => setRecipient(event.target.value)}
                         isInvalid={invalidRecipient}
                         errorBorderColor="red.300"
+                        borderLeftRadius={0}
                     />
                 </Box>
             </Box>
             <Box display="flex" flexDirection="row">
-                <Box minWidth="35%" marginRight="5px">
+                <Box minWidth="35%">
                     <Text
                         fontSize="xs"
                         minWidth="35%"
@@ -251,6 +254,8 @@ export default function Send() {
                                     flexShrink="0"
                                     fontWeight="normal"
                                     fontSize="15px"
+                                    borderRight="0"
+                                    borderRightRadius={0}
                                     width="100%"
                                     isDisabled={loadingTokens}
                                 >
@@ -342,6 +347,7 @@ export default function Send() {
                             _focusVisible={{ ...inputStyles.field._focusVisible }}
                             paddingRight="4.5rem"
                             placeholder="0.0"
+                            borderLeftRadius={0}
                             value={amount}
                             onChange={(event) => {
                                 const { value } = event.target;
@@ -377,8 +383,8 @@ export default function Send() {
                 </Box>
             </Box>
             <Button
-                colorScheme={networkMismatch && safe ? "orange" : "blueSwatch"}
-                rightIcon={<IoCashOutline size="25px" />}
+                colorScheme={networkMismatch && safe ? "bronzeSwatch" : "blueSwatch"}
+                rightIcon={<IoPaperPlane size="20px" />}
                 isLoading={sending}
                 loadingText="Creating send transaction..."
                 isDisabled={
@@ -429,9 +435,7 @@ export default function Send() {
                     }
                 }}
             >
-                {networkMismatch && safe
-                    ? `Switch to ${upperFirst(networkName)} network`
-                    : "Create and sign safe transaction"}
+                {networkMismatch && safe ? `Switch to ${upperFirst(networkName)} network` : "Create Safe Transaction"}
             </Button>
         </Stack>
     );
