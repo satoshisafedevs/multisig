@@ -178,7 +178,7 @@ deploy-hosting-production:
   before_script:
     - apk update && apk add python3 make g++ git
     - cd $CI_PROJECT_DIR/frontend && yarn install
-    - yarn global add firebase-tools@12.4.8
+    - yarn global add firebase-tools
   script:
     - cd $CI_PROJECT_DIR/frontend
     - |
@@ -199,7 +199,7 @@ deploy-functions-production:
   before_script:
     - apk update && apk add python3 make g++ git
     - cd $CI_PROJECT_DIR/functions && yarn install
-    - yarn global add firebase-tools@12.4.8
+    - yarn global add firebase-tools
   script:
     - echo OPENAI_KEY=$OPENAI_KEY >> .env
     - echo TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID >> .env
