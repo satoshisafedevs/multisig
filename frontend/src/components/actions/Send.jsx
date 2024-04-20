@@ -385,6 +385,7 @@ export default function Send() {
                 </Box>
             </Box>
             <Button
+                marginTop="18px"
                 colorScheme={networkMismatch && safe ? "bronzeSwatch" : "blueSwatch"}
                 rightIcon={<IoPaperPlane size="20px" />}
                 isLoading={sending}

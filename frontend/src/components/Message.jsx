@@ -50,7 +50,6 @@ function Message({ message, hoverID, setHoverID }) {
     };
 
     const timeOptions = {
-        timeZone: "America/Los_Angeles",
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
@@ -64,9 +63,8 @@ function Message({ message, hoverID, setHoverID }) {
         const currentYear = new Date().getFullYear();
         const dateYear = date.getFullYear();
 
-        // Define the base dateOptions
+        // Define the base dateOptions without a fixed timeZone
         const dateOptions = {
-            timeZone: "America/Los_Angeles",
             month: "long",
             day: "numeric",
             hour: "2-digit",
@@ -83,7 +81,7 @@ function Message({ message, hoverID, setHoverID }) {
         return date.toLocaleString("en-US", dateOptions);
     };
 
-    const convertToTime = (ts) => new Date(timeInMilliseconds(ts)).toLocaleString("en-US", timeOptions);
+    const convertToTime = (ts) => new Date(timeInMilliseconds(ts)).toLocaleTimeString("en-US", timeOptions);
 
     const isToday = (ts) => {
         const date = new Date(timeInMilliseconds(ts));

@@ -23,7 +23,7 @@ import {
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { IoChevronBackOutline } from "react-icons/io5";
 import useGnosisSafe from "../../hooks/useGnosisSafe";
 
@@ -47,6 +47,7 @@ function ImportSafeModal({
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loading, setLoading] = useState(false);
     const toast = useToast();
+    const hasRunOnce = useRef(false);
 
     // Updated function to handle asynchronous refresh list
     const handleRefreshList = async () => {
@@ -90,13 +91,22 @@ function ImportSafeModal({
         }
     };
 
+    useEffect(() => {
+        if (!hasRunOnce.current) {
+            if (!userTeamData.userSafes || userTeamData?.userSafes?.length === 0) {
+                handleRefreshList();
+            }
+            hasRunOnce.current = true;
+        }
+    }, [userTeamData]);
+
     return (
         <>
             <ModalHeader>Import Gnosis Safe</ModalHeader>
             <ModalCloseButton top="var(--chakra-space-3)" />
             <ModalBody paddingTop="0">
                 Select the Safe(s) from the list below that you would like to import for this team.
-                {userTeamData?.userSafes?.length > 0 ? (
+                {userTeamData?.userSafes?.length > 0 && (
                     <TableContainer
                         marginTop="20px"
                         paddingTop="10px"
@@ -141,23 +151,20 @@ function ImportSafeModal({
                             </Tbody>
                         </Table>
                     </TableContainer>
-                ) : (
-                    <>
-                        <Alert status="warning" marginTop="20px" borderRadius="var(--chakra-radii-base)">
-                            <AlertIcon />
-                            It appears that you don&apos;t have a Gnosis Safe(s) associated with your wallet.
-                        </Alert>
-                        {/* <Button
-                            marginTop="20px"
-                            colorScheme="blueSwatch"
-                            onClick={() => refreshSafeList({ walletAddress: userTeamData.userWalletAddress })}
-                        >
-                            Refresh list
-                        </Button> */}
-                    </>
+                )}
+                {(!userTeamData.userSafes || userTeamData?.userSafes?.length === 0) && isRefreshing && (
+                    <Alert status="info" marginTop="20px" borderRadius="var(--chakra-radii-base)">
+                        <AlertIcon />
+                        Fetching safes data...
+                    </Alert>
+                )}
+                {(!userTeamData.userSafes || userTeamData?.userSafes?.length === 0) && !isRefreshing && (
+                    <Alert status="warning" marginTop="20px" borderRadius="var(--chakra-radii-base)">
+                        <AlertIcon />
+                        It appears that you don&apos;t have a Gnosis Safe(s) associated with your wallet.
+                    </Alert>
                 )}
             </ModalBody>
-
             <ModalFooter justifyContent="space-between">
                 <StyledButton
                     leftIcon={<IoChevronBackOutline size="18px" margin="0" />}
