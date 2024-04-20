@@ -34,7 +34,8 @@ const MAX_TEAM_NAME_LENGTH = 50;
 
 function TeamPicker() {
     const toast = useToast();
-    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData } = useUser();
+    const { user, firestoreUser, teamsData, setCurrentTeam, setTeamUsersInfo, getUserTeamsData, setUserTeamData } =
+        useUser();
     const { setWalletMismatch } = useWagmi();
     const { resetBalanceData } = useSafeBalance();
     const {
@@ -56,6 +57,7 @@ function TeamPicker() {
         document.title = "Select your team - Satoshi Safe";
         setCurrentTeam(null);
         setTeamUsersInfo(null);
+        setUserTeamData();
         setWalletMismatch(false);
         resetBalanceData();
         getUserTeamsData(user);

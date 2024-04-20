@@ -11,7 +11,6 @@ import {
     Divider,
     Input,
     Flex,
-    Heading,
     Button,
     IconButton,
     Tag,
@@ -226,11 +225,9 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                                     <AccordionIcon />
                                 </Flex>
                                 <Flex flex="1" gap="10px" align="center" justifyContent="center">
-                                    <Flex justifyContent="flex-start" alignItems="center" width="400px">
+                                    <Flex justifyContent="flex-start" gap="10px" alignItems="center" width="420px">
                                         <BsSafe size="25px" />
-                                        <Heading ml="20px" size="xs">
-                                            {data.name || data.safeAddress}
-                                        </Heading>
+                                        <Box size="xs">{data.name || data.safeAddress}</Box>
                                     </Flex>
                                 </Flex>
                             </Flex>
@@ -238,10 +235,15 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                         <AccordionPanel padding="0 15px" background={isExpanded && bgValue}>
                             <Divider />
                             <Flex justify="space-between" align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
+                                <Box flexBasis="15%" fontWeight="bold">
                                     Name
-                                </Heading>
-                                <Flex flex="1" align="center" justify="center" marginLeft="80px">
+                                </Box>
+                                <Flex
+                                    flex="1"
+                                    align="center"
+                                    justify="center"
+                                    marginLeft={isEditingName ? "70px" : "61px"}
+                                >
                                     {isEditingName ? (
                                         <Input w="70%" value={safeName} onChange={(e) => setSafeName(e.target.value)} />
                                     ) : (
@@ -260,9 +262,9 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                             </Flex>
                             <Divider />
                             <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
+                                <Box fontWeight="bold" flexBasis="15%">
                                     Safe address
-                                </Heading>
+                                </Box>
                                 <Box
                                     flex="1"
                                     textAlign="center"
@@ -277,9 +279,9 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                             </Flex>
                             <Divider />
                             <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
+                                <Box fontWeight="bold" flexBasis="15%">
                                     Owners
-                                </Heading>
+                                </Box>
                                 <Box flex="1" textAlign="center">
                                     {data &&
                                         data.owners &&
@@ -325,18 +327,18 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                             </Flex>
                             <Divider />
                             <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
+                                <Box fontWeight="bold" flexBasis="15%">
                                     Network
-                                </Heading>
+                                </Box>
                                 <Box flex="1" textAlign="center">
                                     {upperFirst(data.network)}
                                 </Box>
                             </Flex>
                             <Divider />
                             <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
+                                <Box fontWeight="bold" flexBasis="15%">
                                     Threshold
-                                </Heading>
+                                </Box>
                                 <Box
                                     flex="1"
                                     paddingLeft="6px"
@@ -360,7 +362,7 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                             </Flex>
                             <Divider />
                             <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%" display="flex" alignItems="center" gap="5px">
+                                <Box fontWeight="bold" flexBasis="15%" display="flex" alignItems="center" gap="5px">
                                     Added
                                     <Tooltip label={tooltipLabel}>
                                         {/* If you're wrapping an icon from react-icons, you need to also wrap the icon
@@ -369,16 +371,16 @@ function SafeDetails({ data, loading, fetchAndUpdateLatestSafesData }) {
                                             <IoHelpCircleOutline size="20px" />
                                         </span>
                                     </Tooltip>
-                                </Heading>
+                                </Box>
                                 <Box flex="1" textAlign="center">
                                     {formatTimestamp(data.addedAt)}
                                 </Box>
                             </Flex>
                             <Divider />
                             <Flex align="center" py={4}>
-                                <Heading size="xs" flexBasis="15%">
+                                <Box fontWeight="bold" flexBasis="15%">
                                     Manage
-                                </Heading>
+                                </Box>
                                 <Box flex="1" textAlign="center">
                                     <Tooltip label={loading && "Syncing with latest data..."}>
                                         <Button

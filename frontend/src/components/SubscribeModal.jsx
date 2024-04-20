@@ -135,7 +135,7 @@ export default function SubscribeModal({ isOpen }) {
                 <ModalBody justifyItems="center">{renderAvailableSubscriptions()}</ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="blue"
+                        colorScheme="blueSwatch"
                         mr={3}
                         onClick={selectSubscriptionType}
                         isLoading={loading}

@@ -38,6 +38,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
             }}
             borderColor={tableBorderColor}
             borderBottom={userTeamData.userSafes.length - 1 === idx ? "none" : "inherit"}
+            style={{ fontVariantNumeric: "normal" }}
         >
             {content}
         </Td>
