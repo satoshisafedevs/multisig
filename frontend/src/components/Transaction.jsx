@@ -95,6 +95,21 @@ function Transaction({ transaction }) {
         setRejecting(false);
     };
 
+    const formatDate = (date) => {
+        const currentDate = new Date();
+        const targetDate = new Date(date);
+        const isCurrentYear = targetDate.getFullYear() === currentDate.getFullYear();
+
+        return targetDate.toLocaleString("en-US", {
+            year: isCurrentYear ? undefined : "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
     const showButtons = () => {
         const correctChain = chains.find((el) => {
             // Check if the network is 'mainnet' and the el.network is 'homestead'
@@ -252,18 +267,11 @@ function Transaction({ transaction }) {
                                                     whiteSpace="nowrap"
                                                     overflow="hidden"
                                                 >
-                                                    {new Date(
+                                                    {formatDate(
                                                         transaction.unifiedDate ||
                                                             transaction.executionDate ||
                                                             transaction.submissionDate,
-                                                    ).toLocaleString("en-US", {
-                                                        year: "numeric",
-                                                        month: "short",
-                                                        day: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                        hour12: true,
-                                                    })}
+                                                    )}
                                                 </Text>
                                             </Stack>
                                             <Stack direction="row" p="5px" alignItems="center">
