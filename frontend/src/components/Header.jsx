@@ -123,7 +123,7 @@ export default function Header({ withTeam }) {
     };
 
     const walletMismatchText =
-        "The MetaMask wallet address you have selected does not match the wallet address registered with Satoshi Safe.";
+        "The wallet address selected in your MetaMask app does not match the wallet address in your profile.";
 
     const notSafeOwner =
         currentTeam?.safes &&

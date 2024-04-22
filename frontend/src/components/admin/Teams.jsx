@@ -61,7 +61,7 @@ function Teams() {
         if (team.id === currentTeam.id) {
             navigate("/");
         }
-        leaveTeam(team);
+        await leaveTeam(team);
         const resp = await getUserTeamsData();
         if (resp) {
             toast({
