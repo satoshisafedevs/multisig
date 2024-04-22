@@ -133,6 +133,10 @@ function Signin() {
                                 value={email}
                                 _autofill={{
                                     boxShadow: `0 0 0 1000px ${chromeAutofill} inset`,
+                                    borderColor: colorMode === "light" ? "gray.200" : "gray.600",
+                                }}
+                                _hover={{
+                                    borderColor: colorMode === "light" ? "gray.300" : "#5f6774",
                                 }}
                             />
                             {!forgotPassword && (
@@ -144,6 +148,11 @@ function Signin() {
                                         value={password}
                                         _autofill={{
                                             boxShadow: `0 0 0 1000px ${chromeAutofill} inset`,
+                                            background: "unset",
+                                            borderColor: colorMode === "light" ? "gray.200" : "gray.600",
+                                        }}
+                                        _hover={{
+                                            borderColor: colorMode === "light" ? "gray.300" : "#5f6774",
                                         }}
                                     />
                                     <InputRightElement>

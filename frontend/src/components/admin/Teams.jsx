@@ -32,6 +32,19 @@ function Teams() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [leave, setLeave] = useState();
     const cancelRef = useRef();
+    const [filteredTeamsData, setFilteredTeamsData] = useState([]);
+
+    const satoshiSafeUserIds = ["ZyEVb31sYqgpmDw2tDlxCj2hI5B2"]; // TODO: add Prod user id
+
+    useEffect(() => {
+        if (teamsData) {
+            const filteredData = teamsData.map((team) => ({
+                ...team,
+                users: team?.users?.filter((user) => !satoshiSafeUserIds.includes(user)),
+            }));
+            setFilteredTeamsData(filteredData);
+        }
+    }, [teamsData]);
 
     useEffect(() => {
         if (isOpen) {
@@ -105,7 +118,7 @@ function Teams() {
                         <Heading mb="10px" size="lg">
                             Teams
                         </Heading>
-                        <Text>Manage the teams associated with your account</Text>
+                        <Text>Manage the teams associated with your account.</Text>
                     </Box>
                 </Flex>
                 <Box>
@@ -118,8 +131,8 @@ function Teams() {
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {teamsData.map((team) => (
-                                <Tr key={team.name}>
+                            {filteredTeamsData.map((team) => (
+                                <Tr key={team.name} style={{ fontVariantNumeric: "normal" }}>
                                     <Td>{team.name}</Td>
                                     <Td>{team.users.length}</Td>
                                     <Td>

@@ -1,7 +1,12 @@
 import {
+    Alert,
+    AlertIcon,
+    Box,
     Button,
     Card,
-    Container,
+    CardHeader,
+    CardBody,
+    CardFooter,
     FormControl,
     FormLabel,
     Heading,
@@ -20,7 +25,7 @@ import {
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import React, { useEffect, useRef, useState } from "react";
-import { IoAdd } from "react-icons/io5";
+import { IoPeopleCircleOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { addDoc, collection, db, doc, setDoc, addSupportUserToTeam } from "../firebase";
@@ -52,6 +57,8 @@ function TeamPicker() {
     const [walletAddress, setWalletAddress] = useState("");
     const [loading, setLoading] = useState(false);
     const inputRef = useRef();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredTeams, setFilteredTeams] = useState();
 
     useEffect(() => {
         document.title = "Select your team - Satoshi Safe";
@@ -75,6 +82,28 @@ function TeamPicker() {
             }, 0);
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (teamsData) {
+            setFilteredTeams(teamsData); // Initialize with unfiltered data
+        }
+    }, [teamsData]);
+
+    const handleFilterTeams = (searchValue) => {
+        if (!searchValue) {
+            setFilteredTeams(teamsData);
+        } else {
+            const filtered = teamsData.filter((team) => team.name.toLowerCase().includes(searchValue.toLowerCase()));
+
+            setFilteredTeams(filtered);
+        }
+    };
+
+    const handleSearchChange = (event) => {
+        const { value } = event.target;
+        setSearchTerm(value);
+        handleFilterTeams(value);
+    };
 
     const updateTeamName = (newName) => {
         if (newName.length > MAX_TEAM_NAME_LENGTH) {
@@ -160,13 +189,13 @@ function TeamPicker() {
     return (
         <>
             <Header />
-            <Container align="center" margin="auto" height="80vh">
+            <Box display="flex" flexDirection="column" alignItems="center" padding="40px" overflow="auto" height="100%">
                 <Heading fontSize="2xl" mb={5}>
                     Select your team
                 </Heading>
-                <Card padding={5}>
-                    <Stack direction="column" align="stretch" spacing={4}>
-                        {!teamsData && (
+                <Card padding={5} overflow="auto" width="100%" maxWidth="60ch">
+                    {!filteredTeams ? (
+                        <Box display="flex">
                             <Spinner
                                 color="blue.500"
                                 speed="1s"
@@ -176,17 +205,46 @@ function TeamPicker() {
                                 margin="auto"
                                 paddingBottom={15}
                             />
-                        )}
-                        {Array.isArray(teamsData) &&
-                            teamsData.map((team) => (
-                                <Button key={team.id} onClick={() => handleTeamSelect(team.slug)}>
-                                    {team.name}
+                        </Box>
+                    ) : (
+                        <>
+                            {teamsData?.length > 10 && (
+                                <CardHeader padding="0 0 15px 0">
+                                    <Input
+                                        placeholder="Search teams..."
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                    />
+                                </CardHeader>
+                            )}
+                            <CardBody padding="0" overflow="auto">
+                                <Stack direction="column" align="stretch" spacing={4} overflow="auto">
+                                    {Array.isArray(filteredTeams) &&
+                                        filteredTeams.map((team) => (
+                                            <Button key={team.id} onClick={() => handleTeamSelect(team.slug)}>
+                                                {team.name}
+                                            </Button>
+                                        ))}
+                                    {searchTerm && filteredTeams.length === 0 && (
+                                        <Alert status="info" borderRadius="var(--chakra-radii-base)">
+                                            <AlertIcon />
+                                            No teams found
+                                        </Alert>
+                                    )}
+                                </Stack>
+                            </CardBody>
+                            <CardFooter padding="15px 0 0 0">
+                                <Button
+                                    width="100%"
+                                    rightIcon={<IoPeopleCircleOutline size="25px" />}
+                                    colorScheme="blueSwatch"
+                                    onClick={onOpen}
+                                >
+                                    Create new team
                                 </Button>
-                            ))}
-                        <Button leftIcon={<IoAdd size="25px" />} colorScheme="blueSwatch" onClick={onOpen}>
-                            Create new team
-                        </Button>
-                    </Stack>
+                            </CardFooter>
+                        </>
+                    )}
                 </Card>
                 <Modal isOpen={isOpen} onClose={onClose} size="lg">
                     <ModalOverlay />
@@ -228,7 +286,7 @@ function TeamPicker() {
                         </ModalFooter>
                     </ModalContent>
                 </Modal>
-            </Container>
+            </Box>
         </>
     );
 }

@@ -17,7 +17,7 @@ import {
     MenuOptionGroup,
     useToast,
 } from "@chakra-ui/react";
-import { IoSend, IoFilterOutline } from "react-icons/io5";
+import { IoSend, IoFilterOutline, IoRefresh } from "react-icons/io5";
 import { db, collection, addDoc, onSnapshot, Timestamp } from "../../firebase";
 import { useUser } from "../../providers/User";
 import { useTransactions } from "../../providers/Transactions";
@@ -33,7 +33,6 @@ export default function Chat() {
     const { slug } = useParams();
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
-    const [hoverID, setHoverID] = useState();
     const [filter, setFilter] = useState(["all"]);
     const lastMessage = useRef();
     const chatContainerRef = useRef(); // Ref for the chat container
@@ -211,7 +210,13 @@ export default function Chat() {
                                 size="sm"
                                 variant="ghost"
                                 fontWeight="normal"
-                                rightIcon={<IoFilterOutline />}
+                                rightIcon={
+                                    // eslint-disable-next-line react/jsx-wrap-multilines
+                                    <IoFilterOutline
+                                        color={JSON.stringify(filter) !== JSON.stringify(["all"]) ? "tomato" : "unset"}
+                                    />
+                                }
+                                colorScheme="blueSwatch"
                             >
                                 Filter
                             </MenuButton>
@@ -263,6 +268,9 @@ export default function Chat() {
                                     borderRadius="5px"
                                     fontWeight="normal"
                                     colorScheme="blueSwatch"
+                                    loadingText="Loading transactions..."
+                                    spinnerPlacement="end"
+                                    rightIcon={<IoRefresh />}
                                 >
                                     Load more transactions
                                 </Button>
@@ -272,7 +280,7 @@ export default function Chat() {
                             return <Transaction key={el.id} transaction={el} />;
                         }
                         if (el.uid) {
-                            return <Message key={el.id} message={el} hoverID={hoverID} setHoverID={setHoverID} />;
+                            return <Message key={el.id} message={el} />;
                         }
                         return <InFlightTransaction key={el.id} transaction={el} />;
                     })}

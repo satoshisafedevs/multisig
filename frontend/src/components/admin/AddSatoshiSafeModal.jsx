@@ -65,7 +65,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                             <Button
                                 colorScheme="blueSwatch"
                                 size="lg"
-                                leftIcon={<IoAddCircleOutline size="20px" />}
+                                rightIcon={<IoAddCircleOutline size="20px" />}
                                 onClick={() => setModalState("new")}
                             >
                                 Create new Safe
@@ -73,7 +73,7 @@ function AddSatoshiSafeModal({ isOpen, setIsOpen }) {
                             <Button
                                 colorScheme="blueSwatch"
                                 size="lg"
-                                leftIcon={<IoEnterOutline size="20px" />}
+                                rightIcon={<IoEnterOutline size="20px" />}
                                 onClick={() => setModalState("import")}
                             >
                                 Import Gnosis Safe

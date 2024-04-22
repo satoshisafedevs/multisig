@@ -13,8 +13,10 @@ export default function ActionsCard() {
     return (
         <Card height="100%">
             <CardHeader paddingBottom="0">
-                <Stack spacing="24px" display="flex" direction="row" align="baseline">
-                    <Heading size="md">Actions</Heading>
+                <Stack display="flex" direction="row" align="baseline">
+                    <Heading size="md" paddingRight="8px">
+                        Actions
+                    </Heading>
                     <>
                         <HeaderTab
                             isActive={activeTab === "swap"}

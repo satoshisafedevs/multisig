@@ -98,7 +98,7 @@ function Profile() {
                     <Heading mb="10px" size="lg">
                         Profile
                     </Heading>
-                    <Text>Change your profile information such as name, profile picture, and wallet address</Text>
+                    <Text>Change your profile information such as name, profile picture, and wallet address.</Text>
                 </Box>
                 <Box>
                     <label htmlFor="image-upload">
@@ -126,7 +126,7 @@ function Profile() {
                 {isEditing.displayName ? (
                     <Input w="70%" value={displayName} onChange={(e) => setName(e.target.value)} />
                 ) : (
-                    <Text textAlign="center" flex="1">
+                    <Text textAlign="center" flex="1" marginLeft="59px">
                         {displayName}
                     </Text>
                 )}
@@ -142,9 +142,10 @@ function Profile() {
                         {email}
                     </Text>
                 )}
-                <Button isDisabled onClick={() => saveProfile("email")}>
+                {/* we don't support email edit yet */}
+                {/* <Button isDisabled onClick={() => saveProfile("email")}>
                     {isEditing.email ? "Save" : "Edit"}
-                </Button>
+                </Button> */}
             </Flex>
             <Divider my={4} />
             <Flex justifyContent="space-between" alignItems="center">
