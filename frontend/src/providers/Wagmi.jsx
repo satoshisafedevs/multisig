@@ -54,7 +54,7 @@ function Wagmi({ children }) {
     useEffect(() => {
         if (switchNetworkError) {
             toast({
-                description: `Fialed to switch network: ${switchNetworkError?.message}`,
+                description: `Failed to switch network: ${switchNetworkError?.message}`,
                 position: "top",
                 status: "error",
                 duration: 5000,
@@ -81,7 +81,7 @@ function Wagmi({ children }) {
             toast({
                 description: "MetaMask account has been updated.",
                 position: "top",
-                status: "warning",
+                status: "info",
                 duration: 5000,
                 isClosable: true,
             });

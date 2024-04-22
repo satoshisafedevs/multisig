@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Heading, Table, Tbody, Td, Text, Th, Thead, Tr, useColorModeValue } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { IoAdd, IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
+import { IoPersonAddOutline, IoChevronDownOutline, IoChevronUpOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import InviteUserModal from "./InviteUserModal";
 
@@ -27,10 +27,10 @@ function Users() {
                     <Heading mb="10px" size="lg">
                         Users
                     </Heading>
-                    <Text>Manage the users associated with the team</Text>
+                    <Text>Manage the users associated with the team.</Text>
                 </Box>
                 <Button
-                    leftIcon={<IoAdd size="25px" />}
+                    rightIcon={<IoPersonAddOutline size="20px" />}
                     colorScheme="blueSwatch"
                     onClick={() => setModalOpen(true)}
                     alignSelf="flex-start"
@@ -63,7 +63,7 @@ function Users() {
                     </Thead>
                     <Tbody>
                         {sortedUsers.map(([, child]) => (
-                            <Tr key={child.email || child.displayName}>
+                            <Tr key={child.email || child.displayName} style={{ fontVariantNumeric: "normal" }}>
                                 <Td>{child.displayName}</Td>
                                 <Td>{child.email}</Td>
                             </Tr>

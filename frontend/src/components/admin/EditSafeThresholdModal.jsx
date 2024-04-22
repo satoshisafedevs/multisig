@@ -32,7 +32,7 @@ function EditSafeThresholdModal({
     network,
     fetchAndUpdateLatestSafesData,
 }) {
-    const { address, chain, chains, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
+    const { address, chain, chains, metaMaskInstalled, switchNetworkAsync, walletMismatch } = useWagmi();
     const { editSafeThreshold } = useGnosisSafe();
     const [newThreshold, setNewThreshold] = useState(threshold);
     const [loading, setLoading] = useState(false);
@@ -108,7 +108,12 @@ function EditSafeThresholdModal({
                                     // For other networks, just match the el.network with the given network
                                     return el.network === network;
                                 });
-                                switchNetwork(correctChain.id);
+                                try {
+                                    setLoading(true);
+                                    await switchNetworkAsync(correctChain.id);
+                                } finally {
+                                    setLoading(false);
+                                }
                             } else {
                                 try {
                                     setLoading(true);

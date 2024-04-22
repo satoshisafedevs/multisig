@@ -14,12 +14,13 @@ const StyledTrashIcon = styled(IoTrash)`
     }
 `;
 
-function Message({ message, hoverID, setHoverID }) {
+function Message({ message }) {
     const { firestoreUser, teamUsersInfo } = useUser();
     const satoshiColor = useColorModeValue(theme.colors.blueSwatch[700], theme.colors.blueSwatch[200]);
     const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [messageID, setMessageID] = useState();
+    const [hoverID, setHoverID] = useState();
 
     const handleMouseEnter = useCallback(
         (id) => {
@@ -58,26 +59,22 @@ function Message({ message, hoverID, setHoverID }) {
     const timeInMilliseconds = (ts) => ts.seconds * 1000 + ts.nanoseconds / 1e6;
 
     const convertToDate = (ts) => {
-        // Assuming timeInMilliseconds(ts) properly converts your timestamp 'ts' to milliseconds
         const date = new Date(timeInMilliseconds(ts));
         const currentYear = new Date().getFullYear();
         const dateYear = date.getFullYear();
 
-        // Define the base dateOptions without a fixed timeZone
         const dateOptions = {
-            month: "long",
+            month: "short",
             day: "numeric",
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
         };
 
-        // If the date is from a past year, include the year in the options
         if (dateYear < currentYear) {
             dateOptions.year = "numeric";
         }
 
-        // Return the formatted date string with or without the year based on the date
         return date.toLocaleString("en-US", dateOptions);
     };
 
@@ -85,25 +82,21 @@ function Message({ message, hoverID, setHoverID }) {
 
     const isToday = (ts) => {
         const date = new Date(timeInMilliseconds(ts));
-        const today = new Date();
-
-        return (
-            date.getFullYear() === today.getFullYear() &&
-            date.getMonth() === today.getMonth() &&
-            date.getDate() === today.getDate()
-        );
+        return date.toDateString() === new Date().toDateString();
     };
 
     const isYesterday = (ts) => {
         const date = new Date(timeInMilliseconds(ts));
         const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1); // set to yesterday's date
+        yesterday.setDate(yesterday.getDate() - 1);
+        return date.toDateString() === yesterday.toDateString();
+    };
 
-        return (
-            date.getFullYear() === yesterday.getFullYear() &&
-            date.getMonth() === yesterday.getMonth() &&
-            date.getDate() === yesterday.getDate()
-        );
+    const isWithinLastWeek = (ts) => {
+        const date = new Date(timeInMilliseconds(ts));
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return date > weekAgo && !isToday(ts) && !isYesterday(ts);
     };
 
     const messageTimeFormat = (key) => {
@@ -112,6 +105,10 @@ function Message({ message, hoverID, setHoverID }) {
         }
         if (isYesterday(key)) {
             return `Yesterday at ${convertToTime(key)}`;
+        }
+        if (isWithinLastWeek(key)) {
+            const dayOfWeek = new Date(timeInMilliseconds(key)).toLocaleDateString("en-US", { weekday: "long" });
+            return `${dayOfWeek} at ${convertToTime(key)}`;
         }
         return convertToDate(key);
     };
@@ -156,19 +153,23 @@ function Message({ message, hoverID, setHoverID }) {
                             </Text>
                             <Text fontSize="xs">{messageTimeFormat(message.createdAt)}</Text>
                         </Stack>
-                        <Text fontSize="xs">{renderMessage(message)}</Text>
+                        <Text fontSize="xs" paddingBottom="2px">
+                            {renderMessage(message)}
+                        </Text>
                     </Box>
-                    {firestoreUser && firestoreUser.uid === message.uid && message.id === hoverID && (
-                        <IconButton
-                            icon={<StyledTrashIcon />}
-                            onClick={() => handleDelete(message.id)}
-                            height="36px"
-                            width="36px"
-                            borderRadius="3px"
-                            background="none"
-                            _hover={{ background: "none", cursor: "default" }}
-                        />
-                    )}
+                    <Box width="45px">
+                        {firestoreUser && firestoreUser.uid === message.uid && message.id === hoverID && (
+                            <IconButton
+                                icon={<StyledTrashIcon />}
+                                onClick={() => handleDelete(message.id)}
+                                height="36px"
+                                width="36px"
+                                borderRadius="3px"
+                                background="none"
+                                _hover={{ background: "none", cursor: "default" }}
+                            />
+                        )}
+                    </Box>
                 </Stack>
             </>
         );
@@ -179,8 +180,6 @@ function Message({ message, hoverID, setHoverID }) {
 Message.propTypes = {
     // eslint-disable-next-line react/forbid-prop-types
     message: PropTypes.any,
-    hoverID: PropTypes.string,
-    setHoverID: PropTypes.func.isRequired,
 };
 
 export default memo(Message);

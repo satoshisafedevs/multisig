@@ -26,7 +26,7 @@ function Billing() {
                 </Heading>
                 <Table mb="20px">
                     <Thead>
-                        <Tr>
+                        <Tr style={{ fontVariantNumeric: "normal" }}>
                             <Th>Team</Th>
                             <Th>Subscription plan</Th>
                             <Th>Price</Th>
@@ -35,7 +35,7 @@ function Billing() {
                     </Thead>
                     <Tbody>
                         {(activeSubscriptions || []).map((sub) => (
-                            <Tr key={sub.id}>
+                            <Tr key={sub.id} style={{ fontVariantNumeric: "normal" }}>
                                 <Td>{sub.team?.name}</Td>
                                 <Td>{sub.subscription?.name}</Td>
                                 <Td>${String(sub.subscription?.price?.toFixed(2)).toLocaleString()} / month + tax</Td>

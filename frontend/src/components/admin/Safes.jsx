@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Flex, Heading, Text, Button } from "@chakra-ui/react";
-import { IoAdd } from "react-icons/io5";
+import { IoAddCircleOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
 import SafeDetails from "./SafeDetails";
@@ -26,10 +26,10 @@ function Safes() {
                     <Heading mb="10px" size="lg">
                         Safes
                     </Heading>
-                    <Text>Manage the safes associated with your Satoshi Safe team</Text>
+                    <Text>Manage the safes associated with your Satoshi Safe team.</Text>
                 </Box>
                 <Button
-                    leftIcon={<IoAdd size="25px" />}
+                    rightIcon={<IoAddCircleOutline size="25px" />}
                     colorScheme="blueSwatch"
                     onClick={() => setModalOpen(true)}
                     alignSelf="flex-start"

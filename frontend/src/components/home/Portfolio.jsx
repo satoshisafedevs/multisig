@@ -76,49 +76,56 @@ function Portfolio({ chartHeight, expandPortfolio, expandAction }) {
     return (
         <Card height="100%" overflow="auto">
             <CardHeader paddingBottom="0">
-                <Stack spacing="24px" display="flex" direction="row" align="baseline">
-                    <Heading size="md">Portfolio</Heading>
+                <Stack display="flex" direction="row" align="baseline">
+                    <Heading size="md" paddingRight="8px">
+                        Portfolio
+                    </Heading>
                     {safesPortfolio && (
                         <>
                             <Button
-                                variant="link"
+                                variant="ghost"
                                 size="sm"
                                 fontWeight={activeTab === "chart" && "bold"}
-                                minWidth="34px"
+                                minWidth="58.5px"
                                 onClick={() => setActiveTab("chart")}
+                                colorScheme="blueSwatch"
                             >
                                 Chart
                             </Button>
                             <Button
-                                variant="link"
+                                variant="ghost"
                                 size="sm"
                                 fontWeight={activeTab === "wallet" && "bold"}
-                                minWidth="82px"
+                                minWidth="107px"
                                 onClick={() => setActiveTab("wallet")}
+                                colorScheme="blueSwatch"
                             >
                                 Wallet Assets
                             </Button>
                             <Button
-                                variant="link"
+                                variant="ghost"
                                 size="sm"
                                 fontWeight={activeTab === "staked" && "bold"}
-                                minWidth="86px"
+                                minWidth="113px"
                                 onClick={() => setActiveTab("staked")}
+                                colorScheme="blueSwatch"
                             >
                                 Staked Assets
                             </Button>
                         </>
                     )}
                 </Stack>
-                <IconButton
-                    icon={isRefreshing ? <Spinner size="sm" /> : <IoRefresh />}
-                    onClick={updateSafeBalances}
-                    position="absolute"
-                    top="0"
-                    right={{ base: "40px", md: "40px" }} // Adjust this value based on the existing layout
-                    background="none"
-                    isLoading={isRefreshing} // Use the loading state to control the spinner
-                />
+                {!isEmpty(historicalTotalBalance) && (
+                    <IconButton
+                        icon={isRefreshing ? <Spinner size="sm" /> : <IoRefresh />}
+                        onClick={updateSafeBalances}
+                        position="absolute"
+                        top="0"
+                        right={{ base: "40px", md: "40px" }} // Adjust this value based on the existing layout
+                        background="none"
+                        isLoading={isRefreshing} // Use the loading state to control the spinner
+                    />
+                )}
                 <IconButton
                     icon={expandPortfolio ? <IoContractOutline /> : <IoExpandOutline />}
                     onClick={expandAction}

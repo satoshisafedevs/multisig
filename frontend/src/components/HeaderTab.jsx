@@ -5,11 +5,12 @@ import PropTypes from "prop-types";
 function HeaderTab({ isActive, onClick, children }) {
     return (
         <Button
-            variant="link"
+            variant="ghost"
             size="sm"
             fontWeight={isActive ? "bold" : "normal"}
             minWidth="34px"
             onClick={() => onClick("chart")}
+            colorScheme="blueSwatch"
         >
             {children}
         </Button>

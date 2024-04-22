@@ -195,7 +195,7 @@ function SwapperOnChain({
                 <Menu>
                     {({ isOpen }) => (
                         <>
-                            <Box display="flex" flexDirection="column" alignItems="flex-start" width="100%">
+                            <Box display="flex" flexDirection="column" alignItems="flex-start" width="30%">
                                 <Text fontSize="xs" color="gray.500">
                                     Safe
                                 </Text>

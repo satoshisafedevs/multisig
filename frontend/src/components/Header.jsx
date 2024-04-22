@@ -239,7 +239,7 @@ export default function Header({ withTeam }) {
                         )}
                         {!isConnected && withTeam && (
                             <Button
-                                leftIcon={<IoWalletOutline />}
+                                rightIcon={<IoWalletOutline />}
                                 size="sm"
                                 colorScheme={setColorScheme()}
                                 isDisabled={preflightCheck || connectIsLoading}
