@@ -89,9 +89,7 @@ export default function Send() {
     const invalidRecipient = recipient !== "" && !ethers.utils.isAddress(recipient);
 
     const exceedingAmount =
-        selectedToken &&
-        amount &&
-        Number(selectedToken.balance) < Number(fromHumanReadable(amount, selectedToken.contract_decimals));
+        selectedToken && amount && toHumanReadable(selectedToken.balance, selectedToken.contract_decimals) < amount;
 
     const tokenABI = [
         {
@@ -137,8 +135,8 @@ export default function Send() {
         type: "send",
         from: safe && ethers.utils.getAddress(safe),
         to: recipient && ethers.utils.isAddress(recipient) && ethers.utils.getAddress(recipient),
-        token: selectedToken.native_token ? "ETH" : selectedToken.contract_ticker_symbol,
-        amount,
+        tokenContract: selectedToken?.contract_address,
+        amount: `${amount} ${selectedToken.native_token ? "ETH" : selectedToken?.contract_ticker_symbol}`,
     };
 
     return (
@@ -438,7 +436,7 @@ export default function Send() {
                     }
                 }}
             >
-                {networkMismatch && safe ? `Switch to ${upperFirst(networkName)} network` : "Create Safe Transaction"}
+                {networkMismatch && safe ? `Switch to ${upperFirst(networkName)} network` : "Create safe transaction"}
             </Button>
         </Stack>
     );

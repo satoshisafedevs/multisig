@@ -11,6 +11,7 @@ function TransactionDetails({ transaction, isNested = false, isList = false }) {
                 const displayKey = isList ? index + 1 : key; // If it's a list, start keys from 1
 
                 if (key === "data") {
+                    if (!value) return <div key={key}>{`${key}: null`}</div>;
                     return (
                         <Accordion key={key} allowMultiple>
                             <AccordionItem border="none">

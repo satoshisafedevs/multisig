@@ -119,15 +119,22 @@ export const toHumanReadable = (value, decimals) => {
 };
 
 export const fromHumanReadable = (value, decimals) => {
-    // Convert the value to a number first to handle any floating point issues
-    const valueNum = Number(value);
+    // Split the input string around the decimal point
+    const parts = value.split(".");
+    const integerPart = parts[0];
+    let decimalPart = parts.length > 1 ? parts[1] : "";
 
-    // Convert the number to a string with fixed decimals
-    const valueStr = valueNum.toFixed(decimals);
+    // Truncate the decimal part to ensure it does not exceed the specified number of decimals
+    decimalPart = decimalPart.substring(0, decimals);
 
-    // Use ethers.js to parse the value string with the specified decimals
-    // This effectively multiplies the human-readable value by 10**decimals to get the smallest unit
-    const formattedValue = ethers.utils.parseUnits(valueStr, decimals);
+    // Pad the decimal part with zeros if it's shorter than required
+    decimalPart = decimalPart.padEnd(decimals, "0");
+
+    // Reconstruct the fully formatted decimal string
+    const formattedDecimal = `${integerPart}.${decimalPart}`;
+
+    // Parse the string to a BigNumber with the specified decimal places
+    const formattedValue = ethers.utils.parseUnits(formattedDecimal, decimals);
 
     return formattedValue.toString();
 };

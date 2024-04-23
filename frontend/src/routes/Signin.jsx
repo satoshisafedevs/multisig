@@ -112,7 +112,7 @@ function Signin() {
             <Flex flexGrow="1" align="center" justify="center">
                 <Card margin="20px">
                     <CardBody>
-                        <Stack spacing="15px" width="310px">
+                        <Stack spacing="15px" width="325px">
                             <Box display="flex" margin="auto" maxWidth="100%" padding="15px 0">
                                 <ReactLogo
                                     satoshiTextColor={
