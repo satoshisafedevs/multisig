@@ -27,7 +27,6 @@ import GetSwapEstimateButton from "./GetSwapEstimateButton";
 
 export default function Swap() {
     const { address, isConnected, chain, metaMaskInstalled, switchNetwork, walletMismatch } = useWagmi();
-    // eslint-disable-next-line no-unused-vars
     const { createAndApproveSwapTransaction } = useGnosisSafe();
     const toast = useToast();
     const [lifi, setLiFi] = useState();
@@ -46,14 +45,10 @@ export default function Swap() {
     const [routeData, setRouteData] = useState();
     // const [totalUSDFrom, setTotalUSDFrom] = useState();
     // eslint-disable-next-line no-unused-vars
-    // const [resetCountDown, setResetCountDown] = useState(false);
-    // eslint-disable-next-line no-unused-vars
-    // const [countdownMessage, setCountdownMessage] = useState("");
     // const [swapRouteModalOpen, setSwapRouteModalOpen] = useState(false);
     const [loadingTokens, setLoadingTokens] = useState(false);
     const [lifiChainTokens, setLifiChainTokens] = useState([]);
     const [creatingTransaction, setCreatingTransaction] = useState(false);
-    const toastIdRef = React.useRef();
 
     const getLiFiSDK = () => {
         const lifiSDK = new LiFi({
@@ -65,23 +60,6 @@ export default function Swap() {
     useEffect(() => {
         getLiFiSDK();
     }, []);
-
-    // useEffect(() => {
-    //     let timerId;
-    //     // Start the countdown only if routeData is present
-    //     if (routeData && countdown > 0) {
-    //         setCountdownMessage(`Swap estimate is valid for ${countdown} seconds`); // Set initial countdown message
-    //         timerId = setTimeout(() => {
-    //             setCountdown(countdown - 1); // Decrement countdown
-    //         }, 1000);
-    //     } else if (countdown <= 0) {
-    //         // Once countdown reaches 0, call setRouteData
-    //         setRouteData();
-    //         setCountdownMessage("Get swap estimate");
-    //     }
-    //     // Cleanup the timeout on component unmount or when countdown changes
-    //     return () => clearTimeout(timerId);
-    // }, [routeData, countdown]);
 
     // const routeOptions = {
     //     integrator?: string // Should contain the identifier of the integrator. Usually, it's dApp/company name.
@@ -202,21 +180,6 @@ export default function Swap() {
 
     let gasCosts = 0;
 
-    // eslint-disable-next-line no-unused-vars
-    const calculateGasCost = (gasPriceHex, gasLimitHex) => {
-        // Parse the hexadecimal values
-        const gasPrice = ethers.BigNumber.from(gasPriceHex);
-        const gasLimit = ethers.BigNumber.from(gasLimitHex);
-
-        // Calculate total gas cost in wei
-        const totalGasCostWei = gasPrice.mul(gasLimit);
-
-        // Format wei to ETH
-        const totalGasCostEth = ethers.utils.formatEther(totalGasCostWei);
-
-        return totalGasCostEth;
-    };
-
     if (routeData) {
         gasCosts = parseFloat(
             toHumanReadable(
@@ -224,61 +187,27 @@ export default function Swap() {
                 routeData?.estimate?.gasCosts[0]?.amount?.token?.decimals,
             ),
         );
-        // gasCosts = parseFloat(
-        //     calculateGasCost(routeData?.transactionRequest?.gasPrice, routeData?.transactionRequest?.gasLimit),
-        // );
     }
 
-    const fromAmoutIsGreaterThanTokenBalance =
-        fromBalances && Number(fromAmount) > Number(fromBalances[fromToken?.symbol]);
-
-    const insufficientEthBalance = fromBalances && parseFloat(fromBalances.ETH) < gasCosts;
-
-    const ethOnlySwapInsufficientBalance =
-        fromBalances && fromToken?.symbol === "ETH" && fromBalances.ETH < parseFloat(fromAmount) + gasCosts;
+    const fromAmountIsGreaterThanTokenBalance = fromBalances && fromAmount > fromBalances[fromToken?.symbol];
 
     const networkMismatch = chain && Number(fromChain) !== chain.id;
 
-    // eslint-disable-next-line no-unused-vars
     const satoshiData = {
         type: "swap",
-        from: fromSafe && ethers.utils.getAddress(fromSafe),
+        fromSafe: fromSafe && ethers.utils.getAddress(fromSafe),
         fromNetwork,
         fromAmount: `${fromAmount} ${fromToken?.symbol}`,
-        to: toSafe && ethers.utils.getAddress(toSafe),
+        fromTokenContract: fromToken?.address,
+        toSafe: toSafe && ethers.utils.getAddress(toSafe),
         toNetwork,
         toAmount: `${
             routeData?.estimate?.toAmount &&
             routeData?.action?.toToken?.decimals &&
             toHumanReadable(routeData.estimate.toAmount, routeData.action.toToken.decimals)
         } ${toToken?.symbol}`,
-        gasCosts: `${gasCosts} ETH`,
+        toTokenContract: toToken?.address,
     };
-
-    const showToast = () => {
-        // If a toast is already shown, do nothing
-        if (toastIdRef.current) {
-            return;
-        }
-
-        // Show the toast and save the toastId
-        toastIdRef.current = toast({
-            description: `To cover estimated transaction fees, ensure you have at least ${formatNumber(gasCosts)}
-          ETH, in addition to the swap amount, in your safe balance before initiating a transaction.`,
-            position: "top",
-            status: "warning",
-            duration: 60000,
-            isClosable: true,
-            onCloseComplete: () => {
-                // Clear the toastIdRef when the toast is closed
-                toastIdRef.current = undefined;
-            },
-        });
-    };
-
-    if (routeData && (insufficientEthBalance || ethOnlySwapInsufficientBalance)) {
-        showToast();
-    }
 
     return (
         <>
@@ -368,12 +297,7 @@ export default function Swap() {
                         <Button
                             marginTop="12px"
                             colorScheme={
-                                networkMismatch ||
-                                fromAmoutIsGreaterThanTokenBalance ||
-                                insufficientEthBalance ||
-                                ethOnlySwapInsufficientBalance
-                                    ? "bronzeSwatch"
-                                    : "blueSwatch"
+                                networkMismatch || fromAmountIsGreaterThanTokenBalance ? "bronzeSwatch" : "blueSwatch"
                             }
                             rightIcon={<IoPaperPlane size="20px" />}
                             onClick={async () => {
@@ -409,19 +333,16 @@ export default function Swap() {
                                 !address ||
                                 !metaMaskInstalled ||
                                 walletMismatch ||
-                                fromAmoutIsGreaterThanTokenBalance ||
-                                insufficientEthBalance ||
-                                ethOnlySwapInsufficientBalance ||
+                                fromAmountIsGreaterThanTokenBalance ||
                                 creatingTransaction
                             }
                             isLoading={creatingTransaction}
                             loadingText="Creating transaction..."
                         >
-                            {(fromAmoutIsGreaterThanTokenBalance && `Insufficient safe ${fromToken?.symbol} balance`) ||
-                                ((insufficientEthBalance || ethOnlySwapInsufficientBalance) &&
-                                    "Insufficient ETH balance") ||
+                            {(fromAmountIsGreaterThanTokenBalance &&
+                                `Insufficient safe ${fromToken?.symbol} balance`) ||
                                 (networkMismatch && `Switch to ${upperFirst(fromNetwork)} network`) ||
-                                "Create and sign safe transaction"}
+                                "Create safe transaction"}
                         </Button>
                         <Box
                             display="flex"

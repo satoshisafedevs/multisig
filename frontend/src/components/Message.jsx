@@ -66,16 +66,23 @@ function Message({ message }) {
         const dateOptions = {
             month: "short",
             day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
         };
 
         if (dateYear < currentYear) {
             dateOptions.year = "numeric";
         }
 
-        return date.toLocaleString("en-US", dateOptions);
+        // Convert the date to a locale string but without including the time.
+        const dateString = date.toLocaleDateString("en-US", dateOptions);
+        // Extract the time separately to insert 'at' in between.
+        const timeString = date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+
+        // Combine the date and time with 'at'
+        return `${dateString} at ${timeString}`;
     };
 
     const convertToTime = (ts) => new Date(timeInMilliseconds(ts)).toLocaleTimeString("en-US", timeOptions);
@@ -101,14 +108,14 @@ function Message({ message }) {
 
     const messageTimeFormat = (key) => {
         if (isToday(key)) {
-            return `Today at ${convertToTime(key)}`;
+            return `Today ${convertToTime(key)}`;
         }
         if (isYesterday(key)) {
-            return `Yesterday at ${convertToTime(key)}`;
+            return `Yesterday ${convertToTime(key)}`;
         }
         if (isWithinLastWeek(key)) {
             const dayOfWeek = new Date(timeInMilliseconds(key)).toLocaleDateString("en-US", { weekday: "long" });
-            return `${dayOfWeek} at ${convertToTime(key)}`;
+            return `${dayOfWeek} ${convertToTime(key)}`;
         }
         return convertToDate(key);
     };

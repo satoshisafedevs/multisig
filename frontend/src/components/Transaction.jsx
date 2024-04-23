@@ -100,14 +100,55 @@ function Transaction({ transaction }) {
         const targetDate = new Date(date);
         const isCurrentYear = targetDate.getFullYear() === currentDate.getFullYear();
 
-        return targetDate.toLocaleString("en-US", {
+        // Check if the target date is today
+        if (targetDate.toDateString() === currentDate.toDateString()) {
+            const timeString = targetDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            });
+            return `Today ${timeString}`;
+        }
+
+        // Check if the target date is yesterday
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1);
+        if (targetDate.toDateString() === yesterday.toDateString()) {
+            const timeString = targetDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            });
+            return `Yesterday ${timeString}`;
+        }
+
+        // Check if the date is within the last week
+        const weekAgo = new Date(currentDate);
+        weekAgo.setDate(currentDate.getDate() - 7);
+        if (targetDate > weekAgo && targetDate < currentDate) {
+            const dayOfWeek = targetDate.toLocaleDateString("en-US", { weekday: "long" });
+            const timeString = targetDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            });
+            return `${dayOfWeek} ${timeString}`;
+        }
+
+        // For other dates, use the previous formatting
+        const dateString = targetDate.toLocaleDateString("en-US", {
             year: isCurrentYear ? undefined : "numeric",
             month: "short",
             day: "numeric",
+        });
+
+        const timeString = targetDate.toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: true,
         });
+
+        return `${dateString} at ${timeString}`;
     };
 
     const showButtons = () => {
@@ -248,7 +289,7 @@ function Transaction({ transaction }) {
                                     flexBasis={["65%", "65%", "65%", "65%", "65%", "60%"]}
                                 >
                                     <Stack direction="row">
-                                        <Stack direction="column" minWidth="240px">
+                                        <Stack direction="column" minWidth="250px">
                                             <Stack direction="row" p="5px" alignItems="center">
                                                 <Image
                                                     boxSize="24px"

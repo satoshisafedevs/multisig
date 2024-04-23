@@ -30,7 +30,7 @@ function GetSwapEstimateButton({
         } else if (countdown <= 0) {
             // Once countdown reaches 0, call setRouteData
             setRouteData();
-            setCountdownMessage("Get Estimate");
+            setCountdownMessage("Get estimate");
             setCountdown(60);
         }
         // Cleanup the timeout on component unmount or when countdown changes
@@ -47,7 +47,7 @@ function GetSwapEstimateButton({
                 setCountdown(60);
             }}
             isLoading={loadingRoutes}
-            loadingText="Getting Estimate..."
+            loadingText="Getting estimate..."
             isDisabled={
                 !fromChain ||
                 !fromToken.address ||
@@ -59,7 +59,7 @@ function GetSwapEstimateButton({
                 !toSafe
             }
         >
-            {(routeData && countdownMessage) || "Get Estimate"}
+            {(routeData && countdownMessage) || "Get estimate"}
         </Button>
     );
 }

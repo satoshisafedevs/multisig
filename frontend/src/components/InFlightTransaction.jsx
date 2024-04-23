@@ -27,7 +27,6 @@ function InFlightTransaction({ transaction }) {
     const baseColor = useColorModeValue("#EDF2F7", "rgba(255, 255, 255, 0.08)");
     const brightColor = useColorModeValue("#CBD5E0", "rgba(255, 255, 255, 0.16)");
     const codeBackground = useColorModeValue("gray.100", "#3D4756");
-    const responsiveStyles = ["column", "column", "column", "column", "column", "row"];
     const accordionStyles = useStyleConfig("Accordion");
 
     const backgroundImage = `linear-gradient(
@@ -71,21 +70,18 @@ function InFlightTransaction({ transaction }) {
                                     borderRadius: isExpanded ? "5px 5px 0 0" : "5px",
                                 }}
                             >
-                                <Stack
-                                    direction="row"
-                                    spacing="4"
-                                    fontSize="sm"
-                                    width="100%"
-                                    justifyContent="space-between"
-                                >
-                                    <Flex direction="column" align="center" justify="space-evenly">
-                                        <Image boxSize="24px" src={networks[transaction.network.toLowerCase()].svg} />
-                                        <Text fontSize="xs" fontWeight="bold">
-                                            {transaction.network}
-                                        </Text>
-                                    </Flex>
-                                    <Stack spacing="2" alignSelf="center" flex="1">
-                                        <Flex direction={responsiveStyles} alignItems="baseline">
+                                <Stack direction="row" fontSize="sm" width="100%" justifyContent="space-between">
+                                    <Stack direction="column" minWidth="250px">
+                                        <Stack direction="row" align="center" padding="5px">
+                                            <Image
+                                                boxSize="24px"
+                                                src={networks[transaction.network.toLowerCase()].svg}
+                                            />
+                                            <Text fontSize="sm" fontWeight="bold">
+                                                {transaction.network}
+                                            </Text>
+                                        </Stack>
+                                        <Flex direction="row" alignItems="baseline" padding="5px">
                                             <Text fontWeight="bold" paddingRight="5px">
                                                 Safe:
                                             </Text>
@@ -109,14 +105,14 @@ function InFlightTransaction({ transaction }) {
                                         </Flex>
                                     </Stack>
                                     <Stack
-                                        spacing="2"
+                                        spacing="4"
                                         flex="1.2"
                                         alignSelf="center"
                                         textOverflow="ellipsis"
                                         whiteSpace="nowrap"
                                         overflow="hidden"
                                     >
-                                        <Flex direction={responsiveStyles} alignItems="baseline">
+                                        <Stack direction="row" alignItems="baseline">
                                             <Text fontWeight="bold" paddingRight="5px">
                                                 Status:
                                             </Text>
@@ -145,8 +141,8 @@ function InFlightTransaction({ transaction }) {
                                                     "Creating..."
                                                 )}
                                             </Text>
-                                        </Flex>
-                                        <Flex direction={responsiveStyles} alignItems="baseline">
+                                        </Stack>
+                                        <Stack direction="row" alignItems="baseline">
                                             <Text fontWeight="bold" paddingRight="5px">
                                                 Action:
                                             </Text>
@@ -163,7 +159,7 @@ function InFlightTransaction({ transaction }) {
                                                     upperFirst(transaction?.satoshiData?.type)) ||
                                                     "Unspecified"}
                                             </Text>
-                                        </Flex>
+                                        </Stack>
                                     </Stack>
                                 </Stack>
                                 <AccordionIcon margin="10px" />
