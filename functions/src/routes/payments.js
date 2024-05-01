@@ -1,8 +1,6 @@
 const { onCall, HttpsError, onRequest, db, Timestamp } = require("../firebase");
 const moment = require("moment");
 
-const ENV_DOMAIN = "https://playground.satoshisafe.ai";
-
 const getTeamIdByStripeSessionId = async (id) => {
     const checkoutSessionRef = db.collection("stripeSubscriptions").doc(id);
     const checkoutSessionDoc = await checkoutSessionRef.get();
@@ -43,8 +41,7 @@ const updateInvoice = async (teamId, ownerId, invoiceData) => {
                 customer: invoiceData.customer,
                 invoiceUrl: invoiceData.hosted_invoice_url,
                 paidAt: Timestamp.fromDate(
-                    moment(invoiceData.created * 1000).toDate(),
-                ), // Convert Stripe's timestamp to Firestore Timestamp
+                    moment(invoiceData.created * 1000).toDate()), // Convert Stripe's timestamp to Firestore Timestamp
                 status: invoiceData.status, // Typically "paid" for this event handler
                 billingReason: invoiceData.billing_reason, // Why this invoice was created (e.g., "subscription_create")
                 customerEmail: invoiceData.customer_email,
@@ -87,8 +84,8 @@ exports.getPaymentLink = onCall(
             phone_number_collection: {
                 enabled: true,
             },
-            success_url: `${ENV_DOMAIN}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${ENV_DOMAIN}?canceled=true`,
+            success_url: `https://www.getsatoshisafe.com/success?exp=${moment().add(1, "month").format("YYYY-MM-DD")}`,
+            cancel_url: "https://www.getsatoshisafe.com",
         });
 
         await db.collection("stripeSubscriptions").doc(session.id).set({
@@ -163,8 +160,7 @@ exports.stripeWebhook = onRequest(
                     await updateFirestoreSubscription(session.subscription, {
                         status: "ACTIVE",
                         nextBillingDate: Timestamp.fromDate(
-                            new Date(nextBillingTimestamp * 1000),
-                        ), // Convert to Firestore Timestamp
+                            new Date(nextBillingTimestamp * 1000)), // Convert to Firestore Timestamp
                         lastBillingDate: Timestamp.now(),
                         endDate: Timestamp.fromDate(new Date(nextBillingTimestamp * 1000)),
                     });
