@@ -95,13 +95,20 @@ function Transaction({ transaction }) {
         setRejecting(false);
     };
 
+    // Helper function to remove time from date
+    const stripTime = (date) => {
+        const stripped = new Date(date);
+        stripped.setHours(0, 0, 0, 0);
+        return stripped;
+    };
+
     const formatDate = (date) => {
         const currentDate = new Date();
         const targetDate = new Date(date);
         const isCurrentYear = targetDate.getFullYear() === currentDate.getFullYear();
 
         // Check if the target date is today
-        if (targetDate.toDateString() === currentDate.toDateString()) {
+        if (stripTime(targetDate).getTime() === stripTime(currentDate).getTime()) {
             const timeString = targetDate.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -112,8 +119,8 @@ function Transaction({ transaction }) {
 
         // Check if the target date is yesterday
         const yesterday = new Date(currentDate);
-        yesterday.setDate(currentDate.getDate() - 1);
-        if (targetDate.toDateString() === yesterday.toDateString()) {
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (stripTime(targetDate).getTime() === stripTime(yesterday).getTime()) {
             const timeString = targetDate.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -124,8 +131,8 @@ function Transaction({ transaction }) {
 
         // Check if the date is within the last week
         const weekAgo = new Date(currentDate);
-        weekAgo.setDate(currentDate.getDate() - 7);
-        if (targetDate > weekAgo && targetDate < currentDate) {
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        if (stripTime(targetDate) > stripTime(weekAgo) && stripTime(targetDate) < stripTime(currentDate)) {
             const dayOfWeek = targetDate.toLocaleDateString("en-US", { weekday: "long" });
             const timeString = targetDate.toLocaleTimeString("en-US", {
                 hour: "2-digit",

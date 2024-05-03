@@ -41,7 +41,7 @@ export default function Header({ withTeam }) {
     const colorValue = useColorModeValue("white", "var(--chakra-colors-gray-700)");
     // for some reason gray.700 not working with styled()
     const { colorMode, toggleColorMode } = useColorMode();
-    const { firestoreUser, currentTeam, userTeamData } = useUser();
+    const { firestoreUser, currentTeam, userTeamData, teamsData } = useUser();
     const { activeSubscriptions } = useSubscriptions();
     const { signOutUser, isSigningOut } = useAuth();
     const {
@@ -172,6 +172,8 @@ export default function Header({ withTeam }) {
         }
     };
 
+    const teamsAvailable = teamsData && teamsData.length > 0;
+
     return (
         <Flex margin="10px 10px 0 10px">
             <Card direction="column" width="100%">
@@ -186,7 +188,7 @@ export default function Header({ withTeam }) {
                                 }
                             />
                         </Box>
-                        {withTeam && (
+                        {withTeam && teamsAvailable && (
                             <>
                                 <Button
                                     variant="link"
@@ -237,7 +239,7 @@ export default function Header({ withTeam }) {
                                 </Button>
                             </Tooltip>
                         )}
-                        {!isConnected && withTeam && (
+                        {!isConnected && withTeam && teamsAvailable && (
                             <Button
                                 rightIcon={<IoWalletOutline />}
                                 size="sm"
