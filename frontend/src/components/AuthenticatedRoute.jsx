@@ -94,6 +94,10 @@ function AuthenticatedRoute({ children }) {
                     .catch(() => {});
             }
         }
+        if (teamsData && teamsData.length === 0) {
+            // user is not part of any team here
+            return navigate("/");
+        }
     }, [teamsData, slug]);
 
     useEffect(() => {

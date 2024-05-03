@@ -72,6 +72,7 @@ const getTransactionDetails = httpsCallable(functions, "api-getTransactionDetail
 const selectSubscriptionForTeam = httpsCallable(functions, "api-selectSubscriptionForTeam");
 const addSupportUserToTeam = httpsCallable(functions, "api-addSupportUserToTeam");
 const updateSafeBalances = httpsCallable(functions, "api-updateSafeBalances");
+const removeTeamUser = httpsCallable(functions, "api-removeTeamUser");
 
 // const createNewSatoshiBot = httpsCallable(functions, "api-createNewSatoshiBot");
 
@@ -127,4 +128,5 @@ export {
     selectSubscriptionForTeam,
     addSupportUserToTeam,
     updateSafeBalances,
+    removeTeamUser,
 };

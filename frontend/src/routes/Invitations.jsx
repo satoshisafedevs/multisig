@@ -32,10 +32,14 @@ function Invite() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [walletAddress, setWalletAddress] = useState("");
 
+    useEffect(() => {
+        document.title = "Accept team invite - Satoshi Safe";
+    }, []);
+
     const UserNameAndPasswordFields = (
         <>
             <FormControl id="displayName">
-                <FormLabel>Display Name</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <Input
                     placeholder="Enter your name"
                     value={displayName}
@@ -51,15 +55,15 @@ function Invite() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                <Text fontSize="sm" mt="2">
-                    This will be your login password.
+                <Text fontSize="smaller" mt="2">
+                    <i>This will be your login password.</i>
                 </Text>
             </FormControl>
             <FormControl id="confirmpassword">
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>Confirm password</FormLabel>
                 <Input
                     type="password"
-                    placeholder="Confirm password"
+                    placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                 />
@@ -91,7 +95,7 @@ function Invite() {
     if (loading) {
         return (
             <Center height="100vh">
-                <Spinner size="xl" color="blue.500" />
+                <Spinner color="blue.500" speed="1s" size="xl" thickness="4px" emptyColor="gray.200" />
             </Center>
         );
     }
@@ -101,7 +105,7 @@ function Invite() {
             <Center height="100vh">
                 <VStack spacing={4}>
                     <Text fontSize="xl">The invite is invalid or has expired.</Text>
-                    <Button colorScheme="green" onClick={() => navigate("/")}>
+                    <Button colorScheme="blueSwatch" onClick={() => navigate("/")}>
                         Go Home
                     </Button>
                 </VStack>
@@ -166,29 +170,29 @@ function Invite() {
                 <Card p={5}>
                     <Center flexDirection="column" spacing={4}>
                         <Heading>Welcome to Satoshi Safe</Heading>
-                        <Text m="10px">
-                            You have been invited by {invite.senderDisplayName} to join {invite.teamName}.
+                        <Text m="10px" pt="10px">
+                            You have been invited by <b>{invite.senderDisplayName}</b> ({invite.invitedByEmail}) to
+                            join&nbsp;<b>{invite.teamName}</b>.
                         </Text>
                         <VStack spacing={3} width="100%" maxWidth="400px" mt="10px">
                             {invite.setPassword && UserNameAndPasswordFields}
                             <FormControl id="wallet-address">
-                                <FormLabel>Wallet Address</FormLabel>
+                                <FormLabel>Wallet address</FormLabel>
                                 <Input
-                                    placeholder="Wallet address to use with this account"
+                                    placeholder="Wallet address to use with this team"
                                     value={walletAddress}
                                     onChange={(e) => setWalletAddress(e.target.value)}
-                                    description="Associate this Metamask wallet with your account."
+                                    description="Associate this MetaMask wallet with your account."
                                 />
                             </FormControl>
-
                             <Button
                                 colorScheme="blueSwatch"
                                 onClick={() => handleAcceptInvite()}
                                 m="20px"
                                 isLoading={isSigningUpLoading}
-                                loadingText="Loading..."
+                                loadingText="Accepting..."
                             >
-                                Accept Invite
+                                Accept invite
                             </Button>
                         </VStack>
                     </Center>

@@ -56,11 +56,11 @@ function Signin() {
 
     const handleForgotPassword = () => setForgotPassword(!forgotPassword);
 
-    const handleEmail = (event) => setEmail(event.target.value);
+    const handleEmail = (event) => setEmail(event.target.value.trim());
 
-    const handlePassword = (event) => setPassword(event.target.value);
+    const handlePassword = (event) => setPassword(event.target.value.trim());
 
-    const handleConfirmPassword = (event) => setConfirmPassword(event.target.value);
+    const handleConfirmPassword = (event) => setConfirmPassword(event.target.value.trim());
 
     const handleHideShow = () => setShowPassword(!showPassword);
 

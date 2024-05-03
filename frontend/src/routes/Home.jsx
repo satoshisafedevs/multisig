@@ -36,7 +36,7 @@ function Home() {
             document.title = `Home - ${currentTeam.name} - Satoshi Safe`;
             return;
         }
-        document.title = "Satoshi Safe";
+        document.title = "Home - Satoshi Safe";
     }, [currentTeam]);
 
     useEffect(() => {

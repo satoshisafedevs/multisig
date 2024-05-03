@@ -87,25 +87,38 @@ function Message({ message }) {
 
     const convertToTime = (ts) => new Date(timeInMilliseconds(ts)).toLocaleTimeString("en-US", timeOptions);
 
-    const isToday = (ts) => {
-        const date = new Date(timeInMilliseconds(ts));
-        return date.toDateString() === new Date().toDateString();
+    // Helper function to remove time from date
+    const stripTime = (date) => {
+        const stripped = new Date(date);
+        stripped.setHours(0, 0, 0, 0);
+        return stripped;
     };
 
+    // Function to check if a timestamp is today
+    const isToday = (ts) => {
+        const today = new Date();
+        const date = new Date(timeInMilliseconds(ts));
+        return stripTime(date).getTime() === stripTime(today).getTime();
+    };
+
+    // Function to check if a timestamp is yesterday
     const isYesterday = (ts) => {
         const date = new Date(timeInMilliseconds(ts));
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        return date.toDateString() === yesterday.toDateString();
+        return stripTime(date).getTime() === stripTime(yesterday).getTime();
     };
 
+    // Function to check if a timestamp is within the last week
     const isWithinLastWeek = (ts) => {
         const date = new Date(timeInMilliseconds(ts));
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        return date > weekAgo && !isToday(ts) && !isYesterday(ts);
+
+        return stripTime(date) > stripTime(weekAgo) && !isToday(ts) && !isYesterday(ts);
     };
 
+    // Function to format message time based on how recent it is
     const messageTimeFormat = (key) => {
         if (isToday(key)) {
             return `Today ${convertToTime(key)}`;

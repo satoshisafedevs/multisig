@@ -25,7 +25,7 @@ import {
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import React, { useEffect, useRef, useState } from "react";
-import { IoPeopleCircleOutline } from "react-icons/io5";
+import { IoAddCircleOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { addDoc, collection, db, doc, setDoc, addSupportUserToTeam } from "../firebase";
@@ -194,6 +194,12 @@ function TeamPicker() {
                     Select your team
                 </Heading>
                 <Card padding={5} overflow="auto" width="100%" maxWidth="60ch">
+                    {teamsData?.length === 0 && (
+                        <Alert status="info" borderRadius="var(--chakra-radii-base)">
+                            <AlertIcon />
+                            You are not part of any team.
+                        </Alert>
+                    )}
                     {!filteredTeams ? (
                         <Box display="flex">
                             <Spinner
@@ -236,7 +242,7 @@ function TeamPicker() {
                             <CardFooter padding="15px 0 0 0">
                                 <Button
                                     width="100%"
-                                    rightIcon={<IoPeopleCircleOutline size="25px" />}
+                                    rightIcon={<IoAddCircleOutline size="25px" />}
                                     colorScheme="blueSwatch"
                                     onClick={onOpen}
                                 >
@@ -274,6 +280,7 @@ function TeamPicker() {
                                     colorScheme="blueSwatch"
                                     onClick={handleNewTeamSubmit}
                                     isLoading={loading}
+                                    loadingText="Creating..."
                                     isDisabled={
                                         teamName.length === 0 ||
                                         walletAddress.length === 0 ||

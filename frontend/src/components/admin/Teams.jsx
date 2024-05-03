@@ -138,6 +138,7 @@ function Teams() {
                                     <Td>
                                         <Button
                                             rightIcon={<IoExitOutline size="20px" />}
+                                            size="sm"
                                             colorScheme="red"
                                             variant="outline"
                                             onClick={() => {

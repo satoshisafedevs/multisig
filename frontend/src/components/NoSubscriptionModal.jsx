@@ -9,13 +9,13 @@ export default function NoSubscriptionModal({ isOpen }) {
         <Modal closeOnOverlayClick={false} isOpen={isOpen}>
             <ModalOverlay />
             <ModalContent maxW="500px">
-                <ModalHeader>Team Subscription Unavailable</ModalHeader>
+                <ModalHeader>Team subscription unavailable</ModalHeader>
                 <ModalBody justifyItems="center">
-                    To activate your team&apos;s subscription, please reach out to your team&apos;s owner.
+                    To activate your team&apos;s subscription, please contact your team&apos;s owner.
                 </ModalBody>
                 <ModalFooter>
                     <Button colorScheme="blue" mr={3} onClick={() => navigate("/")}>
-                        Go back
+                        Go to team selector
                     </Button>
                 </ModalFooter>
             </ModalContent>
