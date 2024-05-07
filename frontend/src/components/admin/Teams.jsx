@@ -34,13 +34,17 @@ function Teams() {
     const cancelRef = useRef();
     const [filteredTeamsData, setFilteredTeamsData] = useState([]);
 
-    const satoshiSafeUserIds = ["ZyEVb31sYqgpmDw2tDlxCj2hI5B2"]; // TODO: add Prod user id
+    let satoshiSafeUserId = "87cPSfJaU3M9SIpEu9d86H95nz22"; // prod
+
+    if (import.meta.env.MODE === "development") {
+        satoshiSafeUserId = "ZyEVb31sYqgpmDw2tDlxCj2hI5B2";
+    }
 
     useEffect(() => {
         if (teamsData) {
             const filteredData = teamsData.map((team) => ({
                 ...team,
-                users: team?.users?.filter((user) => !satoshiSafeUserIds.includes(user)),
+                users: team?.users?.filter((user) => satoshiSafeUserId !== user),
             }));
             setFilteredTeamsData(filteredData);
         }
