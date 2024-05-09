@@ -195,7 +195,7 @@ function TeamPicker() {
                 </Heading>
                 <Card padding={5} overflow="auto" width="100%" maxWidth="60ch">
                     {teamsData?.length === 0 && (
-                        <Alert status="info" borderRadius="var(--chakra-radii-base)">
+                        <Alert status="info" borderRadius="var(--chakra-radii-base)" colorScheme="blueSwatch">
                             <AlertIcon />
                             You are not part of any team.
                         </Alert>
@@ -232,7 +232,11 @@ function TeamPicker() {
                                             </Button>
                                         ))}
                                     {searchTerm && filteredTeams.length === 0 && (
-                                        <Alert status="info" borderRadius="var(--chakra-radii-base)">
+                                        <Alert
+                                            status="info"
+                                            borderRadius="var(--chakra-radii-base)"
+                                            colorScheme="blueSwatch"
+                                        >
                                             <AlertIcon />
                                             No teams found
                                         </Alert>
