@@ -153,7 +153,12 @@ function ImportSafeModal({
                     </TableContainer>
                 )}
                 {(!userTeamData.userSafes || userTeamData?.userSafes?.length === 0) && isRefreshing && (
-                    <Alert status="info" marginTop="20px" borderRadius="var(--chakra-radii-base)">
+                    <Alert
+                        status="info"
+                        marginTop="20px"
+                        borderRadius="var(--chakra-radii-base)"
+                        colorScheme="blueSwatch"
+                    >
                         <AlertIcon />
                         Fetching safes data...
                     </Alert>
