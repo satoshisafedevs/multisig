@@ -1,4 +1,16 @@
-import { Box, Button, Circle, Divider, Flex, Heading, Image, Input, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Circle,
+    Divider,
+    Flex,
+    Heading,
+    Image,
+    Input,
+    Text,
+    useColorModeValue,
+    Tooltip,
+} from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { getDownloadURL, getStorage, ref, uploadString } from "firebase/storage";
 import React, { useEffect, useState } from "react";
@@ -110,13 +122,15 @@ function Profile() {
                             aria-label="Profile Picture Upload"
                             accept="image/*"
                         />
-                        <Circle size="70px" cursor="pointer" _hover={{ backgroundColor: backgroundHover }}>
-                            {image ? (
-                                <Image src={image} alt="Profile" objectFit="cover" borderRadius="50%" />
-                            ) : (
-                                <IoImageOutline size="60%" />
-                            )}
-                        </Circle>
+                        <Tooltip label="Update your profile picture">
+                            <Circle size="70px" cursor="pointer" _hover={{ backgroundColor: backgroundHover }}>
+                                {image ? (
+                                    <Image src={image} alt="Profile" objectFit="cover" borderRadius="50%" />
+                                ) : (
+                                    <IoImageOutline size="60%" />
+                                )}
+                            </Circle>
+                        </Tooltip>
                     </label>
                 </Box>
             </Flex>

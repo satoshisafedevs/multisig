@@ -30,9 +30,25 @@ service cloud.firestore {
             match /messages/{messageID} {
                 allow read, create: if request.auth != null
                     && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamID)).data.users;
-
+                // Allow updates to the 'threadCount' and 'threadLastReply' fields
+                // by any user listed in the 'users' array of the team document
+                allow update: if request.auth != null &&
+                request.auth.uid in get(/databases/$(database)/documents/teams/$(teamID)).data.users &&
+                request.resource.data.diff(resource.data).affectedKeys().hasOnly(['threadCount', 'threadLastReply']);
                 // Allow update and delete only if the request.auth.uid matches the uid field in the message document
                 allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+
+                match /thread/{threadID} {
+                    // Allow read access to threads if the user is part of the team
+                    allow read, create: if request.auth != null
+                        && request.auth.uid in get(/databases/$(database)/documents/teams/$(teamID)).data.users;
+                    // Allow delete of the thread only if the request.auth.uid matches the uid field in the parent message document
+                    // Means - owner of the message can delete whole thread
+                    allow delete: if request.auth != null
+                        && request.auth.uid == get(/databases/$(database)/documents/teams/$(teamID)/messages/$(messageID)).data.uid;
+                    // Allow update and delete only if the request.auth.uid matches the uid field in the thread document
+                    allow update, delete: if request.auth != null && request.auth.uid == resource.data.uid;
+                }
             }
         }
 
@@ -62,7 +78,7 @@ service cloud.firestore {
         }
 
         match /subscriptionTypes/{document=**} {
-        	allow read: if true;
+            allow read: if true;
         }
 
         match /subscriptions/{documentId} {
@@ -70,7 +86,7 @@ service cloud.firestore {
         }
 
         match /invoices/{documentId} {
-        	allow read: if request.auth.uid == resource.data.ownerId;
+            allow read: if request.auth.uid == resource.data.ownerId;
         }
     }
 }

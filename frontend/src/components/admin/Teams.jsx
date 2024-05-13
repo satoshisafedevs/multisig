@@ -36,7 +36,7 @@ function Teams() {
 
     let satoshiSafeUserId = "87cPSfJaU3M9SIpEu9d86H95nz22"; // prod
 
-    if (import.meta.env.MODE === "development") {
+    if (import.meta.env.MODE === "development" || import.meta.env.MODE === "playground") {
         satoshiSafeUserId = "ZyEVb31sYqgpmDw2tDlxCj2hI5B2";
     }
 

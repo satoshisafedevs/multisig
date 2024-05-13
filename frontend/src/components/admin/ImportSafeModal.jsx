@@ -178,7 +178,12 @@ function ImportSafeModal({
                     Back
                 </StyledButton>
                 <Stack direction="row" spacing={4}>
-                    <Button onClick={handleRefreshList} isLoading={isRefreshing} spinner={<Spinner size="sm" />}>
+                    <Button
+                        onClick={handleRefreshList}
+                        isLoading={isRefreshing}
+                        spinner={<Spinner size="sm" />}
+                        loadingText="Refreshing..."
+                    >
                         Refresh list
                     </Button>
                     <Button variant="ghost" onClick={onClose}>

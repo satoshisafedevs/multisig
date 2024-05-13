@@ -38,9 +38,12 @@ const fetchAndProcessSafeData = async (safe) => {
             const { data } = doc.data();
             return { [safeAddress]: data };
         });
-        const portfolio = latestBalance.docs.map((doc) => ({
-            [safeAddress]: doc.data(),
-        }));
+        const portfolio = latestBalance.docs.map((doc) => {
+            const data = doc.data();
+            const filteredChainList = data.chain_list.filter((chain) => chain.usd_value !== 0);
+            data.chain_list = filteredChainList;
+            return { [safeAddress]: data };
+        });
 
         const allBalances = await getDocs(
             query(totalBalanceRef, where("createdAt", ">=", addedAt), orderBy("createdAt", "asc")),
@@ -121,9 +124,8 @@ function SafeBalance({ children }) {
         Object.values(safesPortfolio).forEach((safe) => {
             totalUSDValue += safe.total_usd_value;
 
-            const filteredChains = safe.chain_list.filter((chain) => chain.usd_value !== 0);
-
-            filteredChains.forEach((chain) => {
+            // Assuming safe.chain_list is already filtered to remove zero usd_value items
+            safe.chain_list.forEach((chain) => {
                 const existingChainName = nonZeroUSDValueChains.find((name) => Object.keys(name)[0] === chain.name);
                 if (existingChainName) {
                     existingChainName[chain.name] += chain.usd_value;

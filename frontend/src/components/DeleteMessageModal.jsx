@@ -11,10 +11,22 @@ import {
     Button,
     useToast,
 } from "@chakra-ui/react";
-import { db, doc, deleteDoc } from "../firebase";
+import {
+    db,
+    doc,
+    deleteDoc,
+    getDoc,
+    updateDoc,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    limit,
+    writeBatch,
+} from "../firebase";
 import { useUser } from "../providers/User";
 
-export default function DeleteMessageModal({ messageID, isOpen, setIsOpen, setHoverID }) {
+export default function DeleteMessageModal({ messageID, isOpen, setIsOpen, setHoverID, thread, parentMessageID }) {
     const { currentTeam } = useUser();
     const toast = useToast();
     const cancelRef = useRef();
@@ -32,11 +44,56 @@ export default function DeleteMessageModal({ messageID, isOpen, setIsOpen, setHo
         setHoverID(null);
     };
 
+    // Function to delete an entire subcollection in a batch, with a pre-check for existence
+    async function deleteSubcollectionInBatch(parentDocRef, subcollectionName) {
+        const subCollectionRef = collection(parentDocRef, subcollectionName);
+
+        // Query the subcollection to see if any documents exist
+        const subCollectionSnapshot = await getDocs(subCollectionRef);
+
+        if (subCollectionSnapshot.empty) return;
+
+        // Initialize the batch
+        const batch = writeBatch(db);
+
+        // Add delete operations for each document to the batch
+        subCollectionSnapshot.forEach((docSnapshot) => batch.delete(docSnapshot.ref));
+
+        // Commit the batch deletion
+        await batch.commit();
+    }
+
     const deleteMessage = useCallback(
         async (id) => {
             try {
-                const docRef = doc(db, "teams", currentTeam.id, "messages", id);
+                let docRef;
+                if (thread) {
+                    docRef = doc(db, "teams", currentTeam.id, "messages", parentMessageID, "thread", id);
+                } else {
+                    docRef = doc(db, "teams", currentTeam.id, "messages", id);
+                    await deleteSubcollectionInBatch(docRef, "thread");
+                }
                 await deleteDoc(docRef);
+                if (thread) {
+                    const messagesRef = collection(db, "teams", currentTeam.id, "messages", parentMessageID, "thread");
+                    const querySnapshot = await getDocs(query(messagesRef, orderBy("createdAt", "desc"), limit(1)));
+                    if (querySnapshot.docs.length > 0) {
+                        const latestMessageData = querySnapshot.docs[0].data();
+                        const messageDoc = doc(db, "teams", currentTeam.id, "messages", parentMessageID);
+                        const messageSnap = await getDoc(messageDoc);
+                        const newThreadCount = (messageSnap.data().threadCount || 1) - 1;
+                        await updateDoc(messageDoc, {
+                            threadCount: newThreadCount,
+                            threadLastReply: latestMessageData.createdAt,
+                        });
+                    } else {
+                        const messageDoc = doc(db, "teams", currentTeam.id, "messages", parentMessageID);
+                        await updateDoc(messageDoc, {
+                            threadCount: 0,
+                            threadLastReply: null,
+                        });
+                    }
+                }
             } catch (error) {
                 toast({
                     description: `Failed to delete message: ${error.message}`,
@@ -90,4 +147,6 @@ DeleteMessageModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     setIsOpen: PropTypes.func.isRequired,
     setHoverID: PropTypes.func.isRequired,
+    thread: PropTypes.bool,
+    parentMessageID: PropTypes.string,
 };

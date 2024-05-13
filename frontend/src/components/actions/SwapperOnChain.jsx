@@ -172,25 +172,28 @@ function SwapperOnChain({
 
     return (
         <>
-            <SelectTokenModal
-                isOpen={isFromTokenModalOpen}
-                setIsOpen={setFromTokenModalOpen}
-                tokens={lifiChainTokens}
-                setToken={setFromToken}
-                safe={safe}
-                network={networkName}
-                setRouteData={setRouteData}
-            />
-            <SelectTokenModal
-                isOpen={isToTokenModalOpen}
-                setIsOpen={setToTokenModalOpen}
-                tokens={lifiChainTokens}
-                setToken={setToToken}
-                safe={safe}
-                network={networkName}
-                setRouteData={setRouteData}
-            />
-
+            {isFromTokenModalOpen && (
+                <SelectTokenModal
+                    isOpen={isFromTokenModalOpen}
+                    setIsOpen={setFromTokenModalOpen}
+                    tokens={lifiChainTokens}
+                    setToken={setFromToken}
+                    safe={safe}
+                    network={networkName}
+                    setRouteData={setRouteData}
+                />
+            )}
+            {isToTokenModalOpen && (
+                <SelectTokenModal
+                    isOpen={isToTokenModalOpen}
+                    setIsOpen={setToTokenModalOpen}
+                    tokens={lifiChainTokens}
+                    setToken={setToToken}
+                    safe={safe}
+                    network={networkName}
+                    setRouteData={setRouteData}
+                />
+            )}
             <Box display="flex" flexDirection="row">
                 <Menu>
                     {({ isOpen }) => (
