@@ -1,11 +1,36 @@
-import React, { memo, useState, useCallback } from "react";
+import React, { memo, useState, useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import styled from "@emotion/styled";
-import { Stack, Avatar, Box, Text, IconButton, useColorModeValue } from "@chakra-ui/react";
-import { IoTrash } from "react-icons/io5";
+import {
+    Stack,
+    Avatar,
+    Alert,
+    AlertIcon,
+    Box,
+    Text,
+    IconButton,
+    Button,
+    Drawer,
+    DrawerBody,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    Input,
+    Heading,
+    Tooltip,
+    useColorModeValue,
+    useDisclosure,
+    useToast,
+} from "@chakra-ui/react";
+import { IoTrash, IoSend, IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { db, collection, addDoc, Timestamp, onSnapshot, doc, getDoc, updateDoc } from "../firebase";
 import { useUser } from "../providers/User";
 import DeleteMessageModal from "./DeleteMessageModal";
 import theme from "../theme";
+import ThreadMessage from "./ThreadMessage";
+import LastReply from "./LastReply";
 
 const StyledTrashIcon = styled(IoTrash)`
     &:hover {
@@ -14,13 +39,26 @@ const StyledTrashIcon = styled(IoTrash)`
     }
 `;
 
+const StyledTreadIcon = styled(IoChatbubbleEllipsesOutline)`
+    &:hover {
+        fill: tomato;
+        cursor: pointer;
+    }
+`;
+
 function Message({ message }) {
-    const { firestoreUser, teamUsersInfo } = useUser();
+    const { firestoreUser, teamUsersInfo, currentTeam } = useUser();
     const satoshiColor = useColorModeValue(theme.colors.blueSwatch[700], theme.colors.blueSwatch[200]);
-    const backgroundHover = useColorModeValue("gray.100", "whiteAlpha.200");
+    const backgroundHover = useColorModeValue("gray.100", "#3d4756");
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [messageID, setMessageID] = useState();
     const [hoverID, setHoverID] = useState();
+    const [threadMessage, setThreadMessage] = useState("");
+    const [threadMessages, setThreadMessages] = useState([]);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const btnRef = React.useRef();
+    const toast = useToast();
+    const lastMessage = useRef();
 
     const handleMouseEnter = useCallback(
         (id) => {
@@ -48,6 +86,68 @@ function Message({ message }) {
             ));
         }
         return msg.message;
+    };
+
+    useEffect(() => {
+        if (isOpen && threadMessages.length > 0 && lastMessage.current) {
+            lastMessage.current.scrollIntoView(); // Scroll to the bottom
+        }
+    }, [isOpen, threadMessages, lastMessage.current]);
+
+    useEffect(() => {
+        if (!currentTeam || !currentTeam.id) return;
+        const messagesRef = collection(db, "teams", currentTeam.id, "messages", message.id, "thread");
+
+        let unsubscribe = () => {};
+        try {
+            unsubscribe = onSnapshot(messagesRef, (querySnapshot) => {
+                const chatMessages = querySnapshot.docs
+                    .map((msg) => ({
+                        ...msg.data(),
+                        id: msg.id,
+                    }))
+                    .sort((a, b) => a.createdAt - b.createdAt);
+                setThreadMessages(chatMessages);
+            });
+        } catch (error) {
+            toast({
+                description: `Failed to get thread messages: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+
+        return unsubscribe;
+    }, [currentTeam]);
+
+    const addThreadMessage = async (parentMessageID, text) => {
+        try {
+            const type = "text";
+            const newThreadMessage = {
+                message: text,
+                uid: firestoreUser.uid,
+                type,
+                createdAt: Timestamp.now(),
+            };
+            // Points to the 'threads' subcollection under the specific parent message in the team document
+            const threadsCollectionRef = collection(db, "teams", currentTeam.id, "messages", parentMessageID, "thread");
+            // Add a new document with 'newMessage' object to the 'threads' subcollection
+            await addDoc(threadsCollectionRef, newThreadMessage);
+            const messageDoc = doc(db, "teams", currentTeam.id, "messages", parentMessageID);
+            const messageSnap = await getDoc(messageDoc);
+            const newThreadCount = (messageSnap.data().threadCount || 0) + 1;
+            await updateDoc(messageDoc, { threadCount: newThreadCount, threadLastReply: Timestamp.now() });
+        } catch (error) {
+            toast({
+                description: `Failed to send message: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     };
 
     const timeOptions = {
@@ -141,53 +241,165 @@ function Message({ message }) {
     if (teamUsersInfo && teamUsersInfo[message.uid]) {
         return (
             <>
-                <DeleteMessageModal
-                    messageID={messageID}
-                    isOpen={deleteModalOpen}
-                    setIsOpen={setDeleteModalOpen}
-                    setHoverID={setHoverID}
-                />
+                {deleteModalOpen && (
+                    <DeleteMessageModal
+                        messageID={messageID}
+                        isOpen={deleteModalOpen}
+                        setIsOpen={setDeleteModalOpen}
+                        setHoverID={setHoverID}
+                    />
+                )}
+                {isOpen && (
+                    <Drawer
+                        isOpen={isOpen}
+                        size="md"
+                        placement="right"
+                        onClose={onClose}
+                        finalFocusRef={btnRef}
+                        preserveScrollBarGap
+                    >
+                        <DrawerOverlay />
+                        <DrawerContent>
+                            <DrawerCloseButton top="var(--chakra-space-3)" />
+                            <DrawerHeader>
+                                <Heading size="md">Thread</Heading>
+                            </DrawerHeader>
+                            <DrawerBody>
+                                <Stack spacing="2">
+                                    {threadMessages?.length > 0 ? (
+                                        threadMessages.map((el) => (
+                                            <ThreadMessage key={el.id} parentMessageID={message.id} message={el} />
+                                        ))
+                                    ) : (
+                                        <Alert
+                                            status="info"
+                                            colorScheme="blueSwatch"
+                                            borderRadius="var(--chakra-radii-base)"
+                                        >
+                                            <AlertIcon />
+                                            This thread is empty.
+                                        </Alert>
+                                    )}
+                                </Stack>
+                                <Box ref={lastMessage} />
+                            </DrawerBody>
+                            <DrawerFooter gap="20px">
+                                <Input
+                                    placeholder="Write a reply..."
+                                    value={threadMessage}
+                                    onChange={(event) => setThreadMessage(event.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && threadMessage.trim().length !== 0) {
+                                            setThreadMessage("");
+                                            addThreadMessage(message.id, threadMessage.trim());
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    colorScheme="blueSwatch"
+                                    rightIcon={<IoSend size="20px" />}
+                                    onClick={() => {
+                                        if (threadMessage.trim().length !== 0) {
+                                            setThreadMessage("");
+                                            addThreadMessage(message.id, threadMessage.trim());
+                                        }
+                                    }}
+                                >
+                                    &nbsp;Reply
+                                </Button>
+                            </DrawerFooter>
+                        </DrawerContent>
+                    </Drawer>
+                )}
                 <Stack
+                    position="relative"
                     direction="row"
                     align="center"
                     spacing="0"
-                    paddingLeft="10px"
-                    paddingTop="2px"
-                    paddingBottom="2px"
+                    padding="4px 4px 4px 10px"
                     _hover={{ backgroundColor: backgroundHover, borderRadius: "5px" }}
                     onMouseEnter={() => handleMouseEnter(message.id)}
                     onMouseLeave={handleMouseLeave}
                 >
+                    {hoverID && (
+                        <Box
+                            position="absolute"
+                            top="-1"
+                            right="-1"
+                            minHeight="30px"
+                            border="1px solid var(--chakra-colors-chakra-border-color)"
+                            borderRadius="base"
+                            backgroundColor={backgroundHover}
+                            alignContent="center"
+                        >
+                            <Stack display="flex" flexDirection="row" spacing="4" padding="0 10px">
+                                <Tooltip
+                                    label="Reply in thread"
+                                    placement={firestoreUser?.uid === message?.uid ? "top" : "top-end"}
+                                >
+                                    <IconButton
+                                        icon={<StyledTreadIcon />}
+                                        onClick={onOpen}
+                                        height="unset"
+                                        minWidth="unset"
+                                        background="none"
+                                        _hover={{ background: "none", cursor: "default" }}
+                                    />
+                                </Tooltip>
+                                {firestoreUser && firestoreUser.uid === message.uid && message.id === hoverID && (
+                                    <Tooltip label="Delete" placement="top-end">
+                                        <IconButton
+                                            icon={<StyledTrashIcon />}
+                                            onClick={() => handleDelete(message.id)}
+                                            height="unset"
+                                            minWidth="unset"
+                                            background="none"
+                                            _hover={{ background: "none", cursor: "default" }}
+                                        />
+                                    </Tooltip>
+                                )}
+                            </Stack>
+                        </Box>
+                    )}
+
                     <Avatar
                         size="sm"
                         alt={teamUsersInfo[message.uid].displayName ? teamUsersInfo[message.uid].displayName : null}
                         src={teamUsersInfo[message.uid].photoUrl ? teamUsersInfo[message.uid].photoUrl : null}
                         name={teamUsersInfo[message.uid].displayName ? teamUsersInfo[message.uid].displayName : null}
                     />
-                    <Box flexGrow="1" paddingLeft="6px">
+                    <Box flexGrow="1" paddingLeft="6px" paddingBottom="1px">
                         <Stack direction="row" spacing="5px">
                             <Text fontSize="xs" fontWeight="bold">
                                 {teamUsersInfo && teamUsersInfo[message.uid] && teamUsersInfo[message.uid].displayName
                                     ? teamUsersInfo[message.uid].displayName
                                     : "No name"}
                             </Text>
-                            <Text fontSize="xs">{messageTimeFormat(message.createdAt)}</Text>
+                            <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")}>
+                                {messageTimeFormat(message.createdAt)}
+                            </Text>
                         </Stack>
-                        <Text fontSize="xs" paddingBottom="2px">
-                            {renderMessage(message)}
-                        </Text>
-                    </Box>
-                    <Box width="45px">
-                        {firestoreUser && firestoreUser.uid === message.uid && message.id === hoverID && (
-                            <IconButton
-                                icon={<StyledTrashIcon />}
-                                onClick={() => handleDelete(message.id)}
-                                height="36px"
-                                width="36px"
-                                borderRadius="3px"
-                                background="none"
-                                _hover={{ background: "none", cursor: "default" }}
-                            />
+                        <Text fontSize="xs">{renderMessage(message)}</Text>
+                        {message?.threadCount > 0 && (
+                            <Box display="flex" flexDirection="row">
+                                <Text fontSize="xs">
+                                    <Button
+                                        variant="link"
+                                        size="xs"
+                                        fontWeight="normal"
+                                        color="blue3"
+                                        onClick={onOpen}
+                                        paddingRight="5px"
+                                    >
+                                        {message.threadCount} {message.threadCount === 1 ? "reply" : "replies"}
+                                    </Button>
+                                </Text>
+                                {message.threadLastReply && (
+                                    <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")}>
+                                        <LastReply message={message} />
+                                    </Text>
+                                )}
+                            </Box>
                         )}
                     </Box>
                 </Stack>

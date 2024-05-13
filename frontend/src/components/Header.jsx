@@ -24,7 +24,13 @@ import { isEmpty } from "lodash";
 import moment from "moment";
 import { PropTypes } from "prop-types";
 import React, { useState } from "react";
-import { IoInformationCircleOutline, IoPeopleOutline, IoWalletOutline, IoWarning } from "react-icons/io5";
+import {
+    IoInformationCircleOutline,
+    IoPeopleOutline,
+    IoWalletOutline,
+    IoWarning,
+    IoLogOutOutline,
+} from "react-icons/io5";
 import { useNavigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import ReactLogo from "../img/ReactLogo";
@@ -272,11 +278,11 @@ export default function Header({ withTeam }) {
                                         </Box>
                                         {withTeam && (
                                             <MenuItem onClick={() => navigate(`/team/${slug}/admin?tab=Profile`)}>
-                                                Manage Settings
+                                                Settings
                                             </MenuItem>
                                         )}
                                         <MenuItem onClick={signOutUser} isDisabled={isSigningOut}>
-                                            Sign out
+                                            Sign out <IoLogOutOutline size="20px" style={{ marginLeft: "10px" }} />
                                         </MenuItem>
                                     </MenuGroup>
                                     {withTeam && address && (

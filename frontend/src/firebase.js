@@ -34,6 +34,7 @@ import {
     setDoc,
     updateDoc,
     where,
+    writeBatch,
 } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from "firebase/functions";
 
@@ -129,4 +130,5 @@ export {
     addSupportUserToTeam,
     updateSafeBalances,
     removeTeamUser,
+    writeBatch,
 };

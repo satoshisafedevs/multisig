@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Flex, Heading, Text, Button } from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Flex, Heading, Text, Button } from "@chakra-ui/react";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { useUser } from "../../providers/User";
 import AddSatoshiSafeModal from "./AddSatoshiSafeModal";
@@ -45,7 +45,12 @@ function Safes() {
                     fetchAndUpdateLatestSafesData={fetchAndUpdateLatestSafesData}
                 />
             ))}
-            {safes.length < 1 && <Text as="i">This team has no safes yet.</Text>}
+            {safes.length < 1 && (
+                <Alert status="info" colorScheme="blueSwatch" borderRadius="var(--chakra-radii-base)">
+                    <AlertIcon />
+                    This team has no safes yet.
+                </Alert>
+            )}
         </Box>
     );
 }

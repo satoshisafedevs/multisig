@@ -14,12 +14,21 @@ import {
     Link,
     Text,
     Stack,
+    // Tooltip,
+    // IconButton,
     useColorModeValue,
     useStyleConfig,
     useToast,
 } from "@chakra-ui/react";
+// import styled from "@emotion/styled";
 import { upperFirst } from "lodash";
-import { IoCheckmarkOutline, IoCloseOutline, IoPlayOutline, IoOpenOutline } from "react-icons/io5";
+import {
+    IoCheckmarkOutline,
+    IoCloseOutline,
+    IoPlayOutline,
+    IoOpenOutline,
+    // IoChatbubbleEllipsesOutline,
+} from "react-icons/io5";
 import { useWagmi } from "../providers/Wagmi";
 import useGnosisSafe from "../hooks/useGnosisSafe";
 import networks from "../utils/networks.json";
@@ -39,6 +48,15 @@ function Transaction({ transaction }) {
     const codeBackground = useColorModeValue("gray.100", "none");
     const accordionStyles = useStyleConfig("Accordion");
     const toast = useToast();
+    // const backgroundThreadHover = useColorModeValue("#dfe4e9", "#333c48");
+    // const [isHovered, setIsHovered] = useState(false);
+
+    // const StyledTreadIcon = styled(IoChatbubbleEllipsesOutline)`
+    //     &:hover {
+    //         fill: tomato;
+    //         cursor: pointer;
+    //     }
+    // `;
 
     const networkMismatch =
         chain &&
@@ -276,8 +294,10 @@ function Transaction({ transaction }) {
             <AccordionItem border="none">
                 {({ isExpanded }) => (
                     <>
-                        <Stack direction="row" justify="space-between" gap="0">
+                        <Stack direction="row" justify="space-between" gap="0" position="relative">
                             <AccordionButton
+                                // onMouseEnter={() => setIsHovered(true)}
+                                // onMouseLeave={() => setIsHovered(false)}
                                 borderRadius={isExpanded ? "5px 5px 0 0" : "5px"}
                                 width="initial"
                                 padding="5px 0 5px 10px"
@@ -290,6 +310,34 @@ function Transaction({ transaction }) {
                                     borderRadius: isExpanded ? "5px 5px 0 0" : "5px",
                                 }}
                             >
+                                {/* {isHovered && (
+                                    <Box
+                                        position="absolute"
+                                        top="-1"
+                                        right="-1"
+                                        minHeight="30px"
+                                        border={`1px solid ${useColorModeValue(
+                                            "var(--chakra-colors-gray-300)",
+                                            "var(--chakra-colors-gray-600)",
+                                        )}`}
+                                        borderRadius="base"
+                                        backgroundColor={backgroundThreadHover}
+                                        alignContent="center"
+                                    >
+                                        <Stack display="flex" flexDirection="row" spacing="4" padding="0 10px">
+                                            <Tooltip label="Reply in thread" placement="top">
+                                                <IconButton
+                                                    icon={<StyledTreadIcon />}
+                                                    // onClick={onOpen}
+                                                    height="unset"
+                                                    minWidth="unset"
+                                                    background="none"
+                                                    _hover={{ background: "none", cursor: "default" }}
+                                                />
+                                            </Tooltip>
+                                        </Stack>
+                                    </Box>
+                                )} */}
                                 <Stack
                                     direction="column"
                                     flexGrow="1"
@@ -314,6 +362,7 @@ function Transaction({ transaction }) {
                                                     textOverflow="ellipsis"
                                                     whiteSpace="nowrap"
                                                     overflow="hidden"
+                                                    color={useColorModeValue("gray.500", "gray.400")}
                                                 >
                                                     {formatDate(
                                                         transaction.unifiedDate ||
@@ -404,11 +453,13 @@ function Transaction({ transaction }) {
                                 <AccordionIcon margin="10px" />
                             </AccordionButton>
                         </Stack>
-                        <AccordionPanel padding="0px">
-                            <Code background={codeBackground} width="100%" padding="10px">
-                                <TransactionDetails transaction={transaction} />
-                            </Code>
-                        </AccordionPanel>
+                        {isExpanded && (
+                            <AccordionPanel padding="0px">
+                                <Code background={codeBackground} width="100%" padding="10px">
+                                    <TransactionDetails transaction={transaction} />
+                                </Code>
+                            </AccordionPanel>
+                        )}
                     </>
                 )}
             </AccordionItem>

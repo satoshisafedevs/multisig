@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { isEqual } from "lodash";
 import {
+    Alert,
+    AlertIcon,
     Box,
     Button,
     Card,
@@ -15,6 +18,7 @@ import {
     MenuList,
     MenuItemOption,
     MenuOptionGroup,
+    Spinner,
     useToast,
 } from "@chakra-ui/react";
 import { IoSend, IoFilterOutline, IoRefresh } from "react-icons/io5";
@@ -66,16 +70,28 @@ export default function Chat() {
         if (!currentTeam || !currentTeam.id) return;
         const messagesRef = collection(db, "teams", currentTeam.id, "messages");
 
-        const unsubscribe = onSnapshot(messagesRef, (querySnapshot) => {
-            const chatMessages = querySnapshot.docs
-                .map((msg) => ({
-                    ...msg.data(),
-                    id: msg.id,
-                    isoDate: convertToISOString(msg.data().createdAt),
-                }))
-                .sort((a, b) => a.createdAt - b.createdAt);
-            setMessages(chatMessages);
-        });
+        let unsubscribe = () => {};
+
+        try {
+            unsubscribe = onSnapshot(messagesRef, (querySnapshot) => {
+                const chatMessages = querySnapshot.docs
+                    .map((msg) => ({
+                        ...msg.data(),
+                        id: msg.id,
+                        isoDate: convertToISOString(msg.data().createdAt),
+                    }))
+                    .sort((a, b) => a.createdAt - b.createdAt);
+                setMessages(chatMessages);
+            });
+        } catch (error) {
+            toast({
+                description: `Failed to get messages: ${error.message}`,
+                position: "top",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
 
         return unsubscribe;
     }, [slug, teamsData, currentTeam]);
@@ -160,7 +176,7 @@ export default function Chat() {
 
     // Combine the two arrays
     const combinedArray = useMemo(() => {
-        const tempArray = [...messages, ...(filterSameNonceTransactions || [])];
+        const tempArray = [...messages, ...(filterSameNonceTransactions || ["empty"])];
         return tempArray.sort((a, b) => new Date(a.isoDate || a.unifiedDate) - new Date(b.isoDate || b.unifiedDate));
     }, [messages, filterSameNonceTransactions]);
 
@@ -256,34 +272,48 @@ export default function Chat() {
                 </Stack>
             </CardHeader>
             <CardBody overflow="auto" paddingTop="10px" paddingBottom="5px" ref={chatContainerRef}>
-                <Stack spacing="2">
-                    {getFilteredData().map((el) => {
-                        if (el.id === "loadMore") {
-                            return (
-                                <Button
-                                    size="sm"
-                                    key="loadMore"
-                                    onClick={handleLoadMoreTransactions}
-                                    isLoading={isTransactionsLoading}
-                                    borderRadius="5px"
-                                    fontWeight="normal"
-                                    colorScheme="blueSwatch"
-                                    loadingText="Loading transactions..."
-                                    spinnerPlacement="end"
-                                    rightIcon={<IoRefresh />}
-                                >
-                                    Load more transactions
-                                </Button>
-                            );
-                        }
-                        if (el.txHash || el.transactionHash || el.nonce || el.data) {
-                            return <Transaction key={el.id} transaction={el} />;
-                        }
-                        if (el.uid) {
-                            return <Message key={el.id} message={el} />;
-                        }
-                        return <InFlightTransaction key={el.id} transaction={el} />;
-                    })}
+                <Stack spacing="2" height="100%">
+                    {combinedArray.length === 0 && (
+                        <Box display="flex" alignItems="center" justifyContent="center" height="100%">
+                            <Spinner color="blue.500" speed="1s" size="xl" thickness="4px" emptyColor="gray.200" />
+                        </Box>
+                    )}
+                    {isEqual(combinedArray, ["empty"]) ? (
+                        <Alert status="info" colorScheme="blueSwatch" borderRadius="var(--chakra-radii-base)">
+                            <AlertIcon />
+                            Nothing to display here.
+                        </Alert>
+                    ) : (
+                        getFilteredData().map((el) => {
+                            if (el.id === "loadMore") {
+                                return (
+                                    <Box key="loadMore">
+                                        <Button
+                                            size="sm"
+                                            key="loadMore"
+                                            onClick={handleLoadMoreTransactions}
+                                            isLoading={isTransactionsLoading}
+                                            borderRadius="5px"
+                                            fontWeight="normal"
+                                            colorScheme="blueSwatch"
+                                            loadingText="Loading transactions..."
+                                            rightIcon={<IoRefresh />}
+                                            width="full"
+                                        >
+                                            Load more transactions
+                                        </Button>
+                                    </Box>
+                                );
+                            }
+                            if (el.txHash || el.transactionHash || el.nonce || el.data) {
+                                return <Transaction key={el.id} transaction={el} />;
+                            }
+                            if (el.uid) {
+                                return <Message key={el.id} message={el} />;
+                            }
+                            return <InFlightTransaction key={el.id} transaction={el} />;
+                        })
+                    )}
                 </Stack>
                 <Box ref={lastMessage} />
             </CardBody>
@@ -294,8 +324,8 @@ export default function Chat() {
                     onChange={(event) => setMessage(event.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && message.trim().length !== 0) {
-                            addMessage(message.trim());
                             setMessage("");
+                            addMessage(message.trim());
                         }
                     }}
                 />
@@ -306,8 +336,8 @@ export default function Chat() {
                         rightIcon={<IoSend size="20px" />}
                         onClick={() => {
                             if (message.trim().length !== 0) {
-                                addMessage(message.trim());
                                 setMessage("");
+                                addMessage(message.trim());
                             }
                         }}
                     >
