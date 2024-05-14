@@ -54,7 +54,7 @@ We welcome contributions from the community. Please read our [Contributing Guide
 
 ## License
 
-Satoshi Safe is open source software [licensed as MIT](LICENSE.md) (if applicable).
+Satoshi Safe is open source software and license under the Business Source License included in the repo.
 
 ## Contact
 
